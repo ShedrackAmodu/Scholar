@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .role-form-section { padding: 120px 0 80px; min-height: 100vh; }
+    .form-container { max-width: 600px; margin: 0 auto; background: var(--card-bg); border-radius: 30px; box-shadow: var(--shadow); border: var(--border); overflow: hidden; animation: slideInUp 0.8s ease; }
+    @keyframes slideInUp { from { opacity: 0; transform: translateY(50px); } to { opacity: 1; transform: translateY(0); } }
+    .form-header { background: linear-gradient(135deg, var(--primary-pink), var(--dark-pink)); padding: 40px; text-align: center; }
+    .form-header h2 { color: white; font-size: 2rem; font-weight: 700; font-family: 'Playfair Display', serif; }
+    .form-body { padding: 40px; }
+    .form-group { margin-bottom: 20px; }
+    .form-group label { display: block; margin-bottom: 8px; color: var(--text-primary); font-weight: 500; }
+    .form-control { width: 100%; padding: 10px 15px; border: 2px solid var(--border); border-radius: 15px; background: var(--card-bg); color: var(--text-primary); transition: all 0.3s ease; }
+    .form-control:focus { border-color: var(--primary-pink); box-shadow: 0 0 0 0.2rem rgba(123, 44, 191, 0.25); outline: none; }
+    .btn-submit { width: 100%; background: linear-gradient(135deg, var(--primary-pink), var(--dark-pink)); color: white; border: none; padding: 15px; border-radius: 15px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease; position: relative; overflow: hidden; }
+    .btn-submit:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(123, 44, 191, 0.4); }
+    .btn-cancel { display: inline-block; margin-top: 15px; color: var(--text-secondary); text-decoration: none; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="role-form-section">
+    <div class="container">
+        <div class="form-container">
+            <div class="form-header">
+                <h2>{{ title }}</h2>
+            </div>
+            <div class="form-body">
+                <form method="post" id="roleForm">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="{{ form.name.id_for_label }}">Name</label>
+                        {{ form.name }}
+                        {% if form.name.errors %}
+                            <small class="text-danger">
+                                {% for err in form.name.errors %}{{ err }} {% endfor %}
+                            </small>
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label for="{{ form.description.id_for_label }}">Description</label>
+                        {{ form.description }}
+                        {% if form.description.errors %}
+                            <small class="text-danger">
+                                {% for err in form.description.errors %}{{ err }} {% endfor %}
+                            </small>
+                        {% endif %}
+                    </div>
+                    <button type="submit" class="btn-submit">Save Role</button>
+                    <a href="{% url 'accounts:role_list' %}" class="btn-cancel">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

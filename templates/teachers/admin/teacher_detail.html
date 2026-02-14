@@ -1,0 +1,38 @@
+{% load static %}
+{% extends 'base.html' %}
+
+{% block title %}Teacher Detail{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8" data-aos="zoom-in">
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">{{ teacher.full_name }}</h3>
+                </div>
+                <div class="card-body">
+                    <p><strong>Email:</strong> {{ teacher.email }}</p>
+                    <p><strong>Subject:</strong> {{ teacher.subject }}</p>
+                    <p><strong>Phone:</strong> {{ teacher.phone }}</p>
+                    <p><strong>Joined:</strong> {{ teacher.date_joined|date:'F j, Y' }}</p>
+                    <a href="{% url 'teachers:admin:teacher_edit' teacher.id %}" class="btn btn-warning me-2"><i class="fas fa-edit"></i> Edit</a>
+                    <a href="{% url 'teachers:admin:teacher_delete' teacher.id %}" class="btn btn-danger"><i class="fas fa-trash-alt"></i> Delete</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.card-header { border-radius: 0.5rem 0.5rem 0 0; }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+AOS.init();
+</script>
+{% endblock %}

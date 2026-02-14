@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Confirm Delete User - {{ user.get_full_name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .delete-section { padding: 120px 0 80px; min-height: 100vh; display: flex; align-items: center; }
+    .delete-card { max-width: 500px; margin: 0 auto; background: var(--card-bg); border-radius: 30px; box-shadow: var(--shadow); border: var(--border); overflow: hidden; animation: scaleIn 0.5s ease; }
+    @keyframes scaleIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+    .delete-header { background: linear-gradient(135deg, #d63031, #c0392b); padding: 40px; text-align: center; position: relative; overflow: hidden; }
+    .delete-header i { font-size: 4rem; color: white; margin-bottom: 20px; animation: bounce 2s ease infinite; }
+    @keyframes bounce { 0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);} }
+    .delete-header h2 { color: white; font-size: 2rem; font-weight: 700; margin-bottom: 10px; font-family: 'Playfair Display', serif; }
+    .delete-header p { color: rgba(255,255,255,0.9); font-size: 1.1rem; }
+    .delete-body { padding: 40px; text-align: center; }
+    .warning-message { margin-bottom: 30px; }
+    .warning-message .alert { background: rgba(214, 48, 49, 0.1); border: 2px solid #d63031; color: #d63031; border-radius: 15px; padding: 15px; }
+    .warning-message i { font-size: 1.5rem; margin-bottom: 10px; }
+    .delete-actions { display: flex; gap: 15px; }
+    .btn-delete { flex: 1; background: #d63031; color: white; border: none; padding: 15px; border-radius: 15px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; gap: 10px; text-decoration: none; }
+    .btn-delete:hover { background: #c0392b; transform: translateY(-3px); box-shadow: 0 10px 25px rgba(214, 48, 49, 0.4); color: white; }
+    .btn-cancel { flex: 1; background: var(--text-secondary); color: white; border: none; padding: 15px; border-radius: 15px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; gap: 10px; text-decoration: none; }
+    .btn-cancel:hover { background: var(--text-primary); transform: translateY(-3px); color: white; }
+    @media (max-width: 768px) { .delete-header { padding: 30px; } .delete-body { padding: 30px; } .delete-actions { flex-direction: column; } }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="delete-section">
+    <div class="container">
+        <div class="delete-card">
+            <div class="delete-header">
+                <i class="fas fa-user-times"></i>
+                <h2>Delete User</h2>
+                <p>This action cannot be undone</p>
+            </div>
+            <div class="delete-body">
+                <div class="warning-message">
+                    <div class="alert">
+                        <i class="fas fa-info-circle"></i>
+                        <p class="mb-0">Are you sure you want to delete user <strong>{{ user.get_full_name }}</strong>?</p>
+                        <p class="mb-0">This will remove all their data and access.</p>
+                    </div>
+                </div>
+                <form method="post" id="deleteForm">
+                    {% csrf_token %}
+                    <div class="delete-actions">
+                        <button type="submit" class="btn-delete" id="deleteBtn">
+                            <span class="btn-text"><i class="fas fa-trash-alt me-2"></i>Yes, Delete</span>
+                            <span class="btn-loader" style="display:none;"><i class="fas fa-spinner fa-spin"></i> Deleting...</span>
+                        </button>
+                        <a href="{% url 'accounts:user_list' %}" class="btn-cancel"><i class="fas fa-times me-2"></i>Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('deleteForm');
+        const deleteBtn = document.getElementById('deleteBtn');
+        form.addEventListener('submit', function(e) {
+            const btnText = deleteBtn.querySelector('.btn-text');
+            const btnLoader = deleteBtn.querySelector('.btn-loader');
+            btnText.style.display='none'; btnLoader.style.display='inline-flex'; deleteBtn.disabled=true;
+        });
+    });
+</script>
+{% endblock %}

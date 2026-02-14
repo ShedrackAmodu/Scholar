@@ -1,0 +1,635 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Score Entry{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Page Header */
+    .page-header {
+        background: linear-gradient(135deg, rgba(123, 44, 191, 0.1), rgba(74, 144, 226, 0.1));
+        padding: 40px 0;
+        margin-bottom: 30px;
+        border-radius: 0 0 50px 50px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .page-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 300px;
+        height: 300px;
+        background: linear-gradient(135deg, var(--primary-pink), var(--secondary-pink));
+        border-radius: 50%;
+        opacity: 0.1;
+        animation: float 15s ease-in-out infinite;
+    }
+
+    .page-header::after {
+        content: '';
+        position: absolute;
+        bottom: -50%;
+        right: -50%;
+        width: 250px;
+        height: 250px;
+        background: linear-gradient(135deg, var(--secondary-pink), var(--primary-pink));
+        border-radius: 50%;
+        opacity: 0.1;
+        animation: float 20s ease-in-out infinite reverse;
+    }
+
+    .page-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+        background: linear-gradient(135deg, var(--primary-pink), var(--dark-pink));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        position: relative;
+        z-index: 2;
+    }
+
+    /* Welcome Card */
+    .welcome-card {
+        background: linear-gradient(135deg, var(--primary-pink), var(--dark-pink));
+        border-radius: 30px;
+        padding: 30px;
+        color: white;
+        margin-bottom: 30px;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 20px 40px rgba(123, 44, 191, 0.3);
+        transition: var(--transition-bounce);
+    }
+
+    .welcome-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 30px 50px rgba(123, 44, 191, 0.4);
+    }
+
+    .welcome-card::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 300px;
+        height: 300px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        animation: float 15s ease-in-out infinite;
+    }
+
+    .welcome-card::after {
+        content: '';
+        position: absolute;
+        bottom: -50%;
+        left: -50%;
+        width: 250px;
+        height: 250px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        animation: float 20s ease-in-out infinite reverse;
+    }
+
+    .welcome-title {
+        font-size: 2rem;
+        font-weight: 600;
+        margin-bottom: 10px;
+        position: relative;
+        z-index: 2;
+    }
+
+    .welcome-text {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        margin-bottom: 0;
+        position: relative;
+        z-index: 2;
+    }
+
+    .welcome-icon {
+        position: absolute;
+        bottom: 20px;
+        right: 30px;
+        font-size: 5rem;
+        opacity: 0.2;
+        color: white;
+        transform: rotate(10deg);
+    }
+
+    /* Stats Cards */
+    .stat-card {
+        background: var(--card-bg);
+        backdrop-filter: blur(10px);
+        border: var(--border);
+        border-radius: 25px;
+        padding: 25px;
+        box-shadow: var(--shadow);
+        transition: var(--transition-bounce);
+        height: 100%;
+        position: relative;
+        overflow: hidden;
+        cursor: pointer;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 40px rgba(123, 44, 191, 0.2);
+    }
+
+    .stat-icon {
+        width: 60px;
+        height: 60px;
+        line-height: 60px;
+        text-align: center;
+        background: linear-gradient(135deg, var(--primary-pink), var(--dark-pink));
+        color: white;
+        font-size: 1.8rem;
+        border-radius: 20px;
+        margin-bottom: 20px;
+        position: relative;
+        z-index: 2;
+    }
+
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 5px;
+        color: var(--text-primary);
+    }
+
+    .stat-label {
+        color: var(--text-secondary);
+        font-size: 1rem;
+        margin-bottom: 0;
+    }
+
+    .stat-trend {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+
+    .trend-up { background: rgba(0, 184, 148, 0.1); color: #00b894; }
+    .trend-down { background: rgba(214, 48, 49, 0.1); color: #d63031; }
+
+    /* Section Title */
+    .section-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 25px;
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .section-title i {
+        color: var(--primary-pink);
+        font-size: 1.8rem;
+    }
+
+    .section-title:after {
+        content: '';
+        flex: 1;
+        height: 2px;
+        background: linear-gradient(90deg, var(--primary-pink), transparent);
+        margin-left: 15px;
+    }
+
+    /* Subject Cards */
+    .subject-card {
+        background: var(--card-bg);
+        backdrop-filter: blur(10px);
+        border: var(--border);
+        border-radius: 25px;
+        padding: 25px;
+        box-shadow: var(--shadow);
+        transition: var(--transition-bounce);
+        height: 100%;
+        position: relative;
+        overflow: hidden;
+        cursor: pointer;
+    }
+
+    .subject-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 100px;
+        height: 100px;
+        background: linear-gradient(135deg, var(--primary-pink), var(--secondary-pink));
+        opacity: 0.1;
+        border-radius: 0 0 0 100%;
+    }
+
+    .subject-card:hover {
+        transform: translateY(-15px);
+        box-shadow: 0 25px 50px rgba(123, 44, 191, 0.2);
+    }
+
+    .subject-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 20px;
+    }
+
+    .subject-icon {
+        width: 50px;
+        height: 50px;
+        line-height: 50px;
+        text-align: center;
+        background: linear-gradient(135deg, var(--primary-pink), var(--dark-pink));
+        color: white;
+        font-size: 1.5rem;
+        border-radius: 15px;
+    }
+
+    .subject-code {
+        padding: 5px 12px;
+        background: rgba(123, 44, 191, 0.1);
+        color: var(--primary-pink);
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .subject-name {
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin-bottom: 15px;
+        color: var(--text-primary);
+    }
+
+    .subject-class {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+        margin-bottom: 10px;
+    }
+
+    .subject-class i { color: var(--primary-pink); }
+
+    .subject-progress {
+        margin: 20px 0;
+    }
+
+    .progress-label {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 5px;
+        font-size: 0.9rem;
+    }
+
+    .progress-bar-container {
+        height: 8px;
+        background: rgba(123, 44, 191, 0.1);
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .progress-bar-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--primary-pink), var(--secondary-pink));
+        border-radius: 10px;
+        width: 0%;
+        transition: width 1s ease;
+    }
+
+    .subject-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 20px;
+        padding-top: 15px;
+        border-top: var(--border);
+    }
+
+    .subject-stats { display: flex; gap: 15px; }
+    .stat-item { text-align: center; }
+    .stat-item small { display: block; color: var(--text-secondary); font-size: 0.7rem; }
+    .stat-item span { font-weight: 600; color: var(--primary-pink); }
+
+    .btn-subject-action {
+        padding: 8px 15px;
+        border-radius: 25px;
+        background: linear-gradient(135deg, var(--primary-pink), var(--dark-pink));
+        color: white;
+        text-decoration: none;
+        font-size: 0.9rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        transition: var(--transition-bounce);
+    }
+
+    .btn-subject-action:hover {
+        transform: scale(1.1);
+        box-shadow: 0 5px 15px rgba(123, 44, 191, 0.4);
+        color: white;
+    }
+
+    /* Quick Actions */
+    .quick-actions-card {
+        background: var(--card-bg);
+        backdrop-filter: blur(10px);
+        border: var(--border);
+        border-radius: 25px;
+        padding: 25px;
+        box-shadow: var(--shadow);
+        margin-top: 30px;
+    }
+
+    .quick-actions-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .quick-actions-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+    }
+
+    .quick-action-item {
+        padding: 15px;
+        background: rgba(123, 44, 191, 0.05);
+        border-radius: 15px;
+        text-decoration: none;
+        color: var(--text-primary);
+        transition: var(--transition-bounce);
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .quick-action-item:hover {
+        background: linear-gradient(135deg, var(--primary-pink), var(--dark-pink));
+        color: white;
+        transform: translateY(-5px);
+    }
+
+    .quick-action-item i {
+        font-size: 1.5rem;
+        color: var(--primary-pink);
+        transition: var(--transition-bounce);
+    }
+
+    .quick-action-item:hover i {
+        color: white;
+        transform: scale(1.2);
+    }
+
+    .quick-action-content h6 {
+        margin-bottom: 5px;
+        font-weight: 600;
+    }
+
+    .quick-action-content small {
+        opacity: 0.8;
+        font-size: 0.8rem;
+    }
+
+    @media (max-width: 768px) {
+        .page-title { font-size: 2rem; }
+        .welcome-title { font-size: 1.5rem; }
+        .section-title { font-size: 1.3rem; }
+        .quick-actions-grid { grid-template-columns: 1fr; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<section class="page-header">
+    <div class="container">
+        <h1 class="page-title animate__animated animate__fadeInDown">
+            <i class="fas fa-pencil-alt me-3"></i>Score Entry
+        </h1>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb animate__animated animate__fadeInUp">
+                <li class="breadcrumb-item"><a href="{% url 'accounts:teacher_dashboard' %}">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="#">Academics</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Score Entry</li>
+            </ol>
+        </nav>
+    </div>
+</section>
+
+<div class="container">
+    <!-- Welcome Card -->
+    <div class="welcome-card animate__animated animate__fadeInUp">
+        <h2 class="welcome-title">Welcome back, {{ request.user.get_full_name }}!</h2>
+        <p class="welcome-text">Ready to record today's scores? You have pending entries to complete.</p>
+        <div class="welcome-icon">
+            <i class="fas fa-chart-line"></i>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-3 col-sm-6">
+            <div class="stat-card animate__animated animate__fadeInUp">
+                <div class="stat-icon"><i class="fas fa-users"></i></div>
+                <div class="stat-value">124</div>
+                <div class="stat-label">Total Students</div>
+                <div class="stat-trend trend-up"><i class="fas fa-arrow-up me-1"></i>+12 this term</div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6">
+            <div class="stat-card animate__animated animate__fadeInUp animate__delay-1s">
+                <div class="stat-icon"><i class="fas fa-book"></i></div>
+                <div class="stat-value">6</div>
+                <div class="stat-label">Subjects</div>
+                <div class="stat-trend trend-up"><i class="fas fa-check-circle me-1"></i>All assigned</div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6">
+            <div class="stat-card animate__animated animate__fadeInUp animate__delay-2s">
+                <div class="stat-icon"><i class="fas fa-clock"></i></div>
+                <div class="stat-value">42</div>
+                <div class="stat-label">Pending Scores</div>
+                <div class="stat-trend trend-down"><i class="fas fa-exclamation-circle me-1"></i>Needs attention</div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6">
+            <div class="stat-card animate__animated animate__fadeInUp animate__delay-3s">
+                <div class="stat-icon"><i class="fas fa-check-double"></i></div>
+                <div class="stat-value">86%</div>
+                <div class="stat-label">Completion Rate</div>
+                <div class="stat-trend trend-up"><i class="fas fa-arrow-up me-1"></i>+5% from last week</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Subjects Taught Section -->
+    <div class="section-title animate__animated animate__fadeInLeft">
+        <i class="fas fa-chalkboard-teacher"></i>
+        My Subjects
+    </div>
+
+    <div class="row g-4 mb-5">
+        <div class="col-lg-4 col-md-6">
+            <div class="subject-card animate__animated animate__fadeInUp">
+                <div class="subject-header">
+                    <div class="subject-icon"><i class="fas fa-square-root-alt"></i></div>
+                    <span class="subject-code">MTH101</span>
+                </div>
+                <h3 class="subject-name">Mathematics</h3>
+                <div class="subject-class">
+                    <i class="fas fa-users"></i>
+                    <span>JSS 2A, JSS 2B, SS 1A</span>
+                </div>
+                
+                <div class="subject-progress">
+                    <div class="progress-label"><span>Completion</span><span>75%</span></div>
+                    <div class="progress-bar-container"><div class="progress-bar-fill" style="width: 75%;"></div></div>
+                </div>
+
+                <div class="subject-footer">
+                    <div class="subject-stats">
+                        <div class="stat-item"><small>Students</small><span>45</span></div>
+                        <div class="stat-item"><small>Pending</small><span>12</span></div>
+                    </div>
+                    <a href="#" class="btn-subject-action"><i class="fas fa-pencil-alt"></i>Enter Scores</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6">
+            <div class="subject-card animate__animated animate__fadeInUp animate__delay-1s">
+                <div class="subject-header">
+                    <div class="subject-icon"><i class="fas fa-language"></i></div>
+                    <span class="subject-code">ENG102</span>
+                </div>
+                <h3 class="subject-name">English Language</h3>
+                <div class="subject-class">
+                    <i class="fas fa-users"></i>
+                    <span>JSS 1A, JSS 2A</span>
+                </div>
+                
+                <div class="subject-progress">
+                    <div class="progress-label"><span>Completion</span><span>60%</span></div>
+                    <div class="progress-bar-container"><div class="progress-bar-fill" style="width: 60%;"></div></div>
+                </div>
+
+                <div class="subject-footer">
+                    <div class="subject-stats">
+                        <div class="stat-item"><small>Students</small><span>38</span></div>
+                        <div class="stat-item"><small>Pending</small><span>15</span></div>
+                    </div>
+                    <a href="#" class="btn-subject-action"><i class="fas fa-pencil-alt"></i>Enter Scores</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6">
+            <div class="subject-card animate__animated animate__fadeInUp animate__delay-2s">
+                <div class="subject-header">
+                    <div class="subject-icon"><i class="fas fa-book-open"></i></div>
+                    <span class="subject-code">SCI103</span>
+                </div>
+                <h3 class="subject-name">Science</h3>
+                <div class="subject-class">
+                    <i class="fas fa-users"></i>
+                    <span>JSS 1B, JSS 3A</span>
+                </div>
+                
+                <div class="subject-progress">
+                    <div class="progress-label"><span>Completion</span><span>90%</span></div>
+                    <div class="progress-bar-container"><div class="progress-bar-fill" style="width: 90%;"></div></div>
+                </div>
+
+                <div class="subject-footer">
+                    <div class="subject-stats">
+                        <div class="stat-item"><small>Students</small><span>42</span></div>
+                        <div class="stat-item"><small>Pending</small><span>4</span></div>
+                    </div>
+                    <a href="#" class="btn-subject-action"><i class="fas fa-pencil-alt"></i>Enter Scores</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions-card animate__animated animate__fadeInUp">
+        <div class="quick-actions-title">
+            <i class="fas fa-bolt"></i>
+            Quick Actions
+        </div>
+        <div class="quick-actions-grid">
+            <a href="#" class="quick-action-item">
+                <i class="fas fa-layer-group"></i>
+                <div class="quick-action-content">
+                    <h6>Bulk Score Entry</h6>
+                    <small>Enter scores for multiple students</small>
+                </div>
+            </a>
+            <a href="#" class="quick-action-item">
+                <i class="fas fa-user-edit"></i>
+                <div class="quick-action-content">
+                    <h6>Individual Entry</h6>
+                    <small>Record score for one student</small>
+                </div>
+            </a>
+            <a href="#" class="quick-action-item">
+                <i class="fas fa-file-import"></i>
+                <div class="quick-action-content">
+                    <h6>Import from Excel</h6>
+                    <small>Upload scores from CSV/Excel</small>
+                </div>
+            </a>
+            <a href="#" class="quick-action-item">
+                <i class="fas fa-chart-bar"></i>
+                <div class="quick-action-content">
+                    <h6>View Reports</h6>
+                    <small>See class performance analytics</small>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const progressBars = document.querySelectorAll('.progress-bar-fill');
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const bar = entry.target;
+                const width = bar.style.width;
+                bar.style.width = '0';
+                setTimeout(() => { bar.style.width = width; }, 100);
+                observer.unobserve(bar);
+            }
+        });
+    }, { threshold: 0.5 });
+
+    progressBars.forEach(bar => observer.observe(bar));
+
+    const welcomeTitle = document.querySelector('.welcome-title');
+    const hour = new Date().getHours();
+    let greeting = 'Welcome';
+    if (hour < 12) greeting = 'Good Morning';
+    else if (hour < 17) greeting = 'Good Afternoon';
+    else greeting = 'Good Evening';
+    welcomeTitle.textContent = `${greeting}, {{ request.user.get_full_name }}!`;
+</script>
+{% endblock %}

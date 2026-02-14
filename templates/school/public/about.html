@@ -1,0 +1,926 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}About Us - {{ block.super }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* About Page Hero */
+    .about-hero {
+        position: relative;
+        min-height: 500px;
+        background: linear-gradient(135deg, rgba(123, 44, 191, 0.9), rgba(74, 144, 226, 0.9)), url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        text-align: center;
+        margin-top: -76px;
+        padding-top: 76px;
+    }
+
+    .about-hero h1 {
+        font-size: 4rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        animation: fadeInUp 1s ease;
+    }
+
+    .about-hero p {
+        font-size: 1.3rem;
+        max-width: 800px;
+        margin: 0 auto;
+        opacity: 0.9;
+        animation: fadeInUp 1s ease 0.2s both;
+    }
+
+    /* Mission & Vision */
+    .mission-vision-section {
+        padding: 80px 0;
+        position: relative;
+    }
+
+    .mission-card, .vision-card {
+        background: var(--card-bg);
+        border-radius: 30px;
+        padding: 50px 40px;
+        box-shadow: var(--shadow);
+        height: 100%;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        border: var(--border);
+        transition: var(--transition-bounce);
+    }
+
+    .mission-card:hover, .vision-card:hover {
+        transform: translateY(-15px);
+        box-shadow: 0 20px 40px rgba(123, 44, 191, 0.3);
+    }
+
+    .mission-card::before, .vision-card::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200px;
+        height: 200px;
+        background: linear-gradient(135deg, var(--primary-pink), var(--dark-pink));
+        border-radius: 50%;
+        opacity: 0.1;
+        transition: var(--transition-smooth);
+    }
+
+    .mission-card:hover::before, .vision-card:hover::before {
+        transform: scale(1.5);
+    }
+
+    .card-icon {
+        width: 100px;
+        height: 100px;
+        line-height: 100px;
+        text-align: center;
+        background: linear-gradient(135deg, var(--primary-pink), var(--dark-pink));
+        color: white;
+        font-size: 2.5rem;
+        border-radius: 50%;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 20px rgba(123, 44, 191, 0.3);
+    }
+
+    .mission-card h2, .vision-card h2 {
+        font-family: 'Playfair Display', serif;
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 25px;
+        color: var(--text-primary);
+    }
+
+    .mission-card p, .vision-card p {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+        line-height: 1.8;
+        margin-bottom: 25px;
+    }
+
+    /* Our Story */
+    .story-section {
+        padding: 80px 0;
+        background: linear-gradient(135deg, rgba(123, 44, 191, 0.05), rgba(74, 144, 226, 0.05));
+        position: relative;
+        overflow: hidden;
+    }
+
+    .story-content {
+        padding-right: 50px;
+    }
+
+    .story-content h2 {
+        font-family: 'Playfair Display', serif;
+        font-size: 3rem;
+        font-weight: 700;
+        margin-bottom: 30px;
+        color: var(--text-primary);
+    }
+
+    .story-content p {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+        line-height: 1.8;
+        margin-bottom: 20px;
+    }
+
+    .story-image {
+        position: relative;
+        border-radius: 30px;
+        overflow: hidden;
+        box-shadow: var(--shadow);
+        height: 500px;
+    }
+
+    .story-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.8s ease;
+    }
+
+    .story-image:hover img {
+        transform: scale(1.1);
+    }
+
+    .story-image .year-badge {
+        position: absolute;
+        bottom: 30px;
+        right: 30px;
+        background: linear-gradient(135deg, var(--primary-pink), var(--dark-pink));
+        color: white;
+        padding: 20px 30px;
+        border-radius: 20px;
+        font-size: 2rem;
+        font-weight: 700;
+        box-shadow: 0 10px 25px rgba(123, 44, 191, 0.4);
+        animation: pulse 2s infinite;
+    }
+
+    /* Core Values */
+    .values-section {
+        padding: 80px 0;
+    }
+
+    .value-card {
+        text-align: center;
+        padding: 40px 30px;
+        background: var(--card-bg);
+        border-radius: 20px;
+        box-shadow: var(--shadow);
+        transition: var(--transition-bounce);
+        height: 100%;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .value-card::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 5px;
+        background: linear-gradient(135deg, var(--primary-pink), var(--dark-pink));
+        transform: scaleX(0);
+        transition: transform 0.4s ease;
+    }
+
+    .value-card:hover::after {
+        transform: scaleX(1);
+    }
+
+    .value-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 40px rgba(123, 44, 191, 0.2);
+    }
+
+    .value-icon {
+        width: 80px;
+        height: 80px;
+        line-height: 80px;
+        text-align: center;
+        background: linear-gradient(135deg, var(--primary-pink), var(--dark-pink));
+        color: white;
+        font-size: 2rem;
+        border-radius: 50%;
+        margin: 0 auto 25px;
+        transition: var(--transition-bounce);
+    }
+
+    .value-card:hover .value-icon {
+        transform: rotateY(180deg);
+    }
+
+    .value-card h3 {
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin-bottom: 15px;
+        color: var(--text-primary);
+    }
+
+    .value-card p {
+        color: var(--text-secondary);
+        line-height: 1.6;
+    }
+
+    /* Leadership Team */
+    .team-section {
+        padding: 80px 0;
+        background: linear-gradient(135deg, rgba(123, 44, 191, 0.05), rgba(74, 144, 226, 0.05));
+    }
+
+    .team-card {
+        background: var(--card-bg);
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: var(--shadow);
+        transition: var(--transition-bounce);
+        height: 100%;
+    }
+
+    .team-card:hover {
+        transform: translateY(-15px);
+        box-shadow: 0 20px 40px rgba(123, 44, 191, 0.3);
+    }
+
+    .team-image {
+        height: 300px;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .team-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.8s ease;
+    }
+
+    .team-card:hover .team-image img {
+        transform: scale(1.1);
+    }
+
+    .team-social {
+        position: absolute;
+        bottom: -50px;
+        left: 0;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        padding: 15px;
+        background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+        transition: bottom 0.4s ease;
+    }
+
+    .team-card:hover .team-social {
+        bottom: 0;
+    }
+
+    .team-social a {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: white;
+        color: var(--primary-pink);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        transition: var(--transition-bounce);
+    }
+
+    .team-social a:hover {
+        background: var(--primary-pink);
+        color: white;
+        transform: rotate(360deg);
+    }
+
+    .team-info {
+        padding: 25px;
+        text-align: center;
+    }
+
+    .team-info h3 {
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin-bottom: 5px;
+        color: var(--text-primary);
+    }
+
+    .team-info .position {
+        color: var(--primary-pink);
+        font-weight: 500;
+        margin-bottom: 10px;
+    }
+
+    .team-info .bio {
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+        line-height: 1.6;
+    }
+
+    /* School Facilities */
+    .facilities-section {
+        padding: 80px 0;
+    }
+
+    .facility-card {
+        position: relative;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: var(--shadow);
+        height: 300px;
+        cursor: pointer;
+    }
+
+    .facility-image {
+        width: 100%;
+        height: 100%;
+    }
+
+    .facility-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.8s ease;
+    }
+
+    .facility-card:hover .facility-image img {
+        transform: scale(1.1);
+    }
+
+    .facility-overlay {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        padding: 30px;
+        background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+        color: white;
+        transform: translateY(100%);
+        transition: transform 0.4s ease;
+    }
+
+    .facility-card:hover .facility-overlay {
+        transform: translateY(0);
+    }
+
+    .facility-overlay h3 {
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin-bottom: 10px;
+    }
+
+    .facility-overlay p {
+        font-size: 0.95rem;
+        opacity: 0.9;
+    }
+
+    /* Stats Timeline */
+    .stats-timeline {
+        padding: 60px 0;
+    }
+
+    .timeline-item {
+        display: flex;
+        align-items: center;
+        gap: 30px;
+        margin-bottom: 40px;
+        position: relative;
+    }
+
+    .timeline-item::before {
+        content: '';
+        position: absolute;
+        left: 100px;
+        top: 0;
+        width: 2px;
+        height: 100%;
+        background: linear-gradient(to bottom, var(--primary-pink), var(--dark-pink));
+        opacity: 0.3;
+    }
+
+    .timeline-year {
+        min-width: 120px;
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--primary-pink);
+        font-family: 'Playfair Display', serif;
+    }
+
+    .timeline-content {
+        flex: 1;
+        background: var(--card-bg);
+        padding: 25px;
+        border-radius: 15px;
+        box-shadow: var(--shadow);
+    }
+
+    .timeline-content h3 {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 10px;
+        color: var(--text-primary);
+    }
+
+    .timeline-content p {
+        color: var(--text-secondary);
+        margin: 0;
+    }
+
+    /* Accreditation Badges */
+    .accreditation-section {
+        padding: 60px 0;
+        background: var(--card-bg);
+    }
+
+    .badge-item {
+        text-align: center;
+        padding: 30px;
+    }
+
+    .badge-item img {
+        max-width: 100px;
+        margin-bottom: 20px;
+        filter: grayscale(100%);
+        transition: var(--transition-smooth);
+    }
+
+    .badge-item:hover img {
+        filter: grayscale(0);
+        transform: scale(1.1);
+    }
+
+    .badge-item h4 {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .about-hero h1 {
+            font-size: 2.5rem;
+        }
+
+        .story-content {
+            padding-right: 0;
+            margin-bottom: 30px;
+        }
+
+        .story-image {
+            height: 350px;
+        }
+
+        .timeline-item {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .timeline-item::before {
+            display: none;
+        }
+
+        .team-image {
+            height: 250px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="about-hero">
+    <div class="container">
+        <h1 class="animate__animated animate__fadeInUp">About Our School</h1>
+        <p class="animate__animated animate__fadeInUp animate__delay-1s">
+            Dedicated to excellence in education since 2005, nurturing future leaders and innovators
+        </p>
+    </div>
+</section>
+
+<!-- Mission & Vision -->
+<section class="mission-vision-section">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-md-6" data-aos="fade-right">
+                <div class="mission-card">
+                    <div class="card-icon">
+                        <i class="fas fa-bullseye"></i>
+                    </div>
+                    <h2>Our Mission</h2>
+                    <p>
+                        To provide a nurturing and inclusive learning environment that fosters academic excellence, 
+                        character development, and lifelong learning. We are committed to empowering students with 
+                        the knowledge, skills, and values needed to thrive in a rapidly changing world.
+                    </p>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><i class="fas fa-check-circle" style="color: var(--primary-pink); margin-right: 8px;"></i>Quality education for all</li>
+                        <li class="mb-2"><i class="fas fa-check-circle" style="color: var(--primary-pink); margin-right: 8px;"></i>Holistic development</li>
+                        <li class="mb-2"><i class="fas fa-check-circle" style="color: var(--primary-pink); margin-right: 8px;"></i>Community engagement</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-md-6" data-aos="fade-left">
+                <div class="vision-card">
+                    <div class="card-icon">
+                        <i class="fas fa-eye"></i>
+                    </div>
+                    <h2>Our Vision</h2>
+                    <p>
+                        To be a beacon of educational excellence, recognized globally for producing well-rounded, 
+                        innovative, and socially responsible leaders who make positive contributions to society.
+                    </p>
+                    <div class="row mt-4">
+                        <div class="col-6 text-center">
+                            <h3 class="display-4" style="background: linear-gradient(135deg, var(--primary-pink), var(--dark-pink)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">500+</h3>
+                            <p class="text-secondary">Students</p>
+                        </div>
+                        <div class="col-6 text-center">
+                            <h3 class="display-4" style="background: linear-gradient(135deg, var(--primary-pink), var(--dark-pink)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">50+</h3>
+                            <p class="text-secondary">Teachers</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Our Story -->
+<section class="story-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6" data-aos="fade-right">
+                <div class="story-content">
+                    <h2>Our Journey of Excellence</h2>
+                    <p>
+                        Founded in 2005, our school began with a simple yet powerful vision: to create an educational 
+                        institution that nurtures not just academic excellence, but also character, creativity, and 
+                        compassion. What started with just 50 students and 5 teachers has grown into a thriving 
+                        community of over 500 students and 50 dedicated educators.
+                    </p>
+                    <p>
+                        Over the years, we've expanded our facilities, introduced innovative teaching methods, and 
+                        developed a curriculum that balances traditional values with modern educational practices. 
+                        Our commitment to holistic education has earned us recognition as one of the leading schools 
+                        in the region.
+                    </p>
+                    <p>
+                        Today, we continue to evolve and adapt, embracing technology while maintaining the personal 
+                        touch that makes our school special. We're proud of our alumni who are making their mark in 
+                        various fields worldwide, and we remain dedicated to shaping the next generation of leaders.
+                    </p>
+                </div>
+            </div>
+            <div class="col-lg-6" data-aos="fade-left">
+                <div class="story-image">
+                    <img src="https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" alt="School History">
+                    <div class="year-badge">
+                        <span>Since 2005</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Core Values -->
+<section class="values-section">
+    <div class="container">
+        <div class="section-title" data-aos="fade-up">
+            <h2>Our Core Values</h2>
+            <p>The principles that guide everything we do</p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="100">
+                <div class="value-card">
+                    <div class="value-icon">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <h3>Excellence</h3>
+                    <p>Striving for the highest standards in academics, character, and personal growth</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="200">
+                <div class="value-card">
+                    <div class="value-icon">
+                        <i class="fas fa-heart"></i>
+                    </div>
+                    <h3>Compassion</h3>
+                    <p>Fostering empathy, kindness, and respect for others in our community</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="300">
+                <div class="value-card">
+                    <div class="value-icon">
+                        <i class="fas fa-lightbulb"></i>
+                    </div>
+                    <h3>Innovation</h3>
+                    <p>Embracing creativity and new ideas to enhance learning and teaching</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="400">
+                <div class="value-card">
+                    <div class="value-icon">
+                        <i class="fas fa-handshake"></i>
+                    </div>
+                    <h3>Integrity</h3>
+                    <p>Building trust through honesty, responsibility, and ethical behavior</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Leadership Team -->
+<section class="team-section">
+    <div class="container">
+        <div class="section-title" data-aos="fade-up">
+            <h2>Our Leadership Team</h2>
+            <p>Meet the dedicated professionals guiding our school</p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="100">
+                <div class="team-card">
+                    <div class="team-image">
+                        <img src="https://randomuser.me/api/portraits/women/1.jpg" alt="Principal">
+                        <div class="team-social">
+                            <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                            <a href="#"><i class="fab fa-twitter"></i></a>
+                            <a href="#"><i class="fas fa-envelope"></i></a>
+                        </div>
+                    </div>
+                    <div class="team-info">
+                        <h3>Dr. Sarah Johnson</h3>
+                        <p class="position">Principal</p>
+                        <p class="bio">PhD in Educational Leadership with 20+ years of experience</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="200">
+                <div class="team-card">
+                    <div class="team-image">
+                        <img src="https://randomuser.me/api/portraits/men/2.jpg" alt="Vice Principal">
+                        <div class="team-social">
+                            <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                            <a href="#"><i class="fab fa-twitter"></i></a>
+                            <a href="#"><i class="fas fa-envelope"></i></a>
+                        </div>
+                    </div>
+                    <div class="team-info">
+                        <h3>Mr. Michael Chen</h3>
+                        <p class="position">Vice Principal</p>
+                        <p class="bio">M.Ed with specialization in curriculum development</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="300">
+                <div class="team-card">
+                    <div class="team-image">
+                        <img src="https://randomuser.me/api/portraits/women/3.jpg" alt="Academic Director">
+                        <div class="team-social">
+                            <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                            <a href="#"><i class="fab fa-twitter"></i></a>
+                            <a href="#"><i class="fas fa-envelope"></i></a>
+                        </div>
+                    </div>
+                    <div class="team-info">
+                        <h3>Dr. Emily Okonkwo</h3>
+                        <p class="position">Academic Director</p>
+                        <p class="bio">PhD in Mathematics Education, 15 years in academia</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="400">
+                <div class="team-card">
+                    <div class="team-image">
+                        <img src="https://randomuser.me/api/portraits/men/4.jpg" alt="Admin Director">
+                        <div class="team-social">
+                            <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                            <a href="#"><i class="fab fa-twitter"></i></a>
+                            <a href="#"><i class="fas fa-envelope"></i></a>
+                        </div>
+                    </div>
+                    <div class="team-info">
+                        <h3>Mr. James Adebayo</h3>
+                        <p class="position">Administrative Director</p>
+                        <p class="bio">MBA with focus on educational administration</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- School Facilities -->
+<section class="facilities-section">
+    <div class="container">
+        <div class="section-title" data-aos="fade-up">
+            <h2>Our Facilities</h2>
+            <p>State-of-the-art facilities designed for optimal learning</p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
+                <div class="facility-card">
+                    <div class="facility-image">
+                        <img src="https://images.unsplash.com/photo-1580582932707-520aed937b7b?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" alt="Science Lab">
+                    </div>
+                    <div class="facility-overlay">
+                        <h3>Science Laboratories</h3>
+                        <p>Fully equipped labs for Physics, Chemistry, and Biology</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
+                <div class="facility-card">
+                    <div class="facility-image">
+                        <img src="https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" alt="Library">
+                    </div>
+                    <div class="facility-overlay">
+                        <h3>Modern Library</h3>
+                        <p>Extensive collection of books, digital resources, and study spaces</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
+                <div class="facility-card">
+                    <div class="facility-image">
+                        <img src="https://images.unsplash.com/photo-1577896851231-70ef18881754?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" alt="Sports Complex">
+                    </div>
+                    <div class="facility-overlay">
+                        <h3>Sports Complex</h3>
+                        <p>Basketball court, football field, and indoor sports facilities</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Timeline -->
+<section class="stats-timeline">
+    <div class="container">
+        <div class="section-title" data-aos="fade-up">
+            <h2>Our Growth Story</h2>
+            <p>Key milestones in our journey</p>
+        </div>
+
+        <div class="timeline">
+            <div class="timeline-item" data-aos="fade-up">
+                <div class="timeline-year">2005</div>
+                <div class="timeline-content">
+                    <h3>School Founded</h3>
+                    <p>Started with 50 students and 5 teachers in a single building</p>
+                </div>
+            </div>
+            <div class="timeline-item" data-aos="fade-up" data-aos-delay="100">
+                <div class="timeline-year">2010</div>
+                <div class="timeline-content">
+                    <h3>First Graduating Class</h3>
+                    <p>Celebrated our first set of graduates with 100% pass rate</p>
+                </div>
+            </div>
+            <div class="timeline-item" data-aos="fade-up" data-aos-delay="200">
+                <div class="timeline-year">2015</div>
+                <div class="timeline-content">
+                    <h3>New Campus Opening</h3>
+                    <p>Expanded to a new campus with modern facilities</p>
+                </div>
+            </div>
+            <div class="timeline-item" data-aos="fade-up" data-aos-delay="300">
+                <div class="timeline-year">2020</div>
+                <div class="timeline-content">
+                    <h3>Digital Transformation</h3>
+                    <p>Implemented e-learning platforms and digital classrooms</p>
+                </div>
+            </div>
+            <div class="timeline-item" data-aos="fade-up" data-aos-delay="400">
+                <div class="timeline-year">2024</div>
+                <div class="timeline-content">
+                    <h3>500+ Students</h3>
+                    <p>Proud community of over 500 students and 50 teachers</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Accreditation Badges -->
+<section class="accreditation-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-3 col-6" data-aos="fade-up">
+                <div class="badge-item">
+                    <img src="https://via.placeholder.com/100x100/ffe4e8/ff69b4?text=ISO" alt="ISO Certified">
+                    <h4>ISO 9001:2015</h4>
+                </div>
+            </div>
+            <div class="col-md-3 col-6" data-aos="fade-up" data-aos-delay="100">
+                <div class="badge-item">
+                    <img src="https://via.placeholder.com/100x100/ffe4e8/ff69b4?text=WAEC" alt="WAEC">
+                    <h4>WAEC Accredited</h4>
+                </div>
+            </div>
+            <div class="col-md-3 col-6" data-aos="fade-up" data-aos-delay="200">
+                <div class="badge-item">
+                    <img src="https://via.placeholder.com/100x100/ffe4e8/ff69b4?text=NECO" alt="NECO">
+                    <h4>NECO Approved</h4>
+                </div>
+            </div>
+            <div class="col-md-3 col-6" data-aos="fade-up" data-aos-delay="300">
+                <div class="badge-item">
+                    <img src="https://via.placeholder.com/100x100/ffe4e8/ff69b4?text=Cambridge" alt="Cambridge">
+                    <h4>Cambridge Associate</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Call to Action -->
+<section class="py-5" style="background: linear-gradient(135deg, var(--primary-pink), var(--dark-pink)); color: white;">
+    <div class="container text-center">
+        <h2 class="display-4 mb-4" data-aos="fade-up">Join Our Community</h2>
+        <p class="lead mb-4" data-aos="fade-up" data-aos-delay="100">
+            Be part of a school that cares about your child's future
+        </p>
+        <a href="{% url 'admissions:admission_form' %}" class="btn btn-light btn-lg pulse" data-aos="fade-up" data-aos-delay="200">
+            <i class="fas fa-edit me-2"></i>Apply Now
+        </a>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        // Animate timeline items on scroll
+        const timelineItems = document.querySelectorAll('.timeline-item');
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateX(0)';
+                }
+            });
+        }, { threshold: 0.5 });
+
+        timelineItems.forEach(item => {
+            item.style.opacity = '0';
+            item.style.transform = 'translateX(-20px)';
+            item.style.transition = 'all 0.6s ease';
+            observer.observe(item);
+        });
+
+        // Counter animation for stats
+        $('.stat-number').each(function() {
+            const $this = $(this);
+            $({ Counter: 0 }).animate({ Counter: $this.text() }, {
+                duration: 2000,
+                easing: 'swing',
+                step: function() {
+                    $this.text(Math.ceil(this.Counter));
+                }
+            });
+        });
+
+        // Team card hover effect
+        $('.team-card').hover(
+            function() {
+                $(this).find('.team-social').stop().animate({ bottom: '0' }, 300);
+            },
+            function() {
+                $(this).find('.team-social').stop().animate({ bottom: '-50px' }, 300);
+            }
+        );
+
+        // Value cards animation
+        $('.value-card').hover(
+            function() {
+                $(this).find('.value-icon').addClass('animate__animated animate__pulse');
+            },
+            function() {
+                $(this).find('.value-icon').removeClass('animate__animated animate__pulse');
+            }
+        );
+    });
+</script>
+{% endblock %}

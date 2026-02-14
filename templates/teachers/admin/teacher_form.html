@@ -1,0 +1,35 @@
+{% load static %}
+{% extends 'base.html' %}
+
+{% block title %}Teacher Form{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8" data-aos="zoom-in">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h2 class="card-title mb-4">{{ form.instance.pk|yesno:"Edit Teacher,Add Teacher" }}</h2>
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        {{ form.as_p }}
+                        <button type="submit" class="btn btn-success mt-3"><i class="fas fa-check"></i> Save</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.card .form-control:focus { box-shadow: none; border-color: var(--primary-pink); }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+AOS.init();
+</script>
+{% endblock %}

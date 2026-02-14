@@ -1,0 +1,45 @@
+{% load static %}
+{% extends 'base.html' %}
+
+{% block title %}Bulk Upload{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <h1 class="display-4 text-center mb-4" data-aos="fade-down">Bulk Upload</h1>
+    <div class="row justify-content-center">
+        <div class="col-md-6" data-aos="fade-up" data-aos-delay="200">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data" id="bulkUploadForm">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="id_file" class="form-label">Select CSV file</label>
+                            {{ form.file }}
+                        </div>
+                        <button type="submit" class="btn btn-primary"><i class="fas fa-file-upload"></i> Upload</button>
+                    </form>
+                    <div id="uploadStatus" class="mt-3"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+#uploadStatus { font-style: italic; color: var(--text-secondary); }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+AOS.init();
+// display simple status message
+const form = document.getElementById('bulkUploadForm');
+const status = document.getElementById('uploadStatus');
+form.addEventListener('submit', () => {
+    status.textContent = 'Uploading... please wait.';
+});
+</script>
+{% endblock %}

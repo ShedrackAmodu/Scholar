@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Student Dashboard - {{ student.user.get_full_name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .student-dashboard { padding: 120px 0 80px; min-height: 100vh; background: var(--bg-gradient); }
+    .welcome-banner { background: linear-gradient(135deg, var(--primary-pink), var(--dark-pink)); border-radius: 30px; padding: 40px; margin-bottom: 40px; color: white; position: relative; overflow: hidden; animation: slideInDown 0.8s ease; }
+    @keyframes slideInDown { from { opacity: 0; transform: translateY(-50px); } to { opacity: 1; transform: translateY(0); } }
+    .welcome-title { font-size: 2.5rem; font-weight: 700; margin-bottom: 10px; font-family: 'Playfair Display', serif; }
+    .welcome-subtitle { font-size: 1.1rem; opacity: 0.9; margin-bottom: 20px; }
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px,1fr)); gap: 25px; }
+    .stat-card { background: var(--card-bg); border-radius: 20px; padding: 25px; box-shadow: var(--shadow); border: var(--border); transition: all 0.3s ease; position: relative; overflow: hidden; animation: fadeInUp 0.8s ease; }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+    .stat-icon { width: 50px; height: 50px; background: linear-gradient(135deg, var(--primary-pink), var(--dark-pink)); border-radius: 15px; display: flex; align-items: center; justify-content: center; margin-bottom: 15px; color: white; font-size: 1.5rem; transition: all 0.3s ease; }
+    .stat-value { font-size: 1.8rem; font-weight: 700; color: var(--text-primary); margin-bottom: 5px; font-family: 'Playfair Display', serif; }
+    .stat-label { color: var(--text-secondary); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; }
+    .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-top: 40px; }
+    .dashboard-card { background: var(--card-bg); border-radius: 20px; padding: 25px; box-shadow: var(--shadow); border: var(--border); transition: all 0.3s ease; animation: fadeIn 0.8s ease 0.5s both; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; padding-bottom: 15px; border-bottom: var(--border); }
+    .card-title { font-size: 1.2rem; font-weight: 600; color: var(--text-primary); display: flex; align-items: center; gap: 10px; }
+    .card-title i { color: var(--primary-pink); }
+    .list-group-item { border: none; padding: 10px 0; }
+    .list-group-item + .list-group-item { border-top: var(--border); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="student-dashboard">
+    <div class="container">
+        <div class="welcome-banner">
+            <div class="welcome-content">
+                <h1 class="welcome-title">Hello, {{ student.user.first_name }}!</h1>
+                <p class="welcome-subtitle">Here's a quick overview of your progress.</p>
+            </div>
+        </div>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-chart-line"></i></div>
+                <div class="stat-value">{{ recent_scores.count }}</div>
+                <div class="stat-label">Recent Scores</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-user-check"></i></div>
+                <div class="stat-value">{% if attendance_summary %}{{ attendance_summary.present }}<span>/{{ attendance_summary.total }}</span>{% else %}-{% endif %}</div>
+                <div class="stat-label">Attendance</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-tasks"></i></div>
+                <div class="stat-value">{{ pending_assignments.count }}</div>
+                <div class="stat-label">Pending Assignments</div>
+            </div>
+        </div>
+        <div class="dashboard-grid">
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="fas fa-file-alt"></i> Recent Scores</h3>
+                </div>
+                <ul class="list-group">
+                    {% for score in recent_scores %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            {{ score.subject_assessment.subject.name }}
+                            <span class="badge bg-primary rounded-pill">{{ score.value }}</span>
+                        </li>
+                    {% empty %}
+                        <li class="list-group-item text-secondary">No recent scores</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="fas fa-book"></i> Upcoming Assignments</h3>
+                </div>
+                <ul class="list-group">
+                    {% for asg in pending_assignments %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            {{ asg.title }}
+                            <span>{{ asg.due_date|date:"M d" }}</span>
+                        </li>
+                    {% empty %}
+                        <li class="list-group-item text-secondary">No pending assignments</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // optional student-specific interactions
+</script>
+{% endblock %}

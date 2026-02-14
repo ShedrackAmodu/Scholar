@@ -1,0 +1,1856 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Events - {{ block.super }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Events Hero Section */
+    .events-hero {
+        position: relative;
+        min-height: 400px;
+        background: linear-gradient(135deg, rgba(255, 105, 180, 0.95), rgba(255, 20, 147, 0.95)), url('https://images.unsplash.com/photo-1531058020387-3be344556be6?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        text-align: center;
+        margin-top: -76px;
+        padding-top: 76px;
+        overflow: hidden;
+    }
+
+    .events-hero::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" opacity="0.1"><path d="M20 20 L80 20 L80 80 L20 80 Z" fill="none" stroke="white" stroke-width="2"/><circle cx="50" cy="50" r="15" fill="none" stroke="white" stroke-width="2"/></svg>');
+        background-size: 50px 50px;
+        animation: slide 20s linear infinite;
+    }
+
+    @keyframes slide {
+        from { background-position: 0 0; }
+        to { background-position: 100px 100px; }
+    }
+
+    .events-hero h1 {
+        font-size: 4rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        animation: fadeInUp 1s ease;
+        position: relative;
+    }
+
+    .events-hero p {
+        font-size: 1.3rem;
+        max-width: 700px;
+        margin: 0 auto;
+        opacity: 0.95;
+        animation: fadeInUp 1s ease 0.2s both;
+        position: relative;
+    }
+
+    /* Event Stats */
+    .event-stats {
+        padding: 60px 0 30px;
+        position: relative;
+    }
+
+    .stat-card {
+        background: var(--card-bg);
+        border-radius: 20px;
+        padding: 30px;
+        text-align: center;
+        box-shadow: var(--shadow);
+        transition: var(--transition-bounce);
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        border: var(--border);
+    }
+
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255, 105, 180, 0.1) 0%, transparent 70%);
+        animation: rotate 20s linear infinite;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 40px rgba(255, 105, 180, 0.3);
+    }
+
+    .stat-icon {
+        width: 80px;
+        height: 80px;
+        line-height: 80px;
+        text-align: center;
+        background: linear-gradient(135deg, var(--primary-pink), var(--dark-pink));
+        color: white;
+        font-size: 2rem;
+        border-radius: 50%;
+        margin: 0 auto 20px;
+        position: relative;
+        z-index: 2;
+        transition: var(--transition-bounce);
+    }
+
+    .stat-card:hover .stat-icon {
+        transform: rotateY(180deg);
+    }
+
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 10px;
+        font-family: 'Playfair Display', serif;
+    }
+
+    .stat-label {
+        color: var(--text-secondary);
+        font-size: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    /* Event Controls */
+    .event-controls {
+        padding: 30px 0;
+    }
+
+    .control-card {
+        background: var(--card-bg);
+        border-radius: 20px;
+        padding: 25px;
+        box-shadow: var(--shadow);
+        backdrop-filter: blur(10px);
+        border: var(--border);
+    }
+
+    .view-toggle {
+        display: flex;
+        gap: 10px;
+        background: rgba(255, 105, 180, 0.1);
+        padding: 5px;
+        border-radius: 15px;
+    }
+
+    .view-btn {
+        flex: 1;
+        padding: 10px 20px;
+        border: none;
+        background: transparent;
+        color: var(--text-secondary);
+        border-radius: 12px;
+        transition: var(--transition-smooth);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .view-btn.active {
+        background: linear-gradient(135deg, var(--primary-pink), var(--dark-pink));
+        color: white;
+    }
+
+    .view-btn i {
+        font-size: 1.1rem;
+    }
+
+    .filter-group {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .filter-select {
+        padding: 12px 20px;
+        border-radius: 15px;
+        border: 2px solid transparent;
+        background: var(--card-bg);
+        color: var(--text-primary);
+        cursor: pointer;
+        transition: var(--transition-smooth);
+        flex: 1;
+        min-width: 150px;
+    }
+
+    .filter-select:focus {
+        border-color: var(--primary-pink);
+        outline: none;
+    }
+
+    .search-box {
+        position: relative;
+        flex: 2;
+    }
+
+    .search-box input {
+        width: 100%;
+        padding: 12px 20px 12px 45px;
+        border-radius: 15px;
+        border: 2px solid transparent;
+        background: var(--card-bg);
+        color: var(--text-primary);
+        transition: var(--transition-smooth);
+    }
+
+    .search-box input:focus {
+        border-color: var(--primary-pink);
+        box-shadow: 0 0 0 4px rgba(255, 105, 180, 0.1);
+    }
+
+    .search-box i {
+        position: absolute;
+        left: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--primary-pink);
+    }
+
+    /* Calendar View */
+    .calendar-view {
+        padding: 40px 0;
+        display: none;
+    }
+
+    .calendar-view.active {
+        display: block;
+        animation: fadeIn 0.5s ease;
+    }
+
+    .calendar-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+
+    .calendar-title {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .calendar-title h2 {
+        font-size: 2rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        font-family: 'Playfair Display', serif;
+    }
+
+    .calendar-nav {
+        display: flex;
+        gap: 10px;
+    }
+
+    .calendar-nav-btn {
+        width: 45px;
+        height: 45px;
+        border-radius: 12px;
+        border: none;
+        background: var(--card-bg);
+        color: var(--text-primary);
+        cursor: pointer;
+        transition: var(--transition-bounce);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+    }
+
+    .calendar-nav-btn:hover {
+        background: linear-gradient(135deg, var(--primary-pink), var(--dark-pink));
+        color: white;
+        transform: translateY(-3px);
+    }
+
+    .calendar-weekdays {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+
+    .weekday {
+        text-align: center;
+        font-weight: 600;
+        color: var(--text-primary);
+        padding: 15px;
+        background: var(--card-bg);
+        border-radius: 12px;
+    }
+
+    .calendar-days {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 10px;
+    }
+
+    .calendar-day {
+        background: var(--card-bg);
+        border-radius: 12px;
+        padding: 15px;
+        min-height: 120px;
+        position: relative;
+        transition: var(--transition-smooth);
+        border: var(--border);
+    }
+
+    .calendar-day:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow);
+    }
+
+    .calendar-day.empty {
+        background: transparent;
+        border: 2px dashed var(--border);
+    }
+
+    .day-number {
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 10px;
+    }
+
+    .day-events {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .day-event {
+        padding: 5px 8px;
+        border-radius: 8px;
+        font-size: 0.8rem;
+        color: white;
+        cursor: pointer;
+        transition: var(--transition-smooth);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .day-event:hover {
+        transform: translateX(3px);
+    }
+
+    .event-type-acad { background: linear-gradient(135deg, #0984e3, #74b9ff); }
+    .event-type-sport { background: linear-gradient(135deg, #00b894, #55efc4); }
+    .event-type-cult { background: linear-gradient(135deg, #e17055, #fab1a0); }
+    .event-type-hol { background: linear-gradient(135deg, #fdcb6e, #ffeaa7); }
+    .event-type-meet { background: linear-gradient(135deg, #6c5ce7, #a29bfe); }
+    .event-type-exam { background: linear-gradient(135deg, #d63031, #ff7675); }
+
+    .event-more {
+        text-align: center;
+        margin-top: 5px;
+        font-size: 0.8rem;
+        color: var(--primary-pink);
+        font-weight: 500;
+        cursor: pointer;
+    }
+
+    /* Grid View */
+    .grid-view {
+        padding: 40px 0;
+        display: block;
+    }
+
+    .grid-view.hidden {
+        display: none;
+    }
+
+    .event-card {
+        background: var(--card-bg);
+        border-radius: 30px;
+        overflow: hidden;
+        box-shadow: var(--shadow);
+        transition: var(--transition-bounce);
+        height: 100%;
+        position: relative;
+        backdrop-filter: blur(10px);
+        border: var(--border);
+    }
+
+    .event-card:hover {
+        transform: translateY(-15px);
+        box-shadow: 0 25px 50px rgba(255, 105, 180, 0.3);
+    }
+
+    .event-image {
+        height: 200px;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .event-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.8s ease;
+    }
+
+    .event-card:hover .event-image img {
+        transform: scale(1.1);
+    }
+
+    .event-date-badge {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: linear-gradient(135deg, var(--primary-pink), var(--dark-pink));
+        color: white;
+        padding: 12px;
+        border-radius: 15px;
+        text-align: center;
+        min-width: 60px;
+        box-shadow: 0 5px 15px rgba(255, 105, 180, 0.3);
+        z-index: 2;
+        animation: pulse 2s infinite;
+    }
+
+    .event-date-badge .day {
+        font-size: 1.5rem;
+        font-weight: 700;
+        line-height: 1;
+    }
+
+    .event-date-badge .month {
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        opacity: 0.9;
+    }
+
+    .event-category {
+        position: absolute;
+        top: 15px;
+        left: 15px;
+        padding: 5px 15px;
+        border-radius: 25px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        color: white;
+        z-index: 2;
+    }
+
+    .event-content {
+        padding: 25px;
+    }
+
+    .event-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin-bottom: 15px;
+        color: var(--text-primary);
+        line-height: 1.4;
+    }
+
+    .event-meta {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-bottom: 15px;
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+    }
+
+    .event-meta i {
+        color: var(--primary-pink);
+        width: 20px;
+        margin-right: 8px;
+    }
+
+    .event-description {
+        color: var(--text-secondary);
+        margin-bottom: 20px;
+        line-height: 1.6;
+    }
+
+    .event-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding-top: 15px;
+        border-top: var(--border);
+    }
+
+    .event-price {
+        font-weight: 600;
+        color: var(--primary-pink);
+    }
+
+    .event-price.free {
+        color: #00b894;
+    }
+
+    .event-rsvp {
+        padding: 5px 15px;
+        border-radius: 25px;
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+
+    .event-rsvp.required {
+        background: rgba(255, 105, 180, 0.1);
+        color: var(--primary-pink);
+    }
+
+    .event-rsvp.optional {
+        background: rgba(0, 184, 148, 0.1);
+        color: #00b894;
+    }
+
+    /* Featured Event */
+    .featured-event {
+        background: linear-gradient(135deg, var(--primary-pink), var(--dark-pink));
+        border-radius: 40px;
+        padding: 50px;
+        margin-bottom: 50px;
+        color: white;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .featured-event::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 50%);
+        animation: rotate 30s linear infinite;
+    }
+
+    .featured-badge {
+        display: inline-block;
+        padding: 8px 20px;
+        background: rgba(255,255,255,0.2);
+        border-radius: 25px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        margin-bottom: 20px;
+        backdrop-filter: blur(5px);
+    }
+
+    .featured-event h2 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 20px;
+        font-family: 'Playfair Display', serif;
+    }
+
+    .featured-event p {
+        font-size: 1.1rem;
+        opacity: 0.95;
+        margin-bottom: 30px;
+        max-width: 600px;
+    }
+
+    .featured-countdown {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+
+    .countdown-item {
+        text-align: center;
+    }
+
+    .countdown-number {
+        font-size: 2.5rem;
+        font-weight: 700;
+        line-height: 1;
+        font-family: 'Playfair Display', serif;
+    }
+
+    .countdown-label {
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        opacity: 0.8;
+    }
+
+    /* List View */
+    .list-view {
+        display: none;
+    }
+
+    .list-view.active {
+        display: block;
+        animation: fadeIn 0.5s ease;
+    }
+
+    .event-list-item {
+        display: flex;
+        align-items: center;
+        gap: 30px;
+        background: var(--card-bg);
+        border-radius: 20px;
+        padding: 25px;
+        margin-bottom: 20px;
+        box-shadow: var(--shadow);
+        transition: var(--transition-bounce);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .event-list-item:hover {
+        transform: translateX(15px);
+        box-shadow: 0 15px 35px rgba(255, 105, 180, 0.2);
+    }
+
+    .list-date {
+        min-width: 80px;
+        text-align: center;
+        padding: 15px;
+        background: linear-gradient(135deg, var(--primary-pink), var(--dark-pink));
+        color: white;
+        border-radius: 15px;
+    }
+
+    .list-date .day {
+        font-size: 2rem;
+        font-weight: 700;
+        line-height: 1;
+    }
+
+    .list-date .month {
+        font-size: 1rem;
+        text-transform: uppercase;
+    }
+
+    .list-content {
+        flex: 1;
+    }
+
+    .list-content h3 {
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin-bottom: 10px;
+        color: var(--text-primary);
+    }
+
+    .list-meta {
+        display: flex;
+        gap: 25px;
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+        flex-wrap: wrap;
+    }
+
+    .list-action {
+        padding: 0 20px;
+    }
+
+    /* Event Detail Modal */
+    .event-modal .modal-content {
+        background: var(--card-bg);
+        border-radius: 30px;
+        border: var(--border);
+        backdrop-filter: blur(10px);
+        overflow: hidden;
+    }
+
+    .modal-header {
+        padding: 0;
+        position: relative;
+        height: 200px;
+    }
+
+    .modal-header img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .modal-close {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.2);
+        border: none;
+        color: white;
+        font-size: 1.2rem;
+        cursor: pointer;
+        transition: var(--transition-bounce);
+        backdrop-filter: blur(5px);
+    }
+
+    .modal-close:hover {
+        background: var(--primary-pink);
+        transform: rotate(90deg);
+    }
+
+    .modal-body {
+        padding: 30px;
+    }
+
+    .modal-title {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 20px;
+        color: var(--text-primary);
+        font-family: 'Playfair Display', serif;
+    }
+
+    .modal-details {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+        margin-bottom: 25px;
+    }
+
+    .detail-item {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        padding: 15px;
+        background: rgba(255, 105, 180, 0.05);
+        border-radius: 15px;
+    }
+
+    .detail-icon {
+        width: 45px;
+        height: 45px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, var(--primary-pink), var(--dark-pink));
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+    }
+
+    .detail-content h4 {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        margin-bottom: 5px;
+    }
+
+    .detail-content p {
+        font-size: 1rem;
+        font-weight: 500;
+        color: var(--text-primary);
+        margin: 0;
+    }
+
+    .modal-description {
+        color: var(--text-secondary);
+        line-height: 1.8;
+        margin-bottom: 25px;
+    }
+
+    .modal-actions {
+        display: flex;
+        gap: 15px;
+        flex-wrap: wrap;
+    }
+
+    .rsvp-btn {
+        flex: 1;
+        padding: 15px 30px;
+        border: none;
+        border-radius: 15px;
+        background: linear-gradient(135deg, var(--primary-pink), var(--dark-pink));
+        color: white;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition-bounce);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .rsvp-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(255, 105, 180, 0.4);
+    }
+
+    .calendar-btn {
+        padding: 15px 30px;
+        border-radius: 15px;
+        background: transparent;
+        border: 2px solid var(--primary-pink);
+        color: var(--text-primary);
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition-bounce);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .calendar-btn:hover {
+        background: var(--primary-pink);
+        color: white;
+        transform: translateY(-3px);
+    }
+
+    /* RSVP Modal */
+    .rsvp-modal .modal-content {
+        background: var(--card-bg);
+        border-radius: 30px;
+        border: var(--border);
+        backdrop-filter: blur(10px);
+    }
+
+    .rsvp-options {
+        display: flex;
+        gap: 15px;
+        margin: 30px 0;
+    }
+
+    .rsvp-option {
+        flex: 1;
+        text-align: center;
+        padding: 20px;
+        border-radius: 15px;
+        border: 2px solid transparent;
+        cursor: pointer;
+        transition: var(--transition-bounce);
+    }
+
+    .rsvp-option:hover {
+        transform: translateY(-5px);
+    }
+
+    .rsvp-option.selected {
+        border-color: var(--primary-pink);
+        background: rgba(255, 105, 180, 0.1);
+    }
+
+    .rsvp-option i {
+        font-size: 2rem;
+        margin-bottom: 10px;
+    }
+
+    .rsvp-option.going i { color: #00b894; }
+    .rsvp-option.maybe i { color: #fdcb6e; }
+    .rsvp-option.not-going i { color: #d63031; }
+
+    .rsvp-option h4 {
+        font-size: 1.1rem;
+        margin-bottom: 5px;
+        color: var(--text-primary);
+    }
+
+    .rsvp-option p {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        margin: 0;
+    }
+
+    /* Responsive */
+    @media (max-width: 992px) {
+        .events-hero h1 {
+            font-size: 3rem;
+        }
+
+        .featured-event {
+            padding: 30px;
+        }
+
+        .featured-event h2 {
+            font-size: 2rem;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .events-hero h1 {
+            font-size: 2.5rem;
+        }
+
+        .calendar-weekdays, .calendar-days {
+            grid-template-columns: repeat(7, 1fr);
+            font-size: 0.9rem;
+        }
+
+        .calendar-day {
+            min-height: 80px;
+            padding: 10px;
+        }
+
+        .day-events {
+            display: none;
+        }
+
+        .calendar-day:hover .day-events {
+            display: flex;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 200px;
+            background: var(--card-bg);
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+            z-index: 10;
+        }
+
+        .event-list-item {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 15px;
+        }
+
+        .list-date {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .list-date .day {
+            font-size: 1.5rem;
+        }
+
+        .list-action {
+            width: 100%;
+        }
+
+        .list-action .btn {
+            width: 100%;
+        }
+
+        .featured-countdown {
+            flex-wrap: wrap;
+        }
+
+        .modal-details {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .events-hero h1 {
+            font-size: 2rem;
+        }
+
+        .event-controls .row > div {
+            margin-bottom: 15px;
+        }
+
+        .view-toggle {
+            width: 100%;
+        }
+
+        .filter-select, .search-box {
+            width: 100%;
+        }
+
+        .calendar-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .calendar-nav {
+            width: 100%;
+            justify-content: space-between;
+        }
+
+        .calendar-nav-btn {
+            flex: 1;
+        }
+
+        .event-meta {
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .rsvp-options {
+            flex-direction: column;
+        }
+
+        .modal-actions {
+            flex-direction: column;
+        }
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="events-hero">
+    <div class="container">
+        <h1 class="animate__animated animate__fadeInUp">Upcoming Events</h1>
+        <p class="animate__animated animate__fadeInUp animate__delay-1s">
+            Join us for exciting events, celebrations, and learning opportunities
+        </p>
+    </div>
+</section>
+
+<!-- Event Stats -->
+<section class="event-stats">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-md-3 col-6" data-aos="fade-up" data-aos-delay="100">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-calendar-alt"></i>
+                    </div>
+                    <div class="stat-number" data-target="{{ upcoming_events.count|default:0 }}">{{ upcoming_events.count|default:0 }}</div>
+                    <div class="stat-label">Upcoming Events</div>
+                </div>
+            </div>
+            <div class="col-md-3 col-6" data-aos="fade-up" data-aos-delay="200">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-chalkboard-teacher"></i>
+                    </div>
+                    <div class="stat-number" data-target="{{ academic_events.count|default:0 }}">{{ academic_events.count|default:0 }}</div>
+                    <div class="stat-label">Academic Events</div>
+                </div>
+            </div>
+            <div class="col-md-3 col-6" data-aos="fade-up" data-aos-delay="300">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-futbol"></i>
+                    </div>
+                    <div class="stat-number" data-target="{{ sports_events.count|default:0 }}">{{ sports_events.count|default:0 }}</div>
+                    <div class="stat-label">Sports Events</div>
+                </div>
+            </div>
+            <div class="col-md-3 col-6" data-aos="fade-up" data-aos-delay="400">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-number" data-target="{{ total_participants|default:0 }}">{{ total_participants|default:0 }}</div>
+                    <div class="stat-label">Participants</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Event Controls -->
+<section class="event-controls">
+    <div class="container">
+        <div class="control-card" data-aos="fade-up">
+            <div class="row g-4 align-items-center">
+                <div class="col-lg-3">
+                    <div class="view-toggle">
+                        <button class="view-btn active" data-view="grid">
+                            <i class="fas fa-th-large"></i>
+                            <span>Grid</span>
+                        </button>
+                        <button class="view-btn" data-view="list">
+                            <i class="fas fa-list"></i>
+                            <span>List</span>
+                        </button>
+                        <button class="view-btn" data-view="calendar">
+                            <i class="fas fa-calendar"></i>
+                            <span>Calendar</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="col-lg-3">
+                    <select class="filter-select" id="eventTypeFilter">
+                        <option value="all">All Event Types</option>
+                        <option value="ACAD">Academic</option>
+                        <option value="SPORT">Sports</option>
+                        <option value="CULT">Cultural</option>
+                        <option value="HOL">Holiday</option>
+                        <option value="MEET">Meeting</option>
+                        <option value="EXAM">Examination</option>
+                    </select>
+                </div>
+                <div class="col-lg-3">
+                    <select class="filter-select" id="monthFilter">
+                        <option value="all">All Months</option>
+                        <option value="01">January</option>
+                        <option value="02">February</option>
+                        <option value="03">March</option>
+                        <option value="04">April</option>
+                        <option value="05">May</option>
+                        <option value="06">June</option>
+                        <option value="07">July</option>
+                        <option value="08">August</option>
+                        <option value="09">September</option>
+                        <option value="10">October</option>
+                        <option value="11">November</option>
+                        <option value="12">December</option>
+                    </select>
+                </div>
+                <div class="col-lg-3">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="eventSearch" placeholder="Search events...">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Event -->
+{% if featured_event %}
+<section class="featured-event" data-aos="zoom-in">
+    <div class="container position-relative">
+        <span class="featured-badge">
+            <i class="fas fa-star me-2"></i>Featured Event
+        </span>
+        <div class="row align-items-center">
+            <div class="col-lg-7">
+                <h2>{{ featured_event.title }}</h2>
+                <p>{{ featured_event.description|truncatechars:200 }}</p>
+                
+                {% if featured_event.start_date > now %}
+                <div class="featured-countdown" id="featuredCountdown" data-date="{{ featured_event.start_date|date:'Y-m-d H:i:s' }}">
+                    <div class="countdown-item">
+                        <div class="countdown-number" id="countdown-days">00</div>
+                        <div class="countdown-label">Days</div>
+                    </div>
+                    <div class="countdown-item">
+                        <div class="countdown-number" id="countdown-hours">00</div>
+                        <div class="countdown-label">Hours</div>
+                    </div>
+                    <div class="countdown-item">
+                        <div class="countdown-number" id="countdown-minutes">00</div>
+                        <div class="countdown-label">Minutes</div>
+                    </div>
+                    <div class="countdown-item">
+                        <div class="countdown-number" id="countdown-seconds">00</div>
+                        <div class="countdown-label">Seconds</div>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <button class="btn btn-light btn-lg" onclick="showEventDetails({{ featured_event.id }})">
+                    <i class="fas fa-info-circle me-2"></i>Learn More
+                </button>
+            </div>
+            <div class="col-lg-5 text-center">
+                <div class="event-date-badge" style="position: relative; top: 0; right: 0; display: inline-block;">
+                    <div class="day">{{ featured_event.start_date|date:"d" }}</div>
+                    <div class="month">{{ featured_event.start_date|date:"M" }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Calendar View -->
+<div class="calendar-view" id="calendarView">
+    <div class="container">
+        <div class="calendar-header">
+            <div class="calendar-title">
+                <button class="calendar-nav-btn" onclick="previousMonth()">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <h2 id="currentMonthYear">March 2024</h2>
+                <button class="calendar-nav-btn" onclick="nextMonth()">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+            <button class="btn btn-primary" onclick="goToToday()">
+                <i class="fas fa-calendar-check me-2"></i>Today
+            </button>
+        </div>
+
+        <div class="calendar-weekdays">
+            <div class="weekday">Sun</div>
+            <div class="weekday">Mon</div>
+            <div class="weekday">Tue</div>
+            <div class="weekday">Wed</div>
+            <div class="weekday">Thu</div>
+            <div class="weekday">Fri</div>
+            <div class="weekday">Sat</div>
+        </div>
+
+        <div class="calendar-days" id="calendarDays">
+            <!-- Generated by JavaScript -->
+        </div>
+    </div>
+</div>
+
+<!-- Grid View -->
+<div class="grid-view" id="gridView">
+    <div class="container">
+        <div class="row g-4" id="eventGrid">
+            {% for event in upcoming_events %}
+            <div class="col-lg-4 col-md-6 event-item" 
+                 data-type="{{ event.event_type }}"
+                 data-month="{{ event.start_date|date:'m' }}"
+                 data-title="{{ event.title|lower }}"
+                 data-description="{{ event.description|lower }}">
+                <div class="event-card" data-aos="fade-up" data-aos-delay="{{ forloop.counter|add:'100' }}">
+                    <div class="event-image">
+                        {% if event.image %}
+                        <img src="{{ event.image.url }}" alt="{{ event.title }}" loading="lazy">
+                        {% else %}
+                        <img src="https://images.unsplash.com/photo-1492684223066-81342ee5ff30?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" alt="Event">
+                        {% endif %}
+                        
+                        <div class="event-date-badge">
+                            <span class="day">{{ event.start_date|date:"d" }}</span>
+                            <span class="month">{{ event.start_date|date:"M" }}</span>
+                        </div>
+                        
+                        <div class="event-category event-type-{{ event.event_type|lower }}">
+                            <i class="fas fa-{% if event.event_type == 'ACAD' %}book{% elif event.event_type == 'SPORT' %}futbol{% elif event.event_type == 'CULT' %}palette{% elif event.event_type == 'HOL' %}umbrella-beach{% elif event.event_type == 'MEET' %}users{% elif event.event_type == 'EXAM' %}pencil-alt{% endif %} me-1"></i>
+                            {{ event.get_event_type_display }}
+                        </div>
+                    </div>
+                    
+                    <div class="event-content">
+                        <h3 class="event-title">{{ event.title }}</h3>
+                        
+                        <div class="event-meta">
+                            <span>
+                                <i class="far fa-clock"></i>
+                                {{ event.start_date|date:"g:i A" }} - {{ event.end_date|date:"g:i A" }}
+                            </span>
+                            {% if event.location %}
+                            <span>
+                                <i class="fas fa-map-marker-alt"></i>
+                                {{ event.location|truncatechars:30 }}
+                            </span>
+                            {% endif %}
+                        </div>
+                        
+                        <p class="event-description">{{ event.description|truncatechars:100 }}</p>
+                        
+                        <div class="event-footer">
+                            <span class="event-price {% if not event.price %}free{% endif %}">
+                                {% if event.price %}
+                                    ₦{{ event.price }}
+                                {% else %}
+                                    <i class="fas fa-tag me-1"></i>Free
+                                {% endif %}
+                            </span>
+                            <span class="event-rsvp {% if event.requires_rsvp %}required{% else %}optional{% endif %}">
+                                <i class="fas fa-{% if event.requires_rsvp %}check-circle{% else %}info-circle{% endif %} me-1"></i>
+                                {% if event.requires_rsvp %}RSVP Required{% else %}Open Event{% endif %}
+                            </span>
+                        </div>
+                        
+                        <button class="btn btn-outline-primary w-100 mt-3" onclick="showEventDetails({{ event.id }})">
+                            View Details <i class="fas fa-arrow-right ms-2"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12">
+                <div class="empty-state">
+                    <div class="empty-icon">
+                        <i class="fas fa-calendar-times"></i>
+                    </div>
+                    <h3>No Upcoming Events</h3>
+                    <p>There are no events scheduled at the moment. Please check back later.</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- List View -->
+<div class="list-view" id="listView">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                {% for event in upcoming_events %}
+                <div class="event-list-item event-item"
+                     data-type="{{ event.event_type }}"
+                     data-month="{{ event.start_date|date:'m' }}"
+                     data-title="{{ event.title|lower }}"
+                     data-description="{{ event.description|lower }}">
+                    <div class="list-date">
+                        <div class="day">{{ event.start_date|date:"d" }}</div>
+                        <div class="month">{{ event.start_date|date:"M" }}</div>
+                    </div>
+                    
+                    <div class="list-content">
+                        <h3>{{ event.title }}</h3>
+                        <div class="list-meta">
+                            <span>
+                                <i class="far fa-clock"></i>
+                                {{ event.start_date|date:"g:i A" }}
+                            </span>
+                            <span>
+                                <i class="fas fa-map-marker-alt"></i>
+                                {{ event.location|default:"TBD" }}
+                            </span>
+                            <span>
+                                <i class="fas fa-tag"></i>
+                                {{ event.get_event_type_display }}
+                            </span>
+                        </div>
+                        <p class="text-secondary mb-0">{{ event.description|truncatechars:150 }}</p>
+                    </div>
+                    
+                    <div class="list-action">
+                        <button class="btn btn-primary" onclick="showEventDetails({{ event.id }})">
+                            Details
+                        </button>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="empty-state">
+                    <div class="empty-icon">
+                        <i class="fas fa-calendar-times"></i>
+                    </div>
+                    <h3>No Upcoming Events</h3>
+                    <p>There are no events scheduled at the moment. Please check back later.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Pagination -->
+{% if upcoming_events.has_other_pages %}
+<section class="pagination-section">
+    <div class="container">
+        <div class="pagination">
+            {% if upcoming_events.has_previous %}
+            <a href="?page={{ upcoming_events.previous_page_number }}" class="page-link">
+                <i class="fas fa-chevron-left"></i>
+            </a>
+            {% endif %}
+
+            {% for num in upcoming_events.paginator.page_range %}
+                {% if upcoming_events.number == num %}
+                <a href="?page={{ num }}" class="page-link active">{{ num }}</a>
+                {% elif num > upcoming_events.number|add:'-3' and num < upcoming_events.number|add:'3' %}
+                <a href="?page={{ num }}" class="page-link">{{ num }}</a>
+                {% endif %}
+            {% endfor %}
+
+            {% if upcoming_events.has_next %}
+            <a href="?page={{ upcoming_events.next_page_number }}" class="page-link">
+                <i class="fas fa-chevron-right"></i>
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Past Events Section -->
+{% if past_events %}
+<section class="py-5">
+    <div class="container">
+        <div class="section-title" data-aos="fade-up">
+            <h2>Past Events</h2>
+            <p>Relive our memorable moments</p>
+        </div>
+
+        <div class="row g-4">
+            {% for event in past_events|slice:":4" %}
+            <div class="col-md-3 col-6" data-aos="fade-up" data-aos-delay="{{ forloop.counter|add:'100' }}">
+                <div class="event-card" style="opacity: 0.8;">
+                    <div class="event-image" style="height: 150px;">
+                        {% if event.image %}
+                        <img src="{{ event.image.url }}" alt="{{ event.title }}" loading="lazy">
+                        {% endif %}
+                    </div>
+                    <div class="event-content p-3">
+                        <h6 class="event-title mb-2">{{ event.title|truncatechars:50 }}</h6>
+                        <small class="text-secondary">
+                            <i class="far fa-calendar me-1"></i>
+                            {{ event.start_date|date:"M d, Y" }}
+                        </small>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        {% if past_events.count > 4 %}
+        <div class="text-center mt-4">
+            <a href="{% url 'past_events' %}" class="btn btn-outline-primary">
+                View All Past Events <i class="fas fa-arrow-right ms-2"></i>
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endif %}
+
+<!-- Event Detail Modal -->
+<div class="modal fade event-modal" id="eventModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header" id="modalHeader">
+                <button type="button" class="modal-close" data-bs-dismiss="modal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Content loaded dynamically -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- RSVP Modal -->
+<div class="modal fade rsvp-modal" id="rsvpModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title">RSVP for Event</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="rsvp-options">
+                    <div class="rsvp-option going" onclick="selectRSVP('going')">
+                        <i class="fas fa-check-circle"></i>
+                        <h4>Going</h4>
+                        <p>I'll be there</p>
+                    </div>
+                    <div class="rsvp-option maybe" onclick="selectRSVP('maybe')">
+                        <i class="fas fa-question-circle"></i>
+                        <h4>Maybe</h4>
+                        <p>Not sure yet</p>
+                    </div>
+                    <div class="rsvp-option not-going" onclick="selectRSVP('not-going')">
+                        <i class="fas fa-times-circle"></i>
+                        <h4>Not Going</h4>
+                        <p>Can't make it</p>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Add a note (optional)</label>
+                    <textarea class="form-control" rows="3" placeholder="Any comments?"></textarea>
+                </div>
+
+                <button class="btn btn-primary w-100" onclick="submitRSVP()">
+                    Confirm RSVP
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add to Calendar Modal -->
+<div class="modal fade" id="calendarModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add to Calendar</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="list-group">
+                    <a href="#" class="list-group-item list-group-item-action d-flex align-items-center" onclick="addToGoogleCalendar()">
+                        <i class="fab fa-google text-danger me-3 fs-4"></i>
+                        <div>
+                            <h6 class="mb-1">Google Calendar</h6>
+                            <small class="text-secondary">Add to your Google Calendar</small>
+                        </div>
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action d-flex align-items-center" onclick="addToAppleCalendar()">
+                        <i class="fab fa-apple text-dark me-3 fs-4"></i>
+                        <div>
+                            <h6 class="mb-1">Apple Calendar</h6>
+                            <small class="text-secondary">Add to iCalendar</small>
+                        </div>
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action d-flex align-items-center" onclick="addToOutlook()">
+                        <i class="fab fa-microsoft text-primary me-3 fs-4"></i>
+                        <div>
+                            <h6 class="mb-1">Outlook Calendar</h6>
+                            <small class="text-secondary">Add to Outlook</small>
+                        </div>
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action d-flex align-items-center" onclick="downloadICS()">
+                        <i class="fas fa-download text-success me-3 fs-4"></i>
+                        <div>
+                            <h6 class="mb-1">Download ICS</h6>
+                            <small class="text-secondary">Download calendar file</small>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Current event data (would be populated from Django)
+    const eventsData = {
+        {% for event in upcoming_events %}
+        {{ event.id }}: {
+            id: {{ event.id }},
+            title: "{{ event.title|escapejs }}",
+            description: "{{ event.description|escapejs }}",
+            start_date: "{{ event.start_date|date:'Y-m-d H:i:s' }}",
+            end_date: "{{ event.end_date|date:'Y-m-d H:i:s' }}",
+            location: "{{ event.location|escapejs|default:'TBD' }}",
+            event_type: "{{ event.event_type }}",
+            image: "{% if event.image %}{{ event.image.url }}{% endif %}",
+            requires_rsvp: {{ event.requires_rsvp|yesno:"true,false" }},
+            max_attendees: {{ event.max_attendees|default:'null' }},
+            price: "{{ event.price|default:'Free' }}"
+        }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    };
+
+    $(document).ready(function() {
+        // Initialize view
+        let currentView = 'grid';
+        
+        // View toggle
+        $('.view-btn').on('click', function() {
+            const view = $(this).data('view');
+            
+            $('.view-btn').removeClass('active');
+            $(this).addClass('active');
+            
+            $('.grid-view, .list-view, .calendar-view').removeClass('active');
+            $(`#${view}View`).addClass('active');
+            
+            if (view === 'calendar') {
+                renderCalendar();
+            }
+        });
+
+        // Filter functionality
+        function filterEvents() {
+            const type = $('#eventTypeFilter').val();
+            const month = $('#monthFilter').val();
+            const search = $('#eventSearch').val().toLowerCase();
+            
+            $('.event-item').each(function() {
+                const eventType = $(this).data('type');
+                const eventMonth = $(this).data('month');
+                const title = $(this).data('title');
+                const description = $(this).data('description');
+                
+                let show = true;
+                
+                if (type !== 'all' && eventType !== type) show = false;
+                if (month !== 'all' && eventMonth !== month) show = false;
+                if (search && !title.includes(search) && !description.includes(search)) show = false;
+                
+                $(this).toggle(show);
+            });
+        }
+
+        $('#eventTypeFilter, #monthFilter').on('change', filterEvents);
+        $('#eventSearch').on('keyup', filterEvents);
+
+        // Countdown timer for featured event
+        {% if featured_event %}
+        function updateCountdown() {
+            const eventDate = new Date('{{ featured_event.start_date|date:"Y-m-d H:i:s" }}').getTime();
+            const now = new Date().getTime();
+            const distance = eventDate - now;
+            
+            if (distance < 0) {
+                $('#featuredCountdown').html('<h4>Event Started!</h4>');
+                return;
+            }
+            
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+            
+            $('#countdown-days').text(days.toString().padStart(2, '0'));
+            $('#countdown-hours').text(hours.toString().padStart(2, '0'));
+            $('#countdown-minutes').text(minutes.toString().padStart(2, '0'));
+            $('#countdown-seconds').text(seconds.toString().padStart(2, '0'));
+        }
+
+        setInterval(updateCountdown, 1000);
+        {% endif %}
+    });
+
+    // Calendar functions
+    let currentDate = new Date();
+
+    function renderCalendar() {
+        const year = currentDate.getFullYear();
+        const month = currentDate.getMonth();
+        
+        $('#currentMonthYear').text(currentDate.toLocaleDateString('default', { month: 'long', year: 'numeric' }));
+        
+        const firstDay = new Date(year, month, 1);
+        const lastDay = new Date(year, month + 1, 0);
+        
+        let calendarHTML = '';
+        
+        // Previous month days
+        for (let i = 0; i < firstDay.getDay(); i++) {
+            calendarHTML += '<div class="calendar-day empty"></div>';
+        }
+        
+        // Current month days
+        for (let d = 1; d <= lastDay.getDate(); d++) {
+            const date = new Date(year, month, d);
+            const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+            
+            // Get events for this day
+            const dayEvents = Object.values(eventsData).filter(event => {
+                const eventDate = new Date(event.start_date);
+                return eventDate.getDate() === d && 
+                       eventDate.getMonth() === month && 
+                       eventDate.getFullYear() === year;
+            });
+            
+            calendarHTML += `
+                <div class="calendar-day">
+                    <div class="day-number">${d}</div>
+                    <div class="day-events">
+                        ${dayEvents.slice(0, 2).map(event => `
+                            <div class="day-event event-type-${event.event_type.toLowerCase()}" 
+                                 onclick="showEventDetails(${event.id})">
+                                ${event.title}
+                            </div>
+                        `).join('')}
+                        ${dayEvents.length > 2 ? `
+                            <div class="event-more" onclick="showDayEvents('${dateStr}')">
+                                +${dayEvents.length - 2} more
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+        }
+        
+        $('#calendarDays').html(calendarHTML);
+    }
+
+    function previousMonth() {
+        currentDate.setMonth(currentDate.getMonth() - 1);
+        renderCalendar();
+    }
+
+    function nextMonth() {
+        currentDate.setMonth(currentDate.getMonth() + 1);
+        renderCalendar();
+    }
+
+    function goToToday() {
+        currentDate = new Date();
+        renderCalendar();
+    }
+
+    // Event detail functions
+    function showEventDetails(eventId) {
+        const event = eventsData[eventId];
+        if (!event) return;
+        
+        const modalHeader = $('#modalHeader');
+        const modalBody = $('#modalBody');
+        
+        modalHeader.html(`
+            <img src="${event.image || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80'}" alt="${event.title}">
+            <button type="button" class="modal-close" data-bs-dismiss="modal">
+                <i class="fas fa-times"></i>
+            </button>
+        `);
+        
+        const startDate = new Date(event.start_date);
+        const endDate = new Date(event.end_date);
+        
+        modalBody.html(`
+            <h2 class="modal-title">${event.title}</h2>
+            
+            <div class="modal-details">
+                <div class="detail-item">
+                    <div class="detail-icon"><i class="far fa-calendar"></i></div>
+                    <div class="detail-content">
+                        <h4>Date</h4>
+                        <p>${startDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}</p>
+                    </div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-icon"><i class="far fa-clock"></i></div>
+                    <div class="detail-content">
+                        <h4>Time</h4>
+                        <p>${startDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })} - ${endDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</p>
+                    </div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-icon"><i class="fas fa-map-marker-alt"></i></div>
+                    <div class="detail-content">
+                        <h4>Location</h4>
+                        <p>${event.location}</p>
+                    </div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-icon"><i class="fas fa-tag"></i></div>
+                    <div class="detail-content">
+                        <h4>Event Type</h4>
+                        <p>${event.event_type}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-description">
+                ${event.description}
+            </div>
+            
+            <div class="modal-actions">
+                ${event.requires_rsvp ? `
+                    <button class="rsvp-btn" onclick="openRSVP(${event.id})">
+                        <i class="fas fa-check-circle"></i>
+                        RSVP Now
+                    </button>
+                ` : ''}
+                <button class="calendar-btn" onclick="openCalendar(${event.id})">
+                    <i class="far fa-calendar-plus"></i>
+                    Add to Calendar
+                </button>
+            </div>
+        `);
+        
+        $('#eventModal').modal('show');
+    }
+
+    function openRSVP(eventId) {
+        $('#eventModal').modal('hide');
+        $('#rsvpModal').modal('show');
+        $('#rsvpModal').data('eventId', eventId);
+    }
+
+    function openCalendar(eventId) {
+        $('#eventModal').modal('hide');
+        $('#calendarModal').modal('show');
+        $('#calendarModal').data('eventId', eventId);
+    }
+
+    function selectRSVP(status) {
+        $('.rsvp-option').removeClass('selected');
+        $(`.rsvp-option.${status}`).addClass('selected');
+    }
+
+    function submitRSVP() {
+        const eventId = $('#rsvpModal').data('eventId');
+        const status = $('.rsvp-option.selected').length ? 
+                      $('.rsvp-option.selected').find('h4').text().toLowerCase() : null;
+        
+        if (!status) {
+            alert('Please select an option');
+            return;
+        }
+        
+        // Here you would send the RSVP to the server
+        showNotification('RSVP submitted successfully!', 'success');
+        $('#rsvpModal').modal('hide');
+    }
+
+    // Calendar integration functions
+    function addToGoogleCalendar() {
+        const eventId = $('#calendarModal').data('eventId');
+        const event = eventsData[eventId];
+        
+        const startDate = new Date(event.start_date);
+        const endDate = new Date(event.end_date);
+        
+        const formatDate = (date) => {
+            return date.toISOString().replace(/-|:|\.\d\d\d/g, '');
+        };
+        
+        const url = `https://www.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(event.title)}&dates=${formatDate(startDate)}/${formatDate(endDate)}&details=${encodeURIComponent(event.description)}&location=${encodeURIComponent(event.location)}&sf=true&output=xml`;
+        
+        window.open(url, '_blank');
+        $('#calendarModal').modal('hide');
+    }
+
+    function addToAppleCalendar() {
+        downloadICS();
+    }
+
+    function addToOutlook() {
+        const eventId = $('#calendarModal').data('eventId');
+        const event = eventsData[eventId];
+        
+        const startDate = new Date(event.start_date);
+        const endDate = new Date(event.end_date);
+        
+        const formatDate = (date) => {
+            return date.toISOString().replace(/-|:|\.\d\d\d/g, '');
+        };
+        
+        const url = `https://outlook.live.com/calendar/0/deeplink/compose?subject=${encodeURIComponent(event.title)}&startdt=${formatDate(startDate)}&enddt=${formatDate(endDate)}&body=${encodeURIComponent(event.description)}&location=${encodeURIComponent(event.location)}`;
+        
+        window.open(url, '_blank');
+        $('#calendarModal').modal('hide');
+    }
+
+    function downloadICS() {
+        const eventId = $('#calendarModal').data('eventId');
+        const event = eventsData[eventId];
+        
+        const startDate = new Date(event.start_date);
+        const endDate = new Date(event.end_date);
+        
+        const formatDate = (date) => {
+            return date.toISOString().replace(/-|:|\.\d\d\d/g, '');
+        };
+        
+        const icsContent = `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//School Management System//EN
+BEGIN:VEVENT
+UID:${eventId}@school.edu
+DTSTAMP:${formatDate(new Date())}
+DTSTART:${formatDate(startDate)}
+DTEND:${formatDate(endDate)}
+SUMMARY:${event.title}
+DESCRIPTION:${event.description}
+LOCATION:${event.location}
+END:VEVENT
+END:VCALENDAR`;
+        
+        const blob = new Blob([icsContent], { type: 'text/calendar' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `event-${eventId}.ics`;
+        a.click();
+        
+        $('#calendarModal').modal('hide');
+    }
+
+    function showDayEvents(dateStr) {
+        // Filter events for this day and show them in a list
+        const dayEvents = Object.values(eventsData).filter(event => {
+            const eventDate = new Date(event.start_date);
+            return eventDate.toISOString().split('T')[0] === dateStr;
+        });
+        
+        // You could show a modal with the list of events for this day
+        console.log('Events on', dateStr, dayEvents);
+    }
+</script>
+{% endblock %}

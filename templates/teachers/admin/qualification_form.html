@@ -1,0 +1,35 @@
+{% load static %}
+{% extends 'base.html' %}
+
+{% block title %}Qualification Form{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6" data-aos="fade-up">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h3 class="card-title mb-4">{{ form.instance.pk|yesno:"Edit Qualification,Add Qualification" }}</h3>
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        {{ form.as_p }}
+                        <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Submit</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.card .form-control:focus { border-color: var(--secondary-pink); }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+AOS.init();
+</script>
+{% endblock %}

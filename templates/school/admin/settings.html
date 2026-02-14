@@ -1,0 +1,815 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}School Settings{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* School Settings Specific Styles */
+    .settings-container {
+        padding: 2rem;
+    }
+
+    /* Settings Header */
+    .settings-header {
+        background: linear-gradient(135deg, #7B2CBF, #4A90E2);
+        border-radius: 30px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        color: white;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .settings-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 300px;
+        height: 300px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        animation: float 8s ease-in-out infinite;
+    }
+
+    .settings-header h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .settings-header p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+    }
+
+    /* Settings Grid */
+    .settings-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .settings-card {
+        background: var(--card-bg);
+        border-radius: 20px;
+        padding: 1.5rem;
+        box-shadow: var(--shadow);
+        border: var(--border);
+        transition: all 0.3s ease;
+    }
+
+    .settings-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(123, 44, 191, 0.2);
+    }
+
+    .card-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: var(--border);
+    }
+
+    .card-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 20px;
+        background: linear-gradient(135deg, #7B2CBF, #4A90E2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+        color: white;
+    }
+
+    .card-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .card-subtitle {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+    }
+
+    /* Form Styles */
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        font-weight: 500;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .form-label i {
+        color: #7B2CBF;
+    }
+
+    .form-control, .form-select {
+        border-radius: 15px;
+        padding: 0.8rem 1rem;
+        border: var(--border);
+        background: var(--card-bg);
+        color: var(--text-primary);
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #7B2CBF;
+        box-shadow: 0 0 0 4px rgba(123, 44, 191, 0.1);
+        transform: translateY(-2px);
+    }
+
+    /* Color Picker */
+    .color-picker {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+    }
+
+    .color-input {
+        width: 60px;
+        height: 60px;
+        border-radius: 15px;
+        border: 2px solid var(--border);
+        cursor: pointer;
+        padding: 0;
+        overflow: hidden;
+    }
+
+    .color-input::-webkit-color-swatch-wrapper {
+        padding: 0;
+    }
+
+    .color-input::-webkit-color-swatch {
+        border: none;
+    }
+
+    .color-value {
+        font-family: monospace;
+        padding: 0.5rem 1rem;
+        background: var(--card-bg);
+        border: var(--border);
+        border-radius: 15px;
+        color: var(--text-primary);
+    }
+
+    /* Time Picker */
+    .time-picker {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .time-input {
+        flex: 1;
+    }
+
+    /* Logo Upload */
+    .logo-upload {
+        display: flex;
+        gap: 2rem;
+        align-items: center;
+    }
+
+    .logo-preview {
+        width: 100px;
+        height: 100px;
+        border-radius: 20px;
+        background: linear-gradient(135deg, #7B2CBF, #4A90E2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        color: white;
+        overflow: hidden;
+    }
+
+    .logo-preview img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .logo-actions {
+        flex: 1;
+    }
+
+    /* Social Media Links */
+    .social-input {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .social-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 15px;
+        background: linear-gradient(135deg, #7B2CBF, #4A90E2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+    }
+
+    .social-field {
+        flex: 1;
+    }
+
+    /* Toggle Switch */
+    .toggle-switch {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.5rem 0;
+    }
+
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 60px;
+        height: 34px;
+    }
+
+    .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        transition: .4s;
+        border-radius: 34px;
+    }
+
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 26px;
+        width: 26px;
+        left: 4px;
+        bottom: 4px;
+        background-color: white;
+        transition: .4s;
+        border-radius: 50%;
+    }
+
+    input:checked + .slider {
+        background: linear-gradient(135deg, #7B2CBF, #4A90E2);
+    }
+
+    input:checked + .slider:before {
+        transform: translateX(26px);
+    }
+
+    /* Academic Years List */
+    .years-list {
+        margin-top: 1rem;
+    }
+
+    .year-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem;
+        border-radius: 15px;
+        background: rgba(123, 44, 191, 0.05);
+        margin-bottom: 0.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .year-item:hover {
+        transform: translateX(10px);
+        background: rgba(123, 44, 191, 0.1);
+    }
+
+    .year-info {
+        flex: 1;
+    }
+
+    .year-name {
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.2rem;
+    }
+
+    .year-dates {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+    }
+
+    .year-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .year-badge {
+        padding: 0.3rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .badge-current {
+        background: linear-gradient(135deg, #00b894, #00cec9);
+        color: white;
+    }
+
+    /* Holiday Calendar */
+    .holiday-calendar {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .holiday-card {
+        background: rgba(123, 44, 191, 0.05);
+        border-radius: 15px;
+        padding: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .holiday-card:hover {
+        transform: translateY(-5px);
+        background: rgba(123, 44, 191, 0.1);
+    }
+
+    .holiday-date {
+        font-size: 0.9rem;
+        color: #7B2CBF;
+        margin-bottom: 0.3rem;
+    }
+
+    .holiday-name {
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .settings-container {
+            padding: 1rem;
+        }
+        
+        .settings-header h1 {
+            font-size: 2rem;
+        }
+        
+        .settings-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .logo-upload {
+            flex-direction: column;
+            text-align: center;
+        }
+        
+        .color-picker {
+            flex-wrap: wrap;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="settings-container">
+    <!-- Settings Header -->
+    <div class="settings-header" data-aos="fade-up">
+        <div class="row align-items-center">
+            <div class="col">
+                <h1>
+                    <i class="fas fa-cog me-3"></i>
+                    School Settings
+                </h1>
+                <p>Configure your school's information, branding, and academic settings</p>
+            </div>
+            <div class="col-auto">
+                <div class="last-updated">
+                    <i class="fas fa-clock me-1"></i>
+                    Last updated: {{ school.updated_at|date:"F d, Y H:i" }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Grid -->
+    <div class="settings-grid">
+        <!-- Basic Information -->
+        <div class="settings-card" data-aos="fade-up">
+            <div class="card-header">
+                <div class="card-icon">
+                    <i class="fas fa-school"></i>
+                </div>
+                <div>
+                    <h3 class="card-title">Basic Information</h3>
+                    <p class="card-subtitle">School name, contact, and address</p>
+                </div>
+            </div>
+            
+            <form method="post" enctype="multipart/form-data" id="basicInfoForm">
+                {% csrf_token %}
+                
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-building"></i>
+                        School Name
+                    </label>
+                    <input type="text" class="form-control" name="name" value="{{ school.name }}" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-quote-right"></i>
+                        Slogan
+                    </label>
+                    <input type="text" class="form-control" name="slogan" value="{{ school.slogan }}">
+                </div>
+                
+                <div class="logo-upload">
+                    <div class="logo-preview">
+                        {% if school.logo %}
+                            <img src="{{ school.logo.url }}" alt="School Logo">
+                        {% else %}
+                            <i class="fas fa-school"></i>
+                        {% endif %}
+                    </div>
+                    <div class="logo-actions">
+                        <label class="form-label">School Logo</label>
+                        <input type="file" class="form-control" name="logo" accept="image/*">
+                        <small class="text-secondary">Recommended size: 200x200px</small>
+                    </div>
+                </div>
+                
+                <div class="logo-upload mt-3">
+                    <div class="logo-preview">
+                        {% if school.favicon %}
+                            <img src="{{ school.favicon.url }}" alt="Favicon">
+                        {% else %}
+                            <i class="fas fa-star"></i>
+                        {% endif %}
+                    </div>
+                    <div class="logo-actions">
+                        <label class="form-label">Favicon</label>
+                        <input type="file" class="form-control" name="favicon" accept="image/*">
+                        <small class="text-secondary">Recommended size: 32x32px</small>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Contact Information -->
+        <div class="settings-card" data-aos="fade-up" data-aos-delay="100">
+            <div class="card-header">
+                <div class="card-icon">
+                    <i class="fas fa-address-card"></i>
+                </div>
+                <div>
+                    <h3 class="card-title">Contact Information</h3>
+                    <p class="card-subtitle">Address, phone, email, and website</p>
+                </div>
+            </div>
+            
+            <form method="post" id="contactInfoForm">
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-map-marker-alt"></i>
+                        Address
+                    </label>
+                    <textarea class="form-control" name="address" rows="3" required>{{ school.address }}</textarea>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-phone"></i>
+                                Phone
+                            </label>
+                            <input type="tel" class="form-control" name="phone" value="{{ school.phone }}" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-envelope"></i>
+                                Email
+                            </label>
+                            <input type="email" class="form-control" name="email" value="{{ school.email }}" required>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-globe"></i>
+                        Website
+                    </label>
+                    <input type="url" class="form-control" name="website" value="{{ school.website }}">
+                </div>
+            </form>
+        </div>
+
+        <!-- School Hours -->
+        <div class="settings-card" data-aos="fade-up" data-aos-delay="200">
+            <div class="card-header">
+                <div class="card-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div>
+                    <h3 class="card-title">School Hours</h3>
+                    <p class="card-subtitle">Regular and half-day schedules</p>
+                </div>
+            </div>
+            
+            <form method="post" id="schoolHoursForm">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-sun"></i>
+                                Opening Time
+                            </label>
+                            <input type="time" class="form-control" name="opening_time" value="{{ school.opening_time|time:'H:i' }}" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-moon"></i>
+                                Closing Time
+                            </label>
+                            <input type="time" class="form-control" name="closing_time" value="{{ school.closing_time|time:'H:i' }}" required>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-sun"></i>
+                                Half Day Opening
+                            </label>
+                            <input type="time" class="form-control" name="half_day_opening" value="{{ school.half_day_opening|time:'H:i' }}">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-moon"></i>
+                                Half Day Closing
+                            </label>
+                            <input type="time" class="form-control" name="half_day_closing" value="{{ school.half_day_closing|time:'H:i' }}">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="toggle-switch">
+                    <span>Enable Half Days</span>
+                    <label class="switch">
+                        <input type="checkbox" id="enableHalfDays" {% if school.half_day_opening %}checked{% endif %} onchange="toggleHalfDays()">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </form>
+        </div>
+
+        <!-- Academic Settings -->
+        <div class="settings-card" data-aos="fade-up" data-aos-delay="300">
+            <div class="card-header">
+                <div class="card-icon">
+                    <i class="fas fa-calendar-alt"></i>
+                </div>
+                <div>
+                    <h3 class="card-title">Academic Settings</h3>
+                    <p class="card-subtitle">Current term and academic year</p>
+                </div>
+            </div>
+            
+            <form method="post" id="academicForm">
+                <div class="form-group">
+                    <label class="form-label">Current Academic Year</label>
+                    <select class="form-select" name="current_academic_year">
+                        {% for year in academic_years %}
+                            <option value="{{ year.name }}" {% if school.current_academic_year == year.name %}selected{% endif %}>
+                                {{ year.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Current Term</label>
+                    <select class="form-select" name="current_term">
+                        <option value="FIRST" {% if school.current_term == 'FIRST' %}selected{% endif %}>First Term</option>
+                        <option value="SECOND" {% if school.current_term == 'SECOND' %}selected{% endif %}>Second Term</option>
+                        <option value="THIRD" {% if school.current_term == 'THIRD' %}selected{% endif %}>Third Term</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Next Term Begins</label>
+                    <input type="date" class="form-control" name="next_term_begins" value="{{ school.next_term_begins|date:'Y-m-d' }}">
+                </div>
+            </form>
+
+            <!-- Quick Actions -->
+            <div class="mt-3">
+                <a href="{% url 'school:academic_year_list' %}" class="btn btn-outline-primary btn-sm">
+                    <i class="fas fa-calendar-plus me-1"></i>Manage Academic Years
+                </a>
+                <a href="{% url 'school:term_list' %}" class="btn btn-outline-primary btn-sm ms-2">
+                    <i class="fas fa-calendar-week me-1"></i>Manage Terms
+                </a>
+                <a href="{% url 'school:holiday_list' %}" class="btn btn-outline-primary btn-sm ms-2">
+                    <i class="fas fa-umbrella-beach me-1"></i>Manage Holidays
+                </a>
+            </div>
+        </div>
+
+        <!-- Branding -->
+        <div class="settings-card" data-aos="fade-up">
+            <div class="card-header">
+                <div class="card-icon">
+                    <i class="fas fa-palette"></i>
+                </div>
+                <div>
+                    <h3 class="card-title">Branding</h3>
+                    <p class="card-subtitle">School colors and theme</p>
+                </div>
+            </div>
+            
+            <form method="post" id="brandingForm">
+                <div class="color-picker">
+                    <div>
+                        <label class="form-label">Primary Color</label>
+                        <input type="color" class="color-input" name="primary_color" value="{{ school.primary_color }}">
+                    </div>
+                    <div>
+                        <span class="color-value">{{ school.primary_color }}</span>
+                    </div>
+                </div>
+                
+                <div class="color-picker mt-3">
+                    <div>
+                        <label class="form-label">Secondary Color</label>
+                        <input type="color" class="color-input" name="secondary_color" value="{{ school.secondary_color }}">
+                    </div>
+                    <div>
+                        <span class="color-value">{{ school.secondary_color }}</span>
+                    </div>
+                </div>
+                
+                <div class="color-picker mt-3">
+                    <div>
+                        <label class="form-label">Accent Color</label>
+                        <input type="color" class="color-input" name="accent_color" value="{{ school.accent_color }}">
+                    </div>
+                    <div>
+                        <span class="color-value">{{ school.accent_color }}</span>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Preview -->
+            <div class="preview-section mt-3">
+                <label class="form-label">Preview</label>
+                <div class="d-flex gap-2">
+                    <span class="badge" style="background-color: {{ school.primary_color }}">Primary</span>
+                    <span class="badge" style="background-color: {{ school.secondary_color }}">Secondary</span>
+                    <span class="badge" style="background-color: {{ school.accent_color }}">Accent</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Social Media -->
+        <div class="settings-card" data-aos="fade-up" data-aos-delay="100">
+            <div class="card-header">
+                <div class="card-icon">
+                    <i class="fas fa-share-alt"></i>
+                </div>
+                <div>
+                    <h3 class="card-title">Social Media</h3>
+                    <p class="card-subtitle">Connect with your community</p>
+                </div>
+            </div>
+            
+            <form method="post" id="socialForm">
+                <div class="social-input mb-3">
+                    <div class="social-icon">
+                        <i class="fab fa-facebook-f"></i>
+                    </div>
+                    <div class="social-field">
+                        <input type="url" class="form-control" name="facebook" placeholder="Facebook URL" value="{{ school.facebook }}">
+                    </div>
+                </div>
+                
+                <div class="social-input mb-3">
+                    <div class="social-icon">
+                        <i class="fab fa-twitter"></i>
+                    </div>
+                    <div class="social-field">
+                        <input type="url" class="form-control" name="twitter" placeholder="Twitter URL" value="{{ school.twitter }}">
+                    </div>
+                </div>
+                
+                <div class="social-input mb-3">
+                    <div class="social-icon">
+                        <i class="fab fa-instagram"></i>
+                    </div>
+                    <div class="social-field">
+                        <input type="url" class="form-control" name="instagram" placeholder="Instagram URL" value="{{ school.instagram }}">
+                    </div>
+                </div>
+                
+                <div class="social-input mb-3">
+                    <div class="social-icon">
+                        <i class="fab fa-youtube"></i>
+                    </div>
+                    <div class="social-field">
+                        <input type="url" class="form-control" name="youtube" placeholder="YouTube URL" value="{{ school.youtube }}">
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Current Academic Year Info -->
+    <div class="row">
+        <div class="col-md-6">
+            <div class="settings-card" data-aos="fade-up">
+                <h5 class="card-title mb-3">
+                    <i class="fas fa-calendar-check me-2"></i>
+                    Current Academic Year
+                </h5>
+                
+                <div class="current-year-info">
+                    <div class="year-item">
+                        <div class="year-info">
+                            <div class="year-name">{{ school.current_academic_year }}</div>
+                            <div class="year-dates">
+                                {% with year=current_academic_year_obj %}
+                                    {{ year.start_date|date:"M d, Y" }} - {{ year.end_date|date:"M d, Y" }}
+                                {% endwith %}
+                            </div>
+                        </div>
+                        <span class="year-badge badge-current">Current</span>
+                    </div>
+                </div>
+                
+                <div class="mt-3">
+                    <h6>Terms in this Academic Year</h6>
+                    <div class="terms-list">
+                        {% for term in current_terms %}
+                            <div class="year-item">
+                                <div class="year-info">
+                                    <div class="year-name">{{ term.get_term_display }}</div>
+                                    <div class="year-dates">
+                                        {{ term.start_date|date:"M d, Y" }} - {{ term.end_date|date:"M d, Y" }}
+                                    </div>
+                                </div>
+                                {% if term.is_current %}
+                                    <span class="year-badge badge-current">Current</span>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="settings-card" data-aos="fade-up" data-aos-delay="100">
+                <h5 class="card-title mb-3">
+                    <i class="fas fa-umbrella-beach me-2"></i>
+                    Upcoming Holidays
+                </h5>
+                
+                <div class="holiday-calendar">
+                    {% for holiday in upcoming_holidays %}
+                        <div class="holiday-card">
+                            <div class="holiday-date">
+                                <i class="fas fa-calendar-day me-1"></i>
+                                {{ holiday.start_date|date:"M d" }} - {{ holiday.end_date|date:"M d" }}
+                            </div>
+                            <derivative truncated for brevity... (omitted)

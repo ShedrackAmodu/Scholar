@@ -1,0 +1,36 @@
+{% load static %}
+{% extends 'base.html' %}
+
+{% block title %}Expertise Confirm Delete{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6" data-aos="zoom-in">
+            <div class="card shadow">
+                <div class="card-body text-center">
+                    <h2 class="card-title mb-4">Delete Expertise?</h2>
+                    <p>Remove <strong>{{ object }}</strong> from records. This cannot be undone.</p>
+                    <form method="post">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger me-2"><i class="fas fa-trash-alt"></i> Delete</button>
+                        <a href="{% url 'teachers:admin:expertise_list' %}" class="btn btn-secondary"><i class="fas fa-times"></i> Cancel</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.card { border-radius: 1rem; }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+AOS.init();
+</script>
+{% endblock %}

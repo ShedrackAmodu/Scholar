@@ -1,0 +1,498 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Admissions - {{ block.super }}{% endblock %}
+
+{% block content %}
+<!-- Admissions Hero Section -->
+<section class="hero-section py-5" style="background: linear-gradient(135deg, var(--primary-pink), var(--secondary-pink));">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <h1 class="text-white mb-3 animate__animated animate__fadeInLeft">
+                    <i class="fas fa-edit me-3"></i>
+                    Admissions Portal
+                </h1>
+                <p class="text-white-50 mb-4 animate__animated animate__fadeInLeft animate__delay-1s">
+                    Welcome to {{ school.name|default:"our school" }} admissions. 
+                    Apply for admission, check application status, and stay updated with our admission guidelines.
+                </p>
+                <div class="d-flex flex-wrap gap-3 animate__animated animate__fadeInLeft animate__delay-2s">
+                    {% if not user.is_authenticated %}
+                        <a href="{% url 'accounts:login' %}" class="btn btn-light btn-lg">
+                            <i class="fas fa-sign-in-alt me-2"></i> Login to Apply
+                        </a>
+                    {% endif %}
+                    <a href="#guidelines" class="btn btn-outline-light btn-lg">
+                        <i class="fas fa-info-circle me-2"></i> Admission Guidelines
+                    </a>
+                    <a href="#status" class="btn btn-outline-light btn-lg">
+                        <i class="fas fa-search me-2"></i> Check Status
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-4 text-center">
+                <div class="card shadow-lg animate__animated animate__fadeInRight">
+                    <div class="card-body p-4">
+                        <div class="icon-box mb-3">
+                            <i class="fas fa-graduation-cap fa-3x text-primary"></i>
+                        </div>
+                        <h5 class="card-title">Quick Stats</h5>
+                        <div class="row text-center">
+                            <div class="col-6">
+                                <div class="counter-box">
+                                    <h4 class="text-primary counter" data-count="{{ applications.count }}">{{ applications.count }}</h4>
+                                    <small class="text-muted">Applications</small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="counter-box">
+                                    <h4 class="text-success counter" data-count="{{ approved_count }}">{{ approved_count }}</h4>
+                                    <small class="text-muted">Approved</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Main Content -->
+<div class="container my-5">
+    <!-- Admin View: Application Management -->
+    {% if user.is_authenticated and user.is_staff %}
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-tachometer-alt me-2"></i>
+                            Admin Dashboard - Admissions Management
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="stat-card text-center">
+                                    <h6 class="text-muted">Total Applications</h6>
+                                    <h3 class="text-primary">{{ applications.count }}</h3>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="stat-card text-center">
+                                    <h6 class="text-muted">Pending</h6>
+                                    <h3 class="text-warning">{{ pending_count }}</h3>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="stat-card text-center">
+                                    <h6 class="text-muted">Approved</h6>
+                                    <h3 class="text-success">{{ approved_count }}</h3>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="stat-card text-center">
+                                    <h6 class="text-muted">Rejected</h6>
+                                    <h3 class="text-danger">{{ rejected_count }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Applications List -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-list me-2"></i>
+                            Recent Applications
+                        </h5>
+                        <div class="btn-group" role="group">
+                            <a href="{% url 'admissions:admission_list' %}" class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-list me-1"></i> View All
+                            </a>
+                            <a href="{% url 'admissions:bulk_admission' %}" class="btn btn-outline-success btn-sm">
+                                <i class="fas fa-upload me-1"></i> Bulk Upload
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        {% if applications %}
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Student Name</th>
+                                            <th>Class Applied</th>
+                                            <th>Status</th>
+                                            <th>Date Submitted</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for application in applications|slice:":5" %}
+                                            <tr>
+                                                <td>
+                                                    <strong>{{ application.first_name }} {{ application.last_name }}</strong>
+                                                    <br><small class="text-muted">{{ application.email }}</small>
+                                                </td>
+                                                <td>{{ application.applied_class }}</td>
+                                                <td>
+                                                    <span class="badge bg-{{ application.get_status_badge_color }}">
+                                                        {{ application.get_status_display }}
+                                                    </span>
+                                                </td>
+                                                <td>{{ application.submitted_at|date:"M d, Y" }}</td>
+                                                <td>
+                                                    <a href="{% url 'admissions:admission_detail' application.id %}" 
+                                                       class="btn btn-outline-primary btn-sm">
+                                                        <i class="fas fa-eye me-1"></i> View
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <div class="text-center py-4">
+                                <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                                <h5 class="text-muted">No applications yet</h5>
+                                <p class="text-muted">Applications will appear here once submitted.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <!-- Public View: Admission Information -->
+        <div class="row">
+            <!-- Admission Form Section -->
+            <div class="col-lg-8">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-edit me-2"></i>
+                            Apply for Admission
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        {% if user.is_authenticated %}
+                            <div class="alert alert-info">
+                                <i class="fas fa-user-circle me-2"></i>
+                                Logged in as: <strong>{{ user.get_full_name|default:user.username }}</strong>
+                            </div>
+                            <p class="text-muted">
+                                Fill out the application form below to apply for admission to {{ school.name|default:"our school" }}.
+                            </p>
+                            <!-- Application Form would go here -->
+                            <div class="text-center py-4">
+                                <i class="fas fa-file-alt fa-3x text-primary mb-3"></i>
+                                <h5>Application Form</h5>
+                                <p class="text-muted">The application form is available in the admissions office or can be downloaded from the links below.</p>
+                                <div class="d-flex gap-2 justify-content-center">
+                                    <a href="{% url 'admissions:admission_form' %}" class="btn btn-primary">
+                                        <i class="fas fa-download me-2"></i> Download Form
+                                    </a>
+                                    <a href="#contact" class="btn btn-outline-primary">
+                                        <i class="fas fa-envelope me-2"></i> Contact Us
+                                    </a>
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="text-center py-4">
+                                <i class="fas fa-user-plus fa-3x text-primary mb-3"></i>
+                                <h5>Ready to Apply?</h5>
+                                <p class="text-muted">Please log in to your account to start the admission process.</p>
+                                <a href="{% url 'accounts:login' %}" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-sign-in-alt me-2"></i> Login to Apply
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Guidelines Section -->
+                <div class="card shadow-sm mb-4" id="guidelines">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Admission Guidelines
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>Eligibility Requirements</h6>
+                                <ul class="list-unstyled">
+                                    <li><i class="fas fa-check-circle text-success me-2"></i> Age 5-18 years</li>
+                                    <li><i class="fas fa-check-circle text-success me-2"></i> Previous school records</li>
+                                    <li><i class="fas fa-check-circle text-success me-2"></i> Birth certificate</li>
+                                    <li><i class="fas fa-check-circle text-success me-2"></i> Immunization records</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Required Documents</h6>
+                                <ul class="list-unstyled">
+                                    <li><i class="fas fa-file-alt text-primary me-2"></i> Completed application form</li>
+                                    <li><i class="fas fa-copy text-primary me-2"></i> Report card/transcript</li>
+                                    <li><i class="fas fa-id-card text-primary me-2"></i> Passport photos</li>
+                                    <li><i class="fas fa-file-pdf text-primary me-2"></i> Medical certificate</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Status Check Section -->
+                <div class="card shadow-sm mb-4" id="status">
+                    <div class="card-header bg-warning text-dark">
+                        <h5 class="mb-0">
+                            <i class="fas fa-search me-2"></i>
+                            Check Application Status
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <p class="text-muted">Enter your application reference number to check the status of your application.</p>
+                                <form class="row g-3">
+                                    <div class="col-md-8">
+                                        <input type="text" class="form-control" placeholder="Application Reference Number">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <button type="submit" class="btn btn-warning text-dark w-100">
+                                            <i class="fas fa-search me-2"></i> Check Status
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="col-md-4 text-center">
+                                <div class="alert alert-light">
+                                    <i class="fas fa-question-circle fa-2x text-warning mb-2"></i>
+                                    <h6 class="mb-0">Need Help?</h6>
+                                    <small class="text-muted">Contact admissions office</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar Information -->
+            <div class="col-lg-4">
+                <!-- Important Dates -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-secondary text-white">
+                        <h6 class="mb-0">
+                            <i class="fas fa-calendar-alt me-2"></i>
+                            Important Dates
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-unstyled">
+                            <li class="mb-3">
+                                <strong class="text-primary">Application Opens:</strong>
+                                <br><small class="text-muted">January 1, 2024</small>
+                            </li>
+                            <li class="mb-3">
+                                <strong class="text-warning">Application Deadline:</strong>
+                                <br><small class="text-muted">March 31, 2024</small>
+                            </li>
+                            <li class="mb-3">
+                                <strong class="text-success">Interview Dates:</strong>
+                                <br><small class="text-muted">April 1-15, 2024</small>
+                            </li>
+                            <li>
+                                <strong class="text-info">Admission Results:</strong>
+                                <br><small class="text-muted">April 30, 2024</small>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Contact Information -->
+                <div class="card shadow-sm mb-4" id="contact">
+                    <div class="card-header bg-primary text-white">
+                        <h6 class="mb-0">
+                            <i class="fas fa-envelope me-2"></i>
+                            Contact Admissions
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex align-items-start mb-3">
+                            <i class="fas fa-phone-alt text-primary me-3"></i>
+                            <div>
+                                <strong>Phone</strong>
+                                <br><small class="text-muted">{{ school.phone|default:"+1 (555) 123-4567" }}</small>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-start mb-3">
+                            <i class="fas fa-envelope text-primary me-3"></i>
+                            <div>
+                                <strong>Email</strong>
+                                <br><small class="text-muted">{{ school.email|default:"admissions@school.edu" }}</small>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-start">
+                            <i class="fas fa-map-marker-alt text-primary me-3"></i>
+                            <div>
+                                <strong>Address</strong>
+                                <br><small class="text-muted">{{ school.address|default:"123 Education Lane, School City, SC 12345" }}</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Download Forms -->
+                <div class="card shadow-sm">
+                    <div class="card-header bg-info text-white">
+                        <h6 class="mb-0">
+                            <i class="fas fa-download me-2"></i>
+                            Download Forms
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <a href="#" class="btn btn-outline-info">
+                                <i class="fas fa-file-pdf me-2"></i> Application Form
+                            </a>
+                            <a href="#" class="btn btn-outline-info">
+                                <i class="fas fa-file-pdf me-2"></i> Medical Form
+                            </a>
+                            <a href="#" class="btn btn-outline-info">
+                                <i class="fas fa-file-pdf me-2"></i> Financial Aid Form
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Floating Action Button for Mobile -->
+<div class="d-md-none position-fixed" style="bottom: 20px; right: 20px; z-index: 1000;">
+    <a href="{% url 'admissions:admission_form' %}" class="btn btn-primary btn-lg rounded-circle shadow">
+        <i class="fas fa-plus"></i>
+    </a>
+</div>
+
+<style>
+    .hero-section {
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .hero-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('{% static "images/admissions-hero.jpg" %}') no-repeat center center;
+        background-size: cover;
+        opacity: 0.1;
+        z-index: 1;
+    }
+    
+    .card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    }
+    
+    .stat-card {
+        padding: 20px;
+        border-radius: 10px;
+        background: var(--card-bg);
+        border: var(--border);
+        transition: all 0.3s ease;
+    }
+    
+    .stat-card:hover {
+        transform: scale(1.05);
+    }
+    
+    .icon-box {
+        background: linear-gradient(135deg, var(--primary-pink), var(--secondary-pink));
+        border-radius: 50%;
+        width: 80px;
+        height: 80px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+    }
+    
+    .counter {
+        font-weight: 700;
+        font-size: 2rem;
+    }
+    
+    .badge {
+        font-size: 0.875rem;
+        padding: 4px 8px;
+    }
+    
+    .table-hover tbody tr:hover {
+        background-color: rgba(123, 44, 191, 0.1);
+    }
+    
+    @media (max-width: 768px) {
+        .hero-section {
+            padding: 3rem 0;
+        }
+        
+        .stat-card {
+            margin-bottom: 15px;
+        }
+    }
+</style>
+
+<script>
+    // Counter Animation for Stats
+    document.addEventListener('DOMContentLoaded', function() {
+        const counters = document.querySelectorAll('.counter');
+        const speed = 2000;
+        
+        counters.forEach(counter => {
+            const updateCount = () => {
+                const target = +counter.getAttribute('data-count');
+                const count = +counter.innerText;
+                const increment = target / speed;
+                
+                if (count < target) {
+                    counter.innerText = Math.ceil(count + increment);
+                    setTimeout(updateCount, 1);
+                } else {
+                    counter.innerText = target;
+                }
+            };
+            
+            // Start counter when element is in viewport
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        updateCount();
+                        observer.unobserve(entry.target);
+                    }
+                });
+            });
+            
+            observer.observe(counter);
+        });
+    });
+</script>
+{% endblock %}

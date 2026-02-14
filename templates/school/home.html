@@ -1,0 +1,1334 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Welcome to {% if school %}{{ school.name }}{% else %}Our School{% endif %}{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Hero Section */
+    .hero-section {
+        position: relative;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        padding: 120px 0 80px;
+        background: linear-gradient(135deg, rgba(255, 105, 180, 0.1), rgba(255, 182, 193, 0.1));
+    }
+
+    .hero-content {
+        position: relative;
+        z-index: 2;
+        text-align: center;
+        color: var(--text-primary);
+    }
+
+    .hero-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 4.5rem;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        line-height: 1.2;
+        animation: fadeInUp 1s ease;
+    }
+
+    .hero-subtitle {
+        font-size: 1.5rem;
+        margin-bottom: 2.5rem;
+        opacity: 0.9;
+        animation: fadeInUp 1s ease 0.2s both;
+    }
+
+    .hero-cta {
+        animation: fadeInUp 1s ease 0.4s both;
+    }
+
+    .hero-cta .btn {
+        margin: 0 10px;
+        padding: 1rem 2.5rem;
+        font-size: 1.1rem;
+    }
+
+    .hero-image {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 1;
+    }
+
+    .hero-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        opacity: 0.1;
+        animation: slowZoom 20s ease infinite;
+    }
+
+    @keyframes slowZoom {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+    }
+
+    .floating-elements {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        pointer-events: none;
+    }
+
+    .floating-element {
+        position: absolute;
+        background: linear-gradient(135deg, var(--primary-pink), var(--secondary-pink));
+        border-radius: 50%;
+        opacity: 0.1;
+        animation: float 15s ease-in-out infinite;
+    }
+
+    .element-1 {
+        width: 150px;
+        height: 150px;
+        top: 20%;
+        left: 10%;
+        animation-delay: -2s;
+    }
+
+    .element-2 {
+        width: 200px;
+        height: 200px;
+        bottom: 20%;
+        right: 10%;
+        animation-delay: -5s;
+    }
+
+    .element-3 {
+        width: 100px;
+        height: 100px;
+        top: 50%;
+        left: 50%;
+        animation-delay: -8s;
+    }
+
+    /* Featured Events Section */
+    .featured-events {
+        padding: 80px 0;
+        position: relative;
+    }
+
+    .section-title {
+        text-align: center;
+        margin-bottom: 60px;
+    }
+
+    .section-title h2 {
+        font-family: 'Playfair Display', serif;
+        font-size: 3rem;
+        font-weight: 700;
+        margin-bottom: 20px;
+        position: relative;
+        display: inline-block;
+    }
+
+    .section-title h2::before,
+    .section-title h2::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        width: 50px;
+        height: 2px;
+        background: linear-gradient(135deg, var(--primary-pink), var(--secondary-pink));
+    }
+
+    .section-title h2::before {
+        right: 100%;
+        margin-right: 20px;
+    }
+
+    .section-title h2::after {
+        left: 100%;
+        margin-left: 20px;
+    }
+
+    .section-title p {
+        font-size: 1.2rem;
+        color: var(--text-secondary);
+        max-width: 700px;
+        margin: 0 auto;
+    }
+
+    .event-card {
+        background: var(--card-bg);
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: var(--shadow);
+        transition: var(--transition-bounce);
+        height: 100%;
+        position: relative;
+    }
+
+    .event-card:hover {
+        transform: translateY(-15px);
+        box-shadow: 0 20px 40px rgba(255, 105, 180, 0.3);
+    }
+
+    .event-image {
+        height: 250px;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .event-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.8s ease;
+    }
+
+    .event-card:hover .event-image img {
+        transform: scale(1.1);
+    }
+
+    .event-date {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background: linear-gradient(135deg, var(--primary-pink), var(--dark-pink));
+        color: white;
+        padding: 10px 15px;
+        border-radius: 10px;
+        text-align: center;
+        box-shadow: 0 5px 15px rgba(255, 105, 180, 0.3);
+        z-index: 2;
+    }
+
+    .event-date .day {
+        font-size: 1.5rem;
+        font-weight: 700;
+        line-height: 1;
+    }
+
+    .event-date .month {
+        font-size: 0.9rem;
+        text-transform: uppercase;
+    }
+
+    .event-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.7));
+        opacity: 0;
+        transition: var(--transition-smooth);
+    }
+
+    .event-card:hover .event-overlay {
+        opacity: 1;
+    }
+
+    .event-content {
+        padding: 25px;
+        position: relative;
+    }
+
+    .event-category {
+        display: inline-block;
+        padding: 5px 15px;
+        background: rgba(255, 105, 180, 0.1);
+        color: var(--primary-pink);
+        border-radius: 25px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        margin-bottom: 15px;
+    }
+
+    .event-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin-bottom: 10px;
+        color: var(--text-primary);
+    }
+
+    .event-meta {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 15px;
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+    }
+
+    .event-meta i {
+        color: var(--primary-pink);
+        margin-right: 5px;
+    }
+
+    .event-description {
+        color: var(--text-secondary);
+        margin-bottom: 20px;
+        line-height: 1.6;
+    }
+
+    /* Noticeboard Section */
+    .noticeboard-section {
+        padding: 80px 0;
+        background: linear-gradient(135deg, rgba(255, 105, 180, 0.05), rgba(255, 182, 193, 0.05));
+    }
+
+    .notice-card {
+        background: var(--card-bg);
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 20px;
+        box-shadow: var(--shadow);
+        transition: var(--transition-smooth);
+        border-left: 5px solid var(--primary-pink);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .notice-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 100px;
+        height: 100px;
+        background: linear-gradient(135deg, var(--primary-pink), var(--secondary-pink));
+        opacity: 0.1;
+        border-radius: 0 0 0 100%;
+    }
+
+    .notice-card:hover {
+        transform: translateX(10px);
+        box-shadow: 0 10px 30px rgba(255, 105, 180, 0.2);
+    }
+
+    .notice-card.pinned {
+        border-left-color: var(--warning);
+        background: linear-gradient(135deg, var(--card-bg), rgba(253, 203, 110, 0.1));
+    }
+
+    .notice-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 15px;
+    }
+
+    .notice-type {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 5px 15px;
+        background: rgba(255, 105, 180, 0.1);
+        color: var(--primary-pink);
+        border-radius: 25px;
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+
+    .notice-pin {
+        color: var(--warning);
+        font-size: 1.2rem;
+        animation: bounce 2s ease infinite;
+    }
+
+    @keyframes bounce {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.2); }
+    }
+
+    .notice-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 10px;
+        color: var(--text-primary);
+    }
+
+    .notice-meta {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 15px;
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+    }
+
+    .notice-meta i {
+        color: var(--primary-pink);
+        margin-right: 5px;
+    }
+
+    .notice-content {
+        color: var(--text-secondary);
+        margin-bottom: 15px;
+        line-height: 1.6;
+    }
+
+    .notice-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding-top: 15px;
+        border-top: var(--border);
+    }
+
+    /* Statistics Section */
+    .stats-section {
+        padding: 60px 0;
+        background: linear-gradient(135deg, var(--primary-pink), var(--dark-pink));
+        color: white;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .stats-section::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+        animation: rotate 30s linear infinite;
+    }
+
+    @keyframes rotate {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+
+    .stat-item {
+        text-align: center;
+        position: relative;
+        z-index: 2;
+    }
+
+    .stat-number {
+        font-size: 3.5rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+        font-family: 'Playfair Display', serif;
+    }
+
+    .stat-label {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+    }
+
+    .stat-icon {
+        font-size: 3rem;
+        margin-bottom: 20px;
+        opacity: 0.5;
+    }
+
+    /* Testimonials Section */
+    .testimonials-section {
+        padding: 80px 0;
+        position: relative;
+    }
+
+    .testimonial-card {
+        background: var(--card-bg);
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: var(--shadow);
+        transition: var(--transition-bounce);
+        height: 100%;
+        position: relative;
+    }
+
+    .testimonial-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 40px rgba(255, 105, 180, 0.2);
+    }
+
+    .testimonial-quote {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        font-size: 4rem;
+        color: var(--primary-pink);
+        opacity: 0.2;
+    }
+
+    .testimonial-content {
+        margin-bottom: 20px;
+        font-style: italic;
+        color: var(--text-secondary);
+        line-height: 1.8;
+    }
+
+    .testimonial-author {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .author-avatar {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        overflow: hidden;
+        border: 3px solid var(--primary-pink);
+    }
+
+    .author-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .author-info h4 {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 5px;
+        color: var(--text-primary);
+    }
+
+    .author-info p {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        margin: 0;
+    }
+
+    .author-role {
+        display: inline-block;
+        padding: 2px 10px;
+        background: rgba(255, 105, 180, 0.1);
+        color: var(--primary-pink);
+        border-radius: 15px;
+        font-size: 0.8rem;
+    }
+
+    /* Quick Actions */
+    .quick-actions {
+        padding: 60px 0;
+    }
+
+    .action-card {
+        background: var(--card-bg);
+        border-radius: 20px;
+        padding: 40px 30px;
+        text-align: center;
+        box-shadow: var(--shadow);
+        transition: var(--transition-bounce);
+        height: 100%;
+        position: relative;
+        overflow: hidden;
+        cursor: pointer;
+    }
+
+    .action-card::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(255, 105, 180, 0.2), transparent);
+        transform: translate(-50%, -50%);
+        transition: width 0.8s, height 0.8s;
+    }
+
+    .action-card:hover::before {
+        width: 500px;
+        height: 500px;
+    }
+
+    .action-card:hover {
+        transform: translateY(-10px) scale(1.05);
+    }
+
+    .action-icon {
+        width: 100px;
+        height: 100px;
+        line-height: 100px;
+        text-align: center;
+        background: linear-gradient(135deg, var(--primary-pink), var(--dark-pink));
+        color: white;
+        font-size: 2.5rem;
+        border-radius: 50%;
+        margin: 0 auto 25px;
+        box-shadow: 0 10px 20px rgba(255, 105, 180, 0.3);
+        transition: var(--transition-bounce);
+    }
+
+    .action-card:hover .action-icon {
+        transform: scale(1.1) rotate(360deg);
+    }
+
+    .action-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin-bottom: 15px;
+        color: var(--text-primary);
+    }
+
+    .action-description {
+        color: var(--text-secondary);
+        margin-bottom: 20px;
+        line-height: 1.6;
+    }
+
+    /* School Hours Widget */
+    .hours-widget {
+        background: var(--card-bg);
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: var(--shadow);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .hours-widget::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200px;
+        height: 200px;
+        background: linear-gradient(135deg, var(--primary-pink), var(--secondary-pink));
+        border-radius: 50%;
+        opacity: 0.1;
+    }
+
+    .hours-header {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 25px;
+    }
+
+    .hours-icon {
+        width: 60px;
+        height: 60px;
+        line-height: 60px;
+        text-align: center;
+        background: linear-gradient(135deg, var(--primary-pink), var(--dark-pink));
+        color: white;
+        font-size: 1.5rem;
+        border-radius: 50%;
+    }
+
+    .hours-title h3 {
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin-bottom: 5px;
+        color: var(--text-primary);
+    }
+
+    .hours-title p {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+    }
+
+    .hours-list {
+        list-style: none;
+        padding: 0;
+    }
+
+    .hours-list li {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 15px 0;
+        border-bottom: var(--border);
+    }
+
+    .hours-list li:last-child {
+        border-bottom: none;
+    }
+
+    .day {
+        font-weight: 500;
+        color: var(--text-primary);
+    }
+
+    .time {
+        color: var(--primary-pink);
+        font-weight: 600;
+    }
+
+    .special-note {
+        margin-top: 20px;
+        padding: 15px;
+        background: rgba(255, 105, 180, 0.1);
+        border-radius: 10px;
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .hero-title {
+            font-size: 2.5rem;
+        }
+        
+        .hero-subtitle {
+            font-size: 1.2rem;
+        }
+        
+        .section-title h2 {
+            font-size: 2rem;
+        }
+        
+        .stat-number {
+            font-size: 2.5rem;
+        }
+        
+        .action-card {
+            padding: 30px 20px;
+        }
+        
+        .action-icon {
+            width: 80px;
+            height: 80px;
+            line-height: 80px;
+            font-size: 2rem;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .hero-title {
+            font-size: 2rem;
+        }
+        
+        .hero-cta .btn {
+            display: block;
+            width: 100%;
+            margin: 10px 0;
+        }
+        
+        .section-title h2::before,
+        .section-title h2::after {
+            display: none;
+        }
+        
+        .event-meta {
+            flex-direction: column;
+            gap: 5px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section" id="home">
+    <!-- Floating Elements -->
+    <div class="floating-elements">
+        <div class="floating-element element-1"></div>
+        <div class="floating-element element-2"></div>
+        <div class="floating-element element-3"></div>
+    </div>
+    
+    <!-- Hero Image -->
+    <div class="hero-image">
+        {% if school and school.hero_image %}
+            <img src="{{ school.hero_image.url }}" alt="Hero Background">
+        {% else %}
+            <img src="https://via.placeholder.com/1920x1080/ffe4e8/ff69b4?text=Education" alt="Hero Background">
+        {% endif %}
+    </div>
+    
+    <!-- Hero Content -->
+    <div class="container hero-content">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <h1 class="hero-title gradient-text">
+                    Welcome to 
+                    {% if school %}
+                        {{ school.name }}
+                    {% else %}
+                        Excellence Academy
+                    {% endif %}
+                </h1>
+                <p class="hero-subtitle">
+                    <span class="typewriter" data-words='["Nurturing Brilliance", "Building Futures", "Inspiring Excellence"]'></span>
+                </p>
+                <div class="hero-cta">
+                    <a href="{% url 'admissions:admission_form' %}" class="btn btn-primary btn-lg pulse">
+                        <i class="fas fa-edit me-2"></i>Apply Now
+                    </a>
+                    <a href="#featured-events" class="btn btn-outline-primary btn-lg">
+                        <i class="fas fa-calendar-alt me-2"></i>Upcoming Events
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Events Section -->
+<section class="featured-events" id="featured-events" data-aos="fade-up">
+    <div class="container">
+        <div class="section-title">
+            <h2>Featured Events</h2>
+            <p>Discover exciting events and activities happening at our school</p>
+        </div>
+        
+        <div class="row g-4">
+            {% for event in featured_events %}
+                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="{{ forloop.counter|add:'100' }}">
+                    <div class="event-card hvr-float-shadow">
+                        <div class="event-image">
+                            {% if event.image %}
+                                <img src="{{ event.image.url }}" alt="{{ event.title }}">
+                            {% else %}
+                                <img src="https://via.placeholder.com/400x250/ffe4e8/ff69b4?text={{ event.title|urlencode }}" alt="{{ event.title }}">
+                            {% endif %}
+                            <div class="event-date">
+                                <span class="day">{{ event.start_date|date:"d" }}</span>
+                                <span class="month">{{ event.start_date|date:"M" }}</span>
+                            </div>
+                            <div class="event-overlay"></div>
+                        </div>
+                        <div class="event-content">
+                            <span class="event-category">
+                                <i class="fas fa-{% if event.event_type == 'ACAD' %}book{% elif event.event_type == 'SPORT' %}futbol{% elif event.event_type == 'CULT' %}palette{% else %}calendar{% endif %} me-1"></i>
+                                {{ event.get_event_type_display }}
+                            </span>
+                            <h3 class="event-title">{{ event.title }}</h3>
+                            <div class="event-meta">
+                                <span><i class="fas fa-clock me-1"></i>{{ event.start_date|time:"g:i A" }}</span>
+                                {% if event.location %}
+                                    <span><i class="fas fa-map-marker-alt me-1"></i>{{ event.location|truncatechars:20 }}</span>
+                                {% endif %}
+                            </div>
+                            <p class="event-description">{{ event.description|truncatechars:100 }}</p>
+                            <a href="{% url 'announcements:event_detail' event.id %}" class="btn btn-outline-primary btn-sm">
+                                Learn More <i class="fas fa-arrow-right ms-2"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="col-12 text-center">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        No featured events at the moment. Check back later!
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        
+        {% if featured_events %}
+            <div class="text-center mt-5">
+                <a href="{% url 'school:events' %}" class="btn btn-primary btn-lg">
+                    View All Events <i class="fas fa-arrow-right ms-2"></i>
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Statistics Section -->
+<section class="stats-section" data-aos="fade-up">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-item counter-section">
+                    <div class="stat-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-number counter" data-target="500">500</div>
+                    <div class="stat-label">Students</div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-item counter-section">
+                    <div class="stat-icon">
+                        <i class="fas fa-chalkboard-teacher"></i>
+                    </div>
+                    <div class="stat-number counter" data-target="50">50</div>
+                    <div class="stat-label">Teachers</div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-item counter-section">
+                    <div class="stat-icon">
+                        <i class="fas fa-book-open"></i>
+                    </div>
+                    <div class="stat-number counter" data-target="20">20</div>
+                    <div class="stat-label">Subjects</div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-item counter-section">
+                    <div class="stat-icon">
+                        <i class="fas fa-trophy"></i>
+                    </div>
+                    <div class="stat-number counter" data-target="15">15</div>
+                    <div class="stat-label">Years</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Noticeboard Section -->
+<section class="noticeboard-section" id="notices" data-aos="fade-up">
+    <div class="container">
+        <div class="section-title">
+            <h2>Noticeboard</h2>
+            <p>Stay updated with the latest announcements and news</p>
+        </div>
+        
+        <div class="row">
+            <div class="col-lg-8">
+                {% for notice in recent_notices %}
+                    <div class="notice-card {% if notice.is_pinned %}pinned{% endif %}" data-aos="fade-up" data-aos-delay="{{ forloop.counter|add:'100' }}">
+                        <div class="notice-header">
+                            <span class="notice-type">
+                                <i class="fas fa-{% if notice.notice_type == 'EMER' %}exclamation-triangle{% elif notice.notice_type == 'ACAD' %}book{% elif notice.notice_type == 'ADMIN' %}cog{% else %}bullhorn{% endif %} me-1"></i>
+                                {{ notice.get_notice_type_display }}
+                            </span>
+                            {% if notice.is_pinned %}
+                                <span class="notice-pin">
+                                    <i class="fas fa-thumbtack"></i>
+                                </span>
+                            {% endif %}
+                        </div>
+                        <h3 class="notice-title">{{ notice.title }}</h3>
+                        <div class="notice-meta">
+                            <span><i class="fas fa-calendar-alt me-1"></i>{{ notice.publish_date|date:"F d, Y" }}</span>
+                            {% if notice.priority == 'URG' %}
+                                <span class="text-danger"><i class="fas fa-exclamation-circle me-1"></i>Urgent</span>
+                            {% endif %}
+                        </div>
+                        <p class="notice-content">{{ notice.content|truncatechars:200 }}</p>
+                        <div class="notice-footer">
+                            <span class="text-secondary">
+                                <i class="fas fa-eye me-1"></i>{{ notice.view_count }} views
+                            </span>
+                            <a href="{% url 'announcements:notice_detail' notice.id %}" class="btn btn-link">
+                                Read More <i class="fas fa-arrow-right ms-2"></i>
+                            </a>
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        No notices at the moment. Check back later!
+                    </div>
+                {% endfor %}
+            </div>
+            
+            <div class="col-lg-4">
+                <!-- School Hours Widget -->
+                <div class="hours-widget" data-aos="fade-left">
+                    <div class="hours-header">
+                        <div class="hours-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="hours-title">
+                            <h3>School Hours</h3>
+                            <p>Regular Schedule</p>
+                        </div>
+                    </div>
+                    
+                    <ul class="hours-list">
+                        <li>
+                            <span class="day">Monday - Friday</span>
+                            <span class="time">
+                                {% if school %}
+                                    {{ school.opening_time|time:"g:i A" }} - {{ school.closing_time|time:"g:i A" }}
+                                {% else %}
+                                    8:00 AM - 3:00 PM
+                                {% endif %}
+                            </span>
+                        </li>
+                        <li>
+                            <span class="day">Saturday</span>
+                            <span class="time">Closed</span>
+                        </li>
+                        <li>
+                            <span class="day">Sunday</span>
+                            <span class="time">Closed</span>
+                        </li>
+                        {% if school and school.half_day_opening %}
+                            <li>
+                                <span class="day">Half Day</span>
+                                <span class="time">
+                                    {{ school.half_day_opening|time:"g:i A" }} - {{ school.half_day_closing|time:"g:i A" }}
+                                </span>
+                            </li>
+                        {% endif %}
+                    </ul>
+                    
+                    {% if school and school.next_term_begins %}
+                        <div class="special-note">
+                            <i class="fas fa-calendar-check me-2"></i>
+                            Next Term Begins: {{ school.next_term_begins|date:"F d, Y" }}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Quick Links Widget -->
+                <div class="card mt-4" data-aos="fade-left" data-aos-delay="100">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="fas fa-link me-2"></i>
+                            Quick Links
+                        </h5>
+                        <ul class="list-unstyled">
+                            <li class="mb-2">
+                                <a href="{% url 'admissions:admission_form' %}" class="text-decoration-none">
+                                    <i class="fas fa-chevron-right text-pink me-2"></i>
+                                    Apply for Admission
+                                </a>
+                            </li>
+                            <li class="mb-2">
+                                <a href="{% url 'admissions:admission_status' %}" class="text-decoration-none">
+                                    <i class="fas fa-chevron-right text-pink me-2"></i>
+                                    Check Application Status
+                                </a>
+                            </li>
+                            <li class="mb-2">
+                                <a href="{% url 'school:contact' %}" class="text-decoration-none">
+                                    <i class="fas fa-chevron-right text-pink me-2"></i>
+                                    Contact Us
+                                </a>
+                            </li>
+                            <li class="mb-2">
+                                <a href="{% url 'school:about' %}" class="text-decoration-none">
+                                    <i class="fas fa-chevron-right text-pink me-2"></i>
+                                    About Us
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Quick Actions Section -->
+<section class="quick-actions" id="quick-actions" data-aos="fade-up">
+    <div class="container">
+        <div class="section-title">
+            <h2>Quick Actions</h2>
+            <p>What would you like to do today?</p>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-lg-3 col-md-6">
+                <div class="action-card" onclick="location.href='{% url 'admissions:admission_form' %}'">
+                    <div class="action-icon">
+                        <i class="fas fa-edit"></i>
+                    </div>
+                    <h3 class="action-title">Apply Now</h3>
+                    <p class="action-description">Start your journey with us by submitting an application</p>
+                    <span class="btn btn-outline-primary btn-sm">Get Started</span>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6">
+                <div class="action-card" onclick="location.href='{% url 'school:events' %}'">
+                    <div class="action-icon">
+                        <i class="fas fa-calendar-alt"></i>
+                    </div>
+                    <h3 class="action-title">Upcoming Events</h3>
+                    <p class="action-description">Check out our calendar of exciting events</p>
+                    <span class="btn btn-outline-primary btn-sm">View Events</span>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6">
+                <div class="action-card" onclick="location.href='{% url 'school:noticeboard' %}'">
+                    <div class="action-icon">
+                        <i class="fas fa-bullhorn"></i>
+                    </div>
+                    <h3 class="action-title">Noticeboard</h3>
+                    <p class="action-description">Stay informed with the latest announcements</p>
+                    <span class="btn btn-outline-primary btn-sm">Read Notices</span>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6">
+                <div class="action-card" onclick="location.href='{% url 'school:contact' %}'">
+                    <div class="action-icon">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <h3 class="action-title">Contact Us</h3>
+                    <p class="action-description">Get in touch with us for any inquiries</p>
+                    <span class="btn btn-outline-primary btn-sm">Contact Now</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Testimonials Section -->
+<section class="testimonials-section" data-aos="fade-up">
+    <div class="container">
+        <div class="section-title">
+            <h2>What People Say</h2>
+            <p>Hear from our students, parents, and alumni</p>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-lg-4 col-md-6">
+                <div class="testimonial-card" data-aos="fade-up" data-aos-delay="100">
+                    <div class="testimonial-quote">
+                        <i class="fas fa-quote-right"></i>
+                    </div>
+                    <p class="testimonial-content">
+                        "This school has transformed my child's life. The teachers are dedicated, 
+                        and the learning environment is exceptional. Highly recommended!"
+                    </p>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">
+                            <img src="https://randomuser.me/api/portraits/women/1.jpg" alt="Parent">
+                        </div>
+                        <div class="author-info">
+                            <h4>Mrs. Adebayo</h4>
+                            <p>Parent of Primary 3 Student</p>
+                            <span class="author-role">Parent</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6">
+                <div class="testimonial-card" data-aos="fade-up" data-aos-delay="200">
+                    <div class="testimonial-quote">
+                        <i class="fas fa-quote-right"></i>
+                    </div>
+                    <p class="testimonial-content">
+                        "The best decision we made for our daughter. She's grown academically and 
+                        personally. The school's focus on holistic development is amazing!"
+                    </p>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">
+                            <img src="https://randomuser.me/api/portraits/men/2.jpg" alt="Parent">
+                        </div>
+                        <div class="author-info">
+                            <h4>Mr. Okafor</h4>
+                            <p>Parent of JSS 2 Student</p>
+                            <span class="author-role">Parent</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6">
+                <div class="testimonial-card" data-aos="fade-up" data-aos-delay="300">
+                    <div class="testimonial-quote">
+                        <i class="fas fa-quote-right"></i>
+                    </div>
+                    <p class="testimonial-content">
+                        "As an alumnus, I can confidently say this school laid the foundation for 
+                        my success. The values and education I received here are priceless."
+                    </p>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">
+                            <img src="https://randomuser.me/api/portraits/women/3.jpg" alt="Alumni">
+                        </div>
+                        <div class="author-info">
+                            <h4>Dr. Chidinma</h4>
+                            <p>Alumni, Class of 2015</p>
+                            <span class="author-role">Alumni</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Call to Action Section -->
+<section class="py-5" style="background: linear-gradient(135deg, var(--primary-pink), var(--dark-pink)); color: white;" data-aos="fade-up">
+    <div class="container text-center">
+        <h2 class="display-4 mb-4">Ready to Join Us?</h2>
+        <p class="lead mb-4">Take the first step towards quality education and a bright future.</p>
+        <a href="{% url 'admissions:admission_form' %}" class="btn btn-light btn-lg pulse">
+            <i class="fas fa-edit me-2"></i>Apply for Admission
+        </a>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Initialize counters
+    document.addEventListener('DOMContentLoaded', function() {
+        const counters = document.querySelectorAll('.counter');
+        counters.forEach(counter => {
+            const target = parseInt(counter.getAttribute('data-target'));
+            let count = 0;
+            const increment = target / 50; // Divide by number of steps
+            
+            const updateCounter = () => {
+                count += increment;
+                if (count < target) {
+                    counter.innerText = Math.floor(count);
+                    requestAnimationFrame(updateCounter);
+                } else {
+                    counter.innerText = target;
+                }
+            };
+            
+            // Start counter when in viewport
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        updateCounter();
+                        observer.unobserve(entry.target);
+                    }
+                });
+            });
+            
+            observer.observe(counter);
+        });
+    });
+
+    // Parallax effect for hero section
+    window.addEventListener('scroll', () => {
+        const scrolled = window.pageYOffset;
+        const heroImage = document.querySelector('.hero-image img');
+        if (heroImage) {
+            heroImage.style.transform = `translateY(${scrolled * 0.5}px) scale(1.1)`;
+        }
+    });
+
+    // Auto-rotate featured events (optional)
+    let currentEvent = 0;
+    const eventCards = document.querySelectorAll('.event-card');
+    
+    if (eventCards.length > 3) {
+        setInterval(() => {
+            eventCards.forEach(card => card.classList.remove('active'));
+            eventCards[currentEvent].classList.add('active');
+            currentEvent = (currentEvent + 1) % eventCards.length;
+        }, 5000);
+    }
+
+    // Smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    });
+
+    // Newsletter form handling
+    $('#newsletter-form').on('submit', function(e) {
+        e.preventDefault();
+        const email = $(this).find('input[type="email"]').val();
+        
+        if (email) {
+            // Animate button
+            const btn = $(this).find('button');
+            btn.html('<i class="fas fa-spinner fa-spin"></i>');
+            btn.prop('disabled', true);
+            
+            // Simulate AJAX request
+            setTimeout(() => {
+                btn.html('<i class="fas fa-check"></i>');
+                btn.removeClass('btn-primary').addClass('btn-success');
+                
+                // Show success message
+                showNotification('Thank you for subscribing!', 'success');
+                
+                // Reset after 2 seconds
+                setTimeout(() => {
+                    btn.html('<i class="fas fa-paper-plane"></i>');
+                    btn.removeClass('btn-success').addClass('btn-primary');
+                    btn.prop('disabled', false);
+                    $(this).find('input[type="email"]').val('');
+                }, 2000);
+            }, 1500);
+        }
+    });
+
+    // Dynamic year update in footer
+    const yearElement = document.querySelector('.current-year');
+    if (yearElement) {
+        yearElement.textContent = new Date().getFullYear();
+    }
+
+    // Hover effect for action cards
+    document.querySelectorAll('.action-card').forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-15px) scale(1.05)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0) scale(1)';
+        });
+    });
+
+    // Initialize tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+
+    // Add animation to notices when they come into view
+    const noticeObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('animate__animated', 'animate__fadeInRight');
+            }
+        });
+    });
+
+    document.querySelectorAll('.notice-card').forEach(notice => {
+        noticeObserver.observe(notice);
+    });
+
+    // Dynamic color change based on theme
+    document.addEventListener('themeChanged', function(e) {
+        const theme = e.detail.theme;
+        const statsSection = document.querySelector('.stats-section');
+        
+        if (theme === 'dark') {
+            statsSection.style.background = 'linear-gradient(135deg, #b84a7a, #8b3b62)';
+        } else {
+            statsSection.style.background = 'linear-gradient(135deg, var(--primary-pink), var(--dark-pink))';
+        }
+    });
+
+    // Countdown to next event (if any)
+    const nextEventDate = document.getElementById('next-event-date');
+    if (nextEventDate) {
+        const countDownDate = new Date(nextEventDate.dataset.date).getTime();
+        
+        const countdownInterval = setInterval(() => {
+            const now = new Date().getTime();
+            const distance = countDownDate - now;
+            
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+            
+            document.getElementById('countdown-days').textContent = days;
+            document.getElementById('countdown-hours').textContent = hours;
+            document.getElementById('countdown-minutes').textContent = minutes;
+            document.getElementById('countdown-seconds').textContent = seconds;
+            
+            if (distance < 0) {
+                clearInterval(countdownInterval);
+                document.getElementById('countdown-timer').innerHTML = "Event Started!";
+            }
+        }, 1000);
+    }
+</script>
+{% endblock %}

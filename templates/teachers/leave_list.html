@@ -1,0 +1,42 @@
+{% load static %}
+{% extends 'base.html' %}
+
+{% block title %}Leave List{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <h1 class="display-4 text-center mb-4" data-aos="fade-down">Leave List</h1>
+    <div class="row" data-aos="fade-up" data-aos-delay="200">
+        {% for leave in leave_list %}
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm h-100 animate__animated animate__fadeInUp">
+                <div class="card-body">
+                    <h5 class="card-title">{{ leave.type }}</h5>
+                    <p class="card-text"><i class="fas fa-calendar-alt"></i> {{ leave.start_date }} – {{ leave.end_date }}</p>
+                    <p class="card-text">{{ leave.reason|truncatechars:100 }}</p>
+                    <span class="badge {% if leave.status=='Approved' %}bg-success{% elif leave.status=='Pending' %}bg-warning{% else %}bg-danger{% endif %}">
+                        {{ leave.status }}
+                    </span>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center py-5">
+            <p class="lead">No leave requests yet. <a href="{% url 'teachers:leave_create' %}">Apply now</a>.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.card:hover { transform: translateY(-5px) scale(1.02); transition: var(--transition-smooth); }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+AOS.init();
+</script>
+{% endblock %}

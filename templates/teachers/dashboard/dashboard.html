@@ -1,0 +1,1185 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }} | Teacher Dashboard{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Teacher Dashboard Specific Styles */
+    :root {
+        --teacher-primary: #6c5ce7;
+        --teacher-secondary: #a29bfe;
+        --teacher-gradient: linear-gradient(135deg, #6c5ce7, #a29bfe);
+    }
+
+    /* Class Cards */
+    .class-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .class-card {
+        background: var(--card-bg);
+        border-radius: 20px;
+        padding: 1.5rem;
+        box-shadow: var(--shadow);
+        border: var(--border);
+        transition: var(--transition-bounce);
+        position: relative;
+        overflow: hidden;
+        cursor: pointer;
+    }
+
+    .class-card::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200px;
+        height: 200px;
+        background: var(--teacher-gradient);
+        opacity: 0.1;
+        border-radius: 50%;
+        transition: var(--transition-smooth);
+    }
+
+    .class-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 40px rgba(108, 92, 231, 0.3);
+    }
+
+    .class-card:hover::before {
+        transform: scale(1.5);
+    }
+
+    .class-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+    }
+
+    .class-name {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .class-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: var(--teacher-gradient);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: white;
+    }
+
+    .class-details {
+        margin-bottom: 1rem;
+    }
+
+    .class-detail {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--text-secondary);
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+    }
+
+    .class-detail i {
+        color: var(--teacher-primary);
+        width: 20px;
+    }
+
+    .student-count {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem 0;
+        border-top: var(--border);
+        border-bottom: var(--border);
+        margin-bottom: 1rem;
+    }
+
+    .count-number {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--teacher-primary);
+    }
+
+    .count-label {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+    }
+
+    .class-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .class-action {
+        flex: 1;
+        padding: 0.5rem;
+        border-radius: 10px;
+        border: none;
+        background: rgba(108, 92, 231, 0.1);
+        color: var(--teacher-primary);
+        font-weight: 500;
+        transition: var(--transition-smooth);
+        cursor: pointer;
+        text-decoration: none;
+        text-align: center;
+        font-size: 0.9rem;
+    }
+
+    .class-action:hover {
+        background: var(--teacher-gradient);
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    /* Task Cards */
+    .tasks-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .task-card {
+        background: var(--card-bg);
+        border-radius: 20px;
+        padding: 1.5rem;
+        box-shadow: var(--shadow);
+        border: var(--border);
+        border-left: 5px solid;
+        transition: var(--transition-smooth);
+    }
+
+    .task-card.pending {
+        border-left-color: var(--warning);
+    }
+
+    .task-card.urgent {
+        border-left-color: var(--danger);
+    }
+
+    .task-card.completed {
+        border-left-color: var(--success);
+        opacity: 0.7;
+    }
+
+    .task-card:hover {
+        transform: translateX(10px);
+    }
+
+    .task-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+    }
+
+    .task-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .task-badge {
+        padding: 0.2rem 0.6rem;
+        border-radius: 20px;
+        font-size: 0.7rem;
+        font-weight: 600;
+    }
+
+    .task-badge.urgent {
+        background: rgba(214, 48, 49, 0.1);
+        color: var(--danger);
+    }
+
+    .task-badge.pending {
+        background: rgba(253, 203, 110, 0.1);
+        color: var(--warning);
+    }
+
+    .task-details {
+        margin-bottom: 1rem;
+    }
+
+    .task-detail {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--text-secondary);
+        margin-bottom: 0.3rem;
+        font-size: 0.9rem;
+    }
+
+    .task-progress {
+        margin-top: 1rem;
+    }
+
+    .progress-info {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 0.3rem;
+        font-size: 0.8rem;
+    }
+
+    .progress-bar {
+        height: 8px;
+        background: rgba(108, 92, 231, 0.1);
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: var(--teacher-gradient);
+        border-radius: 10px;
+        transition: width 1s ease;
+    }
+
+    /* Schedule Timeline */
+    .schedule-container {
+        background: var(--card-bg);
+        border-radius: 20px;
+        padding: 1.5rem;
+        box-shadow: var(--shadow);
+        border: var(--border);
+        margin-bottom: 2rem;
+    }
+
+    .schedule-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1.5rem;
+    }
+
+    .schedule-date {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .schedule-nav {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .schedule-nav-btn {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        border: none;
+        background: rgba(108, 92, 231, 0.1);
+        color: var(--teacher-primary);
+        cursor: pointer;
+        transition: var(--transition-smooth);
+    }
+
+    .schedule-nav-btn:hover {
+        background: var(--teacher-gradient);
+        color: white;
+        transform: scale(1.1);
+    }
+
+    .timeline {
+        position: relative;
+        padding-left: 100px;
+    }
+
+    .timeline-hour {
+        position: relative;
+        margin-bottom: 1rem;
+    }
+
+    .timeline-time {
+        position: absolute;
+        left: -100px;
+        width: 90px;
+        text-align: right;
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+
+    .timeline-event {
+        background: rgba(108, 92, 231, 0.05);
+        border-radius: 15px;
+        padding: 1rem;
+        margin-left: 1rem;
+        border-left: 3px solid var(--teacher-primary);
+        transition: var(--transition-smooth);
+        cursor: pointer;
+    }
+
+    .timeline-event:hover {
+        transform: translateX(10px);
+        background: rgba(108, 92, 231, 0.1);
+    }
+
+    .timeline-event.current {
+        background: var(--teacher-gradient);
+        color: white;
+    }
+
+    .event-time {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        margin-bottom: 0.3rem;
+    }
+
+    .current .event-time {
+        color: rgba(255, 255, 255, 0.8);
+    }
+
+    .event-title {
+        font-weight: 600;
+        margin-bottom: 0.3rem;
+    }
+
+    .event-subtitle {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+    }
+
+    .current .event-subtitle {
+        color: rgba(255, 255, 255, 0.8);
+    }
+
+    /* Score Entry Grid */
+    .score-entry-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .score-card {
+        background: var(--card-bg);
+        border-radius: 20px;
+        padding: 1.5rem;
+        box-shadow: var(--shadow);
+        border: var(--border);
+    }
+
+    .score-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1.5rem;
+    }
+
+    .score-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .score-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .student-row {
+        display: grid;
+        grid-template-columns: 50px 1fr 150px 100px 100px 50px;
+        align-items: center;
+        padding: 0.8rem;
+        border-radius: 10px;
+        transition: var(--transition-smooth);
+        border-bottom: var(--border);
+    }
+
+    .student-row:hover {
+        background: rgba(108, 92, 231, 0.05);
+        transform: scale(1.01);
+    }
+
+    .student-row.header {
+        background: rgba(108, 92, 231, 0.1);
+        font-weight: 600;
+        color: var(--teacher-primary);
+        border-bottom: none;
+    }
+
+    .student-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        overflow: hidden;
+    }
+
+    .student-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .score-input {
+        width: 80px;
+        padding: 0.3rem 0.5rem;
+        border: var(--border);
+        border-radius: 10px;
+        background: var(--card-bg);
+        color: var(--text-primary);
+        text-align: center;
+        transition: var(--transition-smooth);
+    }
+
+    .score-input:focus {
+        border-color: var(--teacher-primary);
+        box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.2);
+        transform: scale(1.05);
+    }
+
+    .score-input.over-limit {
+        border-color: var(--danger);
+        background: rgba(214, 48, 49, 0.1);
+    }
+
+    /* Attendance Grid */
+    .attendance-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .attendance-student-card {
+        background: var(--card-bg);
+        border-radius: 15px;
+        padding: 1rem;
+        box-shadow: var(--shadow);
+        border: var(--border);
+        transition: var(--transition-smooth);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .attendance-student-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(108, 92, 231, 0.2);
+    }
+
+    .attendance-avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        overflow: hidden;
+    }
+
+    .attendance-info {
+        flex: 1;
+    }
+
+    .attendance-name {
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.2rem;
+    }
+
+    .attendance-meta {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+    }
+
+    .attendance-status {
+        display: flex;
+        gap: 0.3rem;
+    }
+
+    .status-btn {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        border: 2px solid transparent;
+        background: rgba(108, 92, 231, 0.1);
+        color: var(--text-secondary);
+        cursor: pointer;
+        transition: var(--transition-bounce);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .status-btn:hover {
+        transform: scale(1.1);
+    }
+
+    .status-btn.present.active {
+        background: var(--success-gradient);
+        color: white;
+        border-color: var(--success);
+    }
+
+    .status-btn.absent.active {
+        background: var(--danger-gradient);
+        color: white;
+        border-color: var(--danger);
+    }
+
+    .status-btn.late.active {
+        background: var(--warning-gradient);
+        color: white;
+        border-color: var(--warning);
+    }
+
+    /* Assignment Cards */
+    .assignment-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .assignment-card {
+        background: var(--card-bg);
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: var(--shadow);
+        border: var(--border);
+        transition: var(--transition-bounce);
+    }
+
+    .assignment-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 40px rgba(108, 92, 231, 0.3);
+    }
+
+    .assignment-header {
+        padding: 1.5rem;
+        background: var(--teacher-gradient);
+        color: white;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .assignment-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200px;
+        height: 200px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        animation: float 6s ease-in-out infinite;
+    }
+
+    .assignment-type {
+        display: inline-block;
+        padding: 0.3rem 0.8rem;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 20px;
+        font-size: 0.8rem;
+        margin-bottom: 1rem;
+    }
+
+    .assignment-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .assignment-meta {
+        display: flex;
+        gap: 1rem;
+        font-size: 0.9rem;
+        opacity: 0.9;
+    }
+
+    .assignment-body {
+        padding: 1.5rem;
+    }
+
+    .assignment-detail {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--text-secondary);
+        margin-bottom: 0.8rem;
+        font-size: 0.9rem;
+    }
+
+    .assignment-detail i {
+        color: var(--teacher-primary);
+        width: 20px;
+    }
+
+    .assignment-stats {
+        display: flex;
+        justify-content: space-between;
+        padding: 1rem 0;
+        margin: 1rem 0;
+        border-top: var(--border);
+        border-bottom: var(--border);
+    }
+
+    .stat-item {
+        text-align: center;
+    }
+
+    .stat-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--teacher-primary);
+    }
+
+    .stat-label {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+    }
+
+    .assignment-footer {
+        padding: 1rem 1.5rem;
+        background: rgba(108, 92, 231, 0.05);
+        border-top: var(--border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .due-date {
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+    }
+
+    .due-date.urgent {
+        color: var(--danger);
+        animation: pulse 2s infinite;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .student-row {
+            grid-template-columns: 1fr;
+            gap: 0.5rem;
+        }
+        
+        .student-row.header {
+            display: none;
+        }
+        
+        .timeline {
+            padding-left: 70px;
+        }
+        
+        .timeline-time {
+            left: -70px;
+            width: 60px;
+        }
+        
+        .assignment-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="teacher-dashboard">
+    <!-- Welcome Section -->
+    <div class="welcome-section mb-4" data-aos="fade-up">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="display-4 gradient-text">
+                    Welcome back, {{ user.get_full_name }}!
+                </h1>
+                <p class="lead text-secondary">
+                    <i class="fas fa-calendar-alt me-2"></i>
+                    {{ current_date|date:"l, F d, Y" }}
+                </p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <div class="quote-card">
+                    <i class="fas fa-quote-left quote-icon"></i>
+                    <p class="quote-text mb-2">"Education is the most powerful weapon"</p>
+                    <p class="quote-author">- Nelson Mandela</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="stats-grid mb-4">
+        <div class="stat-card" data-aos="fade-up" data-aos-delay="100">
+            <div class="stat-info">
+                <div class="stat-label">My Students</div>
+                <div class="stat-value">{{ total_students }}</div>
+                <div class="stat-change positive">
+                    <i class="fas fa-arrow-up"></i> 5% from last term
+                </div>
+            </div>
+            <div class="stat-icon">
+                <i class="fas fa-users"></i>
+            </div>
+        </div>
+
+        <div class="stat-card" data-aos="fade-up" data-aos-delay="200">
+            <div class="stat-info">
+                <div class="stat-label">Classes Today</div>
+                <div class="stat-value">{{ classes_today }}</div>
+                <div class="stat-change">
+                    <i class="fas fa-clock"></i> Next in 30 min
+                </div>
+            </div>
+            <div class="stat-icon">
+                <i class="fas fa-chalkboard"></i>
+            </div>
+        </div>
+
+        <div class="stat-card" data-aos="fade-up" data-aos-delay="300">
+            <div class="stat-info">
+                <div class="stat-label">Pending Tasks</div>
+                <div class="stat-value">{{ pending_tasks }}</div>
+                <div class="stat-change {% if urgent_tasks > 0 %}negative{% endif %}">
+                    <i class="fas fa-exclamation-triangle"></i> {{ urgent_tasks }} urgent
+                </div>
+            </div>
+            <div class="stat-icon">
+                <i class="fas fa-tasks"></i>
+            </div>
+        </div>
+
+        <div class="stat-card" data-aos="fade-up" data-aos-delay="400">
+            <div class="stat-info">
+                <div class="stat-label">Attendance Today</div>
+                <div class="stat-value">{{ attendance_percentage }}%</div>
+                <div class="stat-change positive">
+                    <i class="fas fa-arrow-up"></i> 2% higher than average
+                </div>
+            </div>
+            <div class="stat-icon">
+                <i class="fas fa-calendar-check"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions-grid mb-4">
+        <a href="#" class="quick-action-card" data-aos="fade-up" data-aos-delay="100">
+            <div class="quick-action-icon">
+                <i class="fas fa-pen"></i>
+            </div>
+            <div class="quick-action-title">Record Scores</div>
+            <div class="quick-action-desc">Enter test/exam scores</div>
+        </a>
+        
+        <a href="#" class="quick-action-card" data-aos="fade-up" data-aos-delay="150">
+            <div class="quick-action-icon">
+                <i class="fas fa-calendar-check"></i>
+            </div>
+            <div class="quick-action-title">Take Attendance</div>
+            <div class="quick-action-desc">Mark today's attendance</div>
+        </a>
+        
+        <a href="#" class="quick-action-card" data-aos="fade-up" data-aos-delay="200">
+            <div class="quick-action-icon">
+                <i class="fas fa-book-open"></i>
+            </div>
+            <div class="quick-action-title">Create Assignment</div>
+            <div class="quick-action-desc">Post new assignment</div>
+        </a>
+        
+        <a href="#" class="quick-action-card" data-aos="fade-up" data-aos-delay="250">
+            <div class="quick-action-icon">
+                <i class="fas fa-chart-line"></i>
+            </div>
+            <div class="quick-action-title">Generate Report</div>
+            <div class="quick-action-desc">Class performance report</div>
+        </a>
+        
+        <a href="#" class="quick-action-card" data-aos="fade-up" data-aos-delay="300">
+            <div class="quick-action-icon">
+                <i class="fas fa-file-pdf"></i>
+            </div>
+            <div class="quick-action-title">Report Cards</div>
+            <div class="quick-action-desc">Generate report cards</div>
+        </a>
+        
+        <a href="#" class="quick-action-card" data-aos="fade-up" data-aos-delay="350">
+            <div class="quick-action-icon">
+                <i class="fas fa-bell"></i>
+            </div>
+            <div class="quick-action-title">Send Notice</div>
+            <div class="quick-action-desc">Class announcements</div>
+        </a>
+    </div>
+
+    <div class="row">
+        <!-- My Classes Section -->
+        <div class="col-lg-8">
+            <div class="section-header mb-3">
+                <h3 class="section-title">My Classes</h3>
+                <a href="#" class="view-all">View All <i class="fas fa-arrow-right"></i></a>
+            </div>
+            
+            <div class="class-grid">
+                {% for class in classes_taught %}
+                    <div class="class-card" data-aos="fade-up" data-aos-delay="{{ forloop.counter|add:'100' }}">
+                        <div class="class-header">
+                            <span class="class-name">{{ class.name }}</span>
+                            <div class="class-icon">
+                                <i class="fas fa-{% if 'Primary' in class.name %}child{% else %}user-graduate{% endif %}"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="class-details">
+                            <div class="class-detail">
+                                <i class="fas fa-users"></i>
+                                <span>{{ class.student_count }} Students</span>
+                            </div>
+                            <div class="class-detail">
+                                <i class="fas fa-book-open"></i>
+                                <span>{{ class.subjects_count }} Subjects</span>
+                            </div>
+                            <div class="class-detail">
+                                <i class="fas fa-clock"></i>
+                                <span>Next: {{ class.next_class|time:"g:i A" }}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="student-count">
+                            <div class="count-number">{{ class.present_count }}</div>
+                            <div class="count-label">Present Today</div>
+                            <div class="count-number">{{ class.absent_count }}</div>
+                            <div class="count-label">Absent</div>
+                        </div>
+                        
+                        <div class="class-actions">
+                            <a href="#" class="class-action">
+                                <i class="fas fa-pen me-1"></i>Scores
+                            </a>
+                            <a href="#" class="class-action">
+                                <i class="fas fa-calendar-check me-1"></i>Attendance
+                            </a>
+                            <a href="#" class="class-action">
+                                <i class="fas fa-users me-1"></i>Students
+                            </a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <!-- Today's Schedule -->
+            <div class="schedule-container" data-aos="fade-up">
+                <div class="schedule-header">
+                    <div class="schedule-date">
+                        <i class="fas fa-calendar-day me-2"></i>
+                        Today's Schedule
+                    </div>
+                    <div class="schedule-nav">
+                        <button class="schedule-nav-btn" onclick="changeDay(-1)">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <button class="schedule-nav-btn" onclick="changeDay(1)">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="timeline" id="timeline">
+                    {% for period in schedule %}
+                        <div class="timeline-hour">
+                            <div class="timeline-time">{{ period.start_time|time:"g:i A" }}</div>
+                            <div class="timeline-event {% if period.is_current %}current{% endif %}">
+                                <div class="event-time">{{ period.start_time|time:"g:i A" }} - {{ period.end_time|time:"g:i A" }}</div>
+                                <div class="event-title">{{ period.subject }}</div>
+                                <div class="event-subtitle">{{ period.class_name }} • Room {{ period.room }}</div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column -->
+        <div class="col-lg-4">
+            <!-- Pending Tasks -->
+            <div class="tasks-grid" data-aos="fade-up">
+                <div class="section-header mb-3">
+                    <h3 class="section-title">Pending Tasks</h3>
+                    <span class="task-count">{{ pending_tasks }} tasks</span>
+                </div>
+                
+                {% for task in pending_tasks_list %}
+                    <div class="task-card {{ task.priority }}" data-aos="fade-up" data-aos-delay="{{ forloop.counter|add:'100' }}">
+                        <div class="task-header">
+                            <span class="task-title">{{ task.title }}</span>
+                            <span class="task-badge {{ task.priority }}">{{ task.priority|upper }}</span>
+                        </div>
+                        
+                        <div class="task-details">
+                            <div class="task-detail">
+                                <i class="fas fa-layer-group"></i>
+                                <span>{{ task.class_name }}</span>
+                            </div>
+                            <div class="task-detail">
+                                <i class="fas fa-clock"></i>
+                                <span>Due: {{ task.due_date|date:"M d, Y" }}</span>
+                            </div>
+                            <div class="task-detail">
+                                <i class="fas fa-check-circle"></i>
+                                <span>{{ task.completed_count }}/{{ task.total_count }} done</span>
+                            </div>
+                        </div>
+                        
+                        <div class="task-progress">
+                            <div class="progress-info">
+                                <span>Progress</span>
+                                <span>{{ task.progress }}%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: {{ task.progress }}%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-3">
+                            <button class="btn btn-primary btn-sm w-100" onclick="markTaskComplete({{ task.id }})">
+                                <i class="fas fa-check me-2"></i>Mark Complete
+                            </button>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="card" data-aos="fade-up">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-history me-2"></i>
+                        Recent Activity
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        {% for activity in recent_activities %}
+                            <div class="list-group-item d-flex align-items-center gap-3">
+                                <div class="activity-icon">
+                                    <i class="fas fa-{{ activity.icon }}"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <p class="mb-1">{{ activity.description }}</p>
+                                    <small class="text-secondary">
+                                        <i class="fas fa-clock me-1"></i>
+                                        {{ activity.created_at|timesince }} ago
+                                    </small>
+                                </div>
+                                {% if not activity.read %}
+                                    <span class="badge bg-primary">New</span>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="card-footer text-center">
+                    <a href="#" class="text-pink">View All Activity</a>
+                </div>
+            </div>
+
+            <!-- Quick Stats -->
+            <div class="card mt-4" data-aos="fade-up">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-chart-pie me-2"></i>
+                        Quick Stats
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Average Score</span>
+                            <span class="fw-bold">{{ class_average }}%</span>
+                        </div>
+                        <div class="progress" style="height: 10px;">
+                            <div class="progress-bar bg-success" style="width: {{ class_average }}%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Pass Rate</span>
+                            <span class="fw-bold">{{ pass_rate }}%</span>
+                        </div>
+                        <div class="progress" style="height: 10px;">
+                            <div class="progress-bar bg-info" style="width: {{ pass_rate }}%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Assignment Completion</span>
+                            <span class="fw-bold">{{ assignment_completion }}%</span>
+                        </div>
+                        <div class="progress" style="height: 10px;">
+                            <div class="progress-bar bg-warning" style="width: {{ assignment_completion }}%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Score Entry Modal -->
+<div class="modal fade dashboard-modal" id="scoreEntryModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Bulk Score Entry</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Select Class</label>
+                    <select class="form-control" id="scoreClass">
+                        <option>Primary 5A</option>
+                        <option>JSS 1B</option>
+                        <option>SS 2C</option>
+                    </select>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Select Subject</label>
+                    <select class="form-control" id="scoreSubject">
+                        <option>Mathematics</option>
+                        <option>English</option>
+                        <option>Science</option>
+                    </select>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Assessment Type</label>
+                    <select class="form-control" id="scoreAssessment">
+                        <option>Test 1</option>
+                        <option>Test 2</option>
+                        <option>Exam</option>
+                    </select>
+                </div>
+                
+                <div class="score-entry-grid">
+                    <div class="score-card">
+                        <div class="student-row header">
+                            <div></div>
+                            <div>Student Name</div>
+                            <div>Admission No.</div>
+                            <div>Score</div>
+                            <div>Grade</div>
+                            <div></div>
+                        </div>
+                        
+                        {% for student in class_students %}
+                            <div class="student-row">
+                                <div class="student-avatar">
+                                    <img src="https://ui-avatars.com/api/?name={{ student.name|urlencode }}&background=6c5ce7&color=fff&size=40" alt="{{ student.name }}">
+                                </div>
+                                <div>{{ student.name }}</div>
+                                <div>{{ student.admission_number }}</div>
+                                <div>
+                                    <input type="number" class="score-input" min="0" max="100" value="{{ student.score }}" onchange="calculateGrade(this)">
+                                </div>
+                                <div class="grade-display">{{ student.grade }}</div>
+                                <div>
+                                    <button class="action-btn" onclick="saveStudentScore({{ student.id }})">
+                                        <i class="fas fa-save"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="saveAllScores()">
+                    <i class="fas fa-save me-2"></i>Save All Scores
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Teacher Dashboard Specific JavaScript
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize schedule timeline
+        initScheduleTimeline();
+        
+        // Auto-refresh tasks every minute
+        setInterval(refreshTasks, 60000);
+        
+        // Real-time attendance tracking
+        initAttendanceTracking();
+    });
+
+    function initScheduleTimeline() {
+        const timeline = document.getElementById('timeline');
+        if (timeline) {
+            // Scroll to current class
+            const currentEvent = timeline.querySelector('.timeline-event.current');
+            if (currentEvent) {
+                currentEvent.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+            
+            // Add click handlers
+            document.querySelectorAll('.timeline-event').forEach(event => {
+                event.addEventListener('click', function() {
+                    showEventDetails(this.dataset.eventId);
+                });
+            });
+        }
+    }
+
+    function changeDay(direction) {
+        // Change schedule day (simulated)
+        showNotification('Loading schedule for ' + (direction > 0 ? 'tomorrow' : 'yesterday'), 'info');
+    }
+
+    function markTaskComplete(taskId) {
+        const taskCard = event.target.closest('.task-card');
+        taskCard.style.transform = 'scale(0.95)';
+        taskCard.style.opacity = '0.5';
+        
+        // Simulate API call
+        setTimeout(() => {
+            taskCard.style.transition = 'all 0.5s ease';
+            taskCard.style.opacity = '0';
+            setTimeout(() => {
+                taskCard.remove();
+                showNotification('Task marked as complete!', 'success');
+                updateTaskCount();
+            }, 500);
+        }, 1000);
+    }
+
+    function refreshTasks() {
+        // Refresh pending tasks (simulated)
+        console.log('Refreshing tasks...');
+    }
+
+    function initAttendanceTracking() {
+        document.querySelectorAll('.status-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const studentCard = this.closest('.attendance-student-card');
+                const statusBtns = studentCard.querySelectorAll('.status-btn');
+                
+                // Remove active class from all buttons in this card
+                statusBtns.forEach(b => b.classList.remove('active'));`
+}]}]}

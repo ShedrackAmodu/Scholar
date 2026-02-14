@@ -1,0 +1,577 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Director Dashboard{% endblock %}
+
+{% block extra_css %}
+<style>
+    .director-dashboard {
+        padding: 120px 0 80px;
+        min-height: 100vh;
+        background: var(--bg-gradient);
+    }
+
+    .welcome-banner {
+        background: linear-gradient(135deg, var(--primary-pink), var(--dark-pink));
+        border-radius: 30px;
+        padding: 40px;
+        margin-bottom: 40px;
+        color: white;
+        position: relative;
+        overflow: hidden;
+        animation: slideInDown 0.8s ease;
+    }
+
+    @keyframes slideInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-50px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .welcome-banner::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 400px;
+        height: 400px;
+        background: rgba(255,255,255,0.1);
+        border-radius: 50%;
+        animation: float 10s ease-in-out infinite;
+    }
+
+    .welcome-banner::after {
+        content: '';
+        position: absolute;
+        bottom: -50%;
+        left: -10%;
+        width: 500px;
+        height: 500px;
+        background: rgba(255,255,255,0.1);
+        border-radius: 50%;
+        animation: float 15s ease-in-out infinite reverse;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translate(0, 0) rotate(0deg); }
+        25% { transform: translate(30px, 30px) rotate(5deg); }
+        50% { transform: translate(-20px, 50px) rotate(-5deg); }
+        75% { transform: translate(40px, -20px) rotate(3deg); }
+    }
+
+    .welcome-content {
+        position: relative;
+        z-index: 2;
+    }
+
+    .welcome-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+        font-family: 'Playfair Display', serif;
+    }
+
+    .welcome-subtitle {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        margin-bottom: 20px;
+    }
+
+    .quick-stats {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 25px;
+        margin-bottom: 40px;
+    }
+
+    .stat-card {
+        background: var(--card-bg);
+        border-radius: 20px;
+        padding: 25px;
+        box-shadow: var(--shadow);
+        border: var(--border);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        animation: fadeInUp 0.8s ease;
+    }
+
+    .stat-card:nth-child(1) { animation-delay: 0.1s; }
+    .stat-card:nth-child(2) { animation-delay: 0.2s; }
+    .stat-card:nth-child(3) { animation-delay: 0.3s; }
+    .stat-card:nth-child(4) { animation-delay: 0.4s; }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .stat-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 40px rgba(123, 44, 191, 0.2);
+    }
+
+    .stat-icon {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, var(--primary-pink), var(--dark-pink));
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 20px;
+        color: white;
+        font-size: 1.8rem;
+        transition: all 0.3s ease;
+    }
+
+    .stat-card:hover .stat-icon {
+        transform: scale(1.1) rotate(5deg);
+    }
+
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 5px;
+    }
+
+    .stat-label {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 25px;
+        margin-bottom: 40px;
+    }
+
+    .dashboard-card {
+        background: var(--card-bg);
+        border-radius: 20px;
+        padding: 25px;
+        box-shadow: var(--shadow);
+        border: var(--border);
+        transition: all 0.3s ease;
+        animation: fadeIn 0.8s ease 0.5s both;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    .card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: var(--border);
+    }
+
+    .card-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .card-title i {
+        color: var(--primary-pink);
+    }
+
+    .view-all {
+        color: var(--primary-pink);
+        text-decoration: none;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+    }
+
+    .view-all:hover {
+        color: var(--dark-pink);
+        transform: translateX(5px);
+    }
+
+    .chart-container {
+        height: 300px;
+        position: relative;
+    }
+
+    .financial-summary {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 15px;
+        margin-top: 20px;
+    }
+
+    .finance-item {
+        text-align: center;
+        padding: 15px;
+        background: rgba(123, 44, 191, 0.05);
+        border-radius: 15px;
+    }
+
+    .finance-value {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: var(--primary-pink);
+        line-height: 1;
+    }
+
+    .finance-label {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        margin-top: 5px;
+    }
+
+    .goal-list {
+        max-height: 300px;
+        overflow-y: auto;
+        padding-right: 10px;
+    }
+
+    .goal-item {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        padding: 15px;
+        border-radius: 15px;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        border: var(--border);
+        margin-bottom: 10px;
+    }
+
+    .goal-item:hover {
+        background: rgba(123, 44, 191, 0.05);
+        transform: translateX(5px);
+    }
+
+    .goal-info {
+        flex: 1;
+    }
+
+    .goal-title {
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 5px;
+    }
+
+    .goal-status {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+    }
+
+    .quick-actions {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: 15px;
+        margin-top: 40px;
+    }
+
+    .quick-action-item {
+        background: var(--card-bg);
+        border-radius: 15px;
+        padding: 20px;
+        text-align: center;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        border: var(--border);
+    }
+
+    .quick-action-item:hover {
+        background: linear-gradient(135deg, var(--primary-pink), var(--dark-pink));
+        transform: translateY(-5px);
+    }
+
+    .quick-actions .quick-icon {
+        font-size: 2rem;
+        color: var(--primary-pink);
+        margin-bottom: 10px;
+        transition: all 0.3s ease;
+    }
+
+    .quick-actions .quick-label {
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: var(--text-primary);
+        transition: all 0.3s ease;
+    }
+
+    @media (max-width: 1200px) {
+        .quick-stats {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (max-width: 992px) {
+        .dashboard-grid {
+            grid-template-columns: 1fr;
+        }
+        .welcome-title {
+            font-size: 2rem;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .quick-stats {
+            grid-template-columns: 1fr;
+        }
+        .financial-summary {
+            grid-template-columns: 1fr;
+        }
+        .quick-actions {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="director-dashboard">
+    <div class="container">
+        <!-- Welcome Banner -->
+        <div class="welcome-banner">
+            <div class="welcome-content">
+                <div class="row align-items-center">
+                    <div class="col-lg-8">
+                        <h1 class="welcome-title">
+                            Welcome back, Director {{ request.user.get_full_name }}!
+                        </h1>
+                        <p class="welcome-subtitle">
+                            Oversee strategy, finance, and institutional growth.
+                        </p>
+                        <div class="student-info">
+                            <span class="student-info-item">
+                                <i class="fas fa-calendar-alt"></i>
+                                Term 1, 2024
+                            </span>
+                            <span class="student-info-item">
+                                <i class="fas fa-clock"></i>
+                                Last updated: {{ school.last_updated|timesince }} ago
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 text-end d-none d-lg-block">
+                        <i class="fas fa-user-tie" style="font-size: 150px; opacity: 0.2;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="quick-stats">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="stat-value">78%</div>
+                <div class="stat-label">Growth Rate</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-dollar-sign"></i>
+                </div>
+                <div class="stat-value">$1.2M</div>
+                <div class="stat-label">Annual Budget</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-value">{{ total_students }}</div>
+                <div class="stat-label">Total Students</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-graduation-cap"></i>
+                </div>
+                <div class="stat-value">{{ total_graduates }}</div>
+                <div class="stat-label">Graduates</div>
+            </div>
+        </div>
+
+        <!-- Dashboard Grid -->
+        <div class="dashboard-grid">
+            <!-- Financial Chart -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-chart-pie"></i>
+                        Financial Overview
+                    </h3>
+                    <select class="form-select" style="width: auto;" id="finance-period">
+                        <option value="year">This Year</option>
+                        <option value="quarter">This Quarter</option>
+                        <option value="all">All Time</option>
+                    </select>
+                </div>
+                
+                <div class="chart-container">
+                    <canvas id="financeChart"></canvas>
+                </div>
+                
+                <div class="financial-summary">
+                    <div class="finance-item">
+                        <div class="finance-value">$450k</div>
+                        <div class="finance-label">Revenue</div>
+                    </div>
+                    <div class="finance-item">
+                        <div class="finance-value">$300k</div>
+                        <div class="finance-label">Expenses</div>
+                    </div>
+                    <div class="finance-item">
+                        <div class="finance-value">$150k</div>
+                        <div class="finance-label">Surplus</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Strategic Goals -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-bullseye"></i>
+                        Strategic Goals
+                    </h3>
+                    <a href="#" class="view-all">View All <i class="fas fa-arrow-right"></i></a>
+                </div>
+                
+                <div class="goal-list">
+                    <div class="goal-item">
+                        <div class="goal-info">
+                            <div class="goal-title">Increase Enrollment by 15%</div>
+                            <div class="goal-status">In Progress</div>
+                        </div>
+                    </div>
+                    <div class="goal-item">
+                        <div class="goal-info">
+                            <div class="goal-title">Launch New Science Wing</div>
+                            <div class="goal-status">Planning</div>
+                        </div>
+                    </div>
+                    <div class="goal-item">
+                        <div class="goal-info">
+                            <div class="goal-title">Professional Development for Teachers</div>
+                            <div class="goal-status">Completed</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+            <div class="quick-action-item" onclick="location.href='{% url 'finance:overview' %}'">
+                <div class="quick-icon">
+                    <i class="fas fa-dollar-sign"></i>
+                </div>
+                <div class="quick-label">View Financials</div>
+            </div>
+            
+            <div class="quick-action-item" onclick="location.href='{% url 'strategy:goals' %}'">
+                <div class="quick-icon">
+                    <i class="fas fa-bullseye"></i>
+                </div>
+                <div class="quick-label">Manage Goals</div>
+            </div>
+            
+            <div class="quick-action-item" onclick="location.href='{% url 'reports:executive' %}'">
+                <div class="quick-icon">
+                    <i class="fas fa-file-alt"></i>
+                </div>
+                <div class="quick-label">Executive Reports</div>
+            </div>
+            
+            <div class="quick-action-item" onclick="location.href='{% url 'meetings:executive' %}'">
+                <div class="quick-icon">
+                    <i class="fas fa-handshake"></i>
+                </div>
+                <div class="quick-label">Board Meetings</div>
+            </div>
+            
+            <div class="quick-action-item" onclick="location.href='{% url 'facilities:maintenance' %}'">
+                <div class="quick-icon">
+                    <i class="fas fa-tools"></i>
+                </div>
+                <div class="quick-label">Facilities</div>
+            </div>
+            
+            <div class="quick-action-item" onclick="location.href='{% url 'announcements:create' %}'">
+                <div class="quick-icon">
+                    <i class="fas fa-bullhorn"></i>
+                </div>
+                <div class="quick-label">Send Announcement</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Finance Chart
+        const ctx = document.getElementById('financeChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Q1', 'Q2', 'Q3', 'Q4'],
+                datasets: [{
+                    label: 'Revenue',
+                    data: [120000, 140000, 130000, 150000],
+                    backgroundColor: '#7B2CBF'
+                }, {
+                    label: 'Expenses',
+                    data: [90000, 95000, 92000, 100000],
+                    backgroundColor: '#00b894'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(123, 44, 191, 0.1)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+
+        // Period selector
+        document.getElementById('finance-period').addEventListener('change', function() {
+            showNotification('Financial data updated for ' + this.value, 'info');
+        });
+    });
+</script>
+{% endblock %}

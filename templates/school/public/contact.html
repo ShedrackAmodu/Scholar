@@ -1,0 +1,1107 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Contact Us - {{ block.super }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Contact Page Specific Styles */
+    .contact-hero {
+        position: relative;
+        min-height: 400px;
+        background: linear-gradient(135deg, rgba(255, 105, 180, 0.9), rgba(255, 20, 147, 0.9)), url('https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        text-align: center;
+        margin-top: -76px;
+        padding-top: 76px;
+    }
+
+    .contact-hero h1 {
+        font-size: 3.5rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        animation: fadeInUp 1s ease;
+    }
+
+    .contact-hero p {
+        font-size: 1.2rem;
+        max-width: 700px;
+        margin: 0 auto;
+        opacity: 0.9;
+        animation: fadeInUp 1s ease 0.2s both;
+    }
+
+    /* Contact Info Cards */
+    .contact-info-section {
+        padding: 80px 0;
+        position: relative;
+    }
+
+    .info-card {
+        background: var(--card-bg);
+        border-radius: 20px;
+        padding: 40px 30px;
+        text-align: center;
+        box-shadow: var(--shadow);
+        transition: var(--transition-bounce);
+        height: 100%;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        border: var(--border);
+    }
+
+    .info-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, var(--primary-pink), var(--dark-pink));
+        opacity: 0;
+        transition: var(--transition-smooth);
+        z-index: 1;
+    }
+
+    .info-card:hover::before {
+        opacity: 0.1;
+    }
+
+    .info-card:hover {
+        transform: translateY(-15px);
+        box-shadow: 0 20px 40px rgba(255, 105, 180, 0.3);
+    }
+
+    .info-icon {
+        width: 100px;
+        height: 100px;
+        line-height: 100px;
+        text-align: center;
+        background: linear-gradient(135deg, var(--primary-pink), var(--dark-pink));
+        color: white;
+        font-size: 2.5rem;
+        border-radius: 50%;
+        margin: 0 auto 25px;
+        box-shadow: 0 10px 20px rgba(255, 105, 180, 0.3);
+        transition: var(--transition-bounce);
+        position: relative;
+        z-index: 2;
+    }
+
+    .info-card:hover .info-icon {
+        transform: scale(1.1) rotateY(180deg);
+        background: linear-gradient(135deg, var(--dark-pink), var(--primary-pink));
+    }
+
+    .info-card h3 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 15px;
+        color: var(--text-primary);
+        position: relative;
+        z-index: 2;
+    }
+
+    .info-card p {
+        color: var(--text-secondary);
+        margin-bottom: 10px;
+        line-height: 1.8;
+        position: relative;
+        z-index: 2;
+    }
+
+    .info-card .contact-link {
+        color: var(--primary-pink);
+        text-decoration: none;
+        font-weight: 500;
+        transition: var(--transition-smooth);
+        position: relative;
+        z-index: 2;
+        display: inline-block;
+        margin-top: 15px;
+    }
+
+    .info-card .contact-link:hover {
+        color: var(--dark-pink);
+        transform: translateX(5px);
+    }
+
+    /* Contact Form Section */
+    .contact-form-section {
+        padding: 60px 0;
+        background: linear-gradient(135deg, rgba(255, 105, 180, 0.05), rgba(255, 182, 193, 0.05));
+        position: relative;
+        overflow: hidden;
+    }
+
+    .contact-form-section::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255, 105, 180, 0.1) 0%, transparent 50%);
+        animation: rotate 30s linear infinite;
+    }
+
+    .contact-form-wrapper {
+        background: var(--card-bg);
+        border-radius: 30px;
+        padding: 50px;
+        box-shadow: var(--shadow);
+        position: relative;
+        z-index: 2;
+        backdrop-filter: blur(10px);
+        border: var(--border);
+    }
+
+    .form-title {
+        text-align: center;
+        margin-bottom: 40px;
+    }
+
+    .form-title h2 {
+        font-family: 'Playfair Display', serif;
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 15px;
+        position: relative;
+        display: inline-block;
+    }
+
+    .form-title h2::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 80px;
+        height: 3px;
+        background: linear-gradient(135deg, var(--primary-pink), var(--dark-pink));
+        border-radius: 3px;
+    }
+
+    .form-title p {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+    }
+
+    .contact-form .form-group {
+        margin-bottom: 25px;
+        position: relative;
+    }
+
+    .contact-form .form-control {
+        height: 60px;
+        border-radius: 15px;
+        border: 2px solid transparent;
+        background: rgba(255, 255, 255, 0.1);
+        padding: 0 20px;
+        font-size: 1rem;
+        transition: var(--transition-smooth);
+        color: var(--text-primary);
+    }
+
+    .contact-form .form-control:focus {
+        border-color: var(--primary-pink);
+        box-shadow: 0 0 0 4px rgba(255, 105, 180, 0.1);
+        transform: translateY(-2px);
+    }
+
+    .contact-form textarea.form-control {
+        height: 150px;
+        padding: 15px 20px;
+        resize: vertical;
+    }
+
+    .contact-form .form-label {
+        position: absolute;
+        left: 20px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: var(--card-bg);
+        padding: 0 5px;
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+        transition: var(--transition-smooth);
+        pointer-events: none;
+    }
+
+    .contact-form textarea ~ .form-label {
+        top: 30px;
+        transform: none;
+    }
+
+    .contact-form .form-control:focus ~ .form-label,
+    .contact-form .form-control:not(:placeholder-shown) ~ .form-label {
+        top: 0;
+        font-size: 0.85rem;
+        color: var(--primary-pink);
+    }
+
+    .contact-form .submit-btn {
+        width: 100%;
+        height: 60px;
+        border-radius: 15px;
+        background: linear-gradient(135deg, var(--primary-pink), var(--dark-pink));
+        color: white;
+        font-size: 1.1rem;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        transition: var(--transition-bounce);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .contact-form .submit-btn::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.3);
+        transform: translate(-50%, -50%);
+        transition: width 0.6s, height 0.6s;
+    }
+
+    .contact-form .submit-btn:hover::before {
+        width: 300px;
+        height: 300px;
+    }
+
+    .contact-form .submit-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(255, 105, 180, 0.4);
+    }
+
+    .contact-form .submit-btn:active {
+        transform: translateY(-1px);
+    }
+
+    .contact-form .submit-btn i {
+        margin-left: 10px;
+        transition: var(--transition-smooth);
+    }
+
+    .contact-form .submit-btn:hover i {
+        transform: translateX(5px);
+    }
+
+    /* Map Section */
+    .map-section {
+        padding: 60px 0;
+        position: relative;
+    }
+
+    .map-container {
+        border-radius: 30px;
+        overflow: hidden;
+        box-shadow: var(--shadow);
+        height: 450px;
+        position: relative;
+    }
+
+    .map-container iframe {
+        width: 100%;
+        height: 100%;
+        border: 0;
+    }
+
+    .map-overlay {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        background: var(--card-bg);
+        padding: 20px 30px;
+        border-radius: 15px;
+        box-shadow: var(--shadow);
+        backdrop-filter: blur(10px);
+        border: var(--border);
+        animation: slideInLeft 1s ease;
+    }
+
+    .map-overlay h4 {
+        color: var(--text-primary);
+        font-size: 1.2rem;
+        margin-bottom: 10px;
+    }
+
+    .map-overlay p {
+        color: var(--text-secondary);
+        margin-bottom: 5px;
+        font-size: 0.95rem;
+    }
+
+    .map-overlay i {
+        color: var(--primary-pink);
+        width: 20px;
+        margin-right: 10px;
+    }
+
+    /* Business Hours */
+    .hours-card {
+        background: var(--card-bg);
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: var(--shadow);
+        height: 100%;
+        backdrop-filter: blur(10px);
+        border: var(--border);
+    }
+
+    .hours-card h3 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 25px;
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .hours-card h3 i {
+        color: var(--primary-pink);
+        font-size: 2rem;
+    }
+
+    .hours-list {
+        list-style: none;
+        padding: 0;
+    }
+
+    .hours-list li {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 15px 0;
+        border-bottom: var(--border);
+    }
+
+    .hours-list li:last-child {
+        border-bottom: none;
+    }
+
+    .hours-list .day {
+        font-weight: 500;
+        color: var(--text-primary);
+    }
+
+    .hours-list .time {
+        color: var(--primary-pink);
+        font-weight: 600;
+    }
+
+    .hours-list .closed {
+        color: var(--danger);
+        font-weight: 600;
+    }
+
+    .special-note {
+        margin-top: 25px;
+        padding: 15px;
+        background: rgba(255, 105, 180, 0.1);
+        border-radius: 10px;
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+        border-left: 4px solid var(--primary-pink);
+    }
+
+    /* FAQ Section */
+    .faq-section {
+        padding: 60px 0;
+    }
+
+    .faq-item {
+        background: var(--card-bg);
+        border-radius: 15px;
+        margin-bottom: 20px;
+        box-shadow: var(--shadow);
+        overflow: hidden;
+        transition: var(--transition-smooth);
+    }
+
+    .faq-item:hover {
+        transform: translateX(10px);
+        box-shadow: 0 10px 30px rgba(255, 105, 180, 0.2);
+    }
+
+    .faq-question {
+        padding: 20px 25px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-weight: 600;
+        color: var(--text-primary);
+        transition: var(--transition-smooth);
+    }
+
+    .faq-question i {
+        color: var(--primary-pink);
+        transition: var(--transition-smooth);
+    }
+
+    .faq-question.active {
+        background: linear-gradient(135deg, var(--primary-pink), var(--dark-pink));
+        color: white;
+    }
+
+    .faq-question.active i {
+        color: white;
+        transform: rotate(180deg);
+    }
+
+    .faq-answer {
+        padding: 0 25px;
+        max-height: 0;
+        overflow: hidden;
+        transition: var(--transition-smooth);
+        color: var(--text-secondary);
+        line-height: 1.8;
+    }
+
+    .faq-answer.show {
+        padding: 20px 25px;
+        max-height: 500px;
+    }
+
+    /* Social Media Links */
+    .social-section {
+        padding: 40px 0;
+        text-align: center;
+    }
+
+    .social-links-large {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+
+    .social-link-large {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--primary-pink), var(--dark-pink));
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        text-decoration: none;
+        transition: var(--transition-bounce);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .social-link-large::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.3);
+        transform: translate(-50%, -50%);
+        transition: width 0.4s, height 0.4s;
+    }
+
+    .social-link-large:hover::before {
+        width: 100px;
+        height: 100px;
+    }
+
+    .social-link-large:hover {
+        transform: translateY(-5px) rotate(360deg);
+        box-shadow: 0 10px 25px rgba(255, 105, 180, 0.4);
+    }
+
+    /* Success Modal */
+    .success-modal .modal-content {
+        background: var(--card-bg);
+        border-radius: 30px;
+        border: var(--border);
+        backdrop-filter: blur(10px);
+    }
+
+    .success-modal .modal-body {
+        padding: 50px;
+        text-align: center;
+    }
+
+    .success-icon {
+        width: 100px;
+        height: 100px;
+        line-height: 100px;
+        text-align: center;
+        background: linear-gradient(135deg, #00b894, #00cec9);
+        color: white;
+        font-size: 3rem;
+        border-radius: 50%;
+        margin: 0 auto 30px;
+        animation: pulse 2s infinite;
+    }
+
+    .success-modal h3 {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 15px;
+    }
+
+    .success-modal p {
+        color: var(--text-secondary);
+        margin-bottom: 30px;
+        font-size: 1.1rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .contact-hero h1 {
+            font-size: 2.5rem;
+        }
+
+        .contact-form-wrapper {
+            padding: 30px 20px;
+        }
+
+        .form-title h2 {
+            font-size: 2rem;
+        }
+
+        .map-container {
+            height: 350px;
+        }
+
+        .map-overlay {
+            position: relative;
+            top: 0;
+            left: 0;
+            margin-top: 20px;
+        }
+
+        .info-card {
+            margin-bottom: 20px;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .contact-hero h1 {
+            font-size: 2rem;
+        }
+
+        .contact-hero p {
+            font-size: 1rem;
+        }
+
+        .form-title h2 {
+            font-size: 1.8rem;
+        }
+
+        .hours-card {
+            margin-top: 20px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="contact-hero">
+    <div class="container">
+        <h1 class="animate__animated animate__fadeInUp">Get in Touch</h1>
+        <p class="animate__animated animate__fadeInUp animate__delay-1s">
+            We'd love to hear from you! Whether you have a question about admissions, academics, or anything else, our team is ready to answer all your questions.
+        </p>
+    </div>
+</section>
+
+<!-- Contact Info Cards -->
+<section class="contact-info-section">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
+                <div class="info-card">
+                    <div class="info-icon">
+                        <i class="fas fa-map-marker-alt"></i>
+                    </div>
+                    <h3>Visit Us</h3>
+                    <p>
+                        {% if school %}
+                            {{ school.address }}
+                        {% else %}
+                            123 Education Avenue, Lagos, Nigeria
+                        {% endif %}
+                    </p>
+                    <a href="#map" class="contact-link">
+                        Get Directions <i class="fas fa-arrow-right ms-2"></i>
+                    </a>
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
+                <div class="info-card">
+                    <div class="info-icon">
+                        <i class="fas fa-phone-alt"></i>
+                    </div>
+                    <h3>Call Us</h3>
+                    <p>
+                        {% if school %}
+                            {{ school.phone }}
+                        {% else %}
+                            +234 800 000 0000
+                        {% endif %}
+                    </p>
+                    <p class="text-secondary">Monday - Friday, 8:00 AM - 3:00 PM</p>
+                    <a href="tel:{% if school %}{{ school.phone }}{% else %}+2348000000000{% endif %}" class="contact-link">
+                        Call Now <i class="fas fa-phone ms-2"></i>
+                    </a>
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
+                <div class="info-card">
+                    <div class="info-icon">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <h3>Email Us</h3>
+                    <p>
+                        {% if school %}
+                            {{ school.email }}
+                        {% else %}
+                            info@school.edu.ng
+                        {% endif %}
+                    </p>
+                    <p class="text-secondary">We reply within 24 hours</p>
+                    <a href="mailto:{% if school %}{{ school.email }}{% else %}info@school.edu.ng{% endif %}" class="contact-link">
+                        Send Email <i class="fas fa-paper-plane ms-2"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Contact Form & Hours Section -->
+<section class="contact-form-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="contact-form-wrapper" data-aos="fade-right">
+                    <div class="form-title">
+                        <h2>Send us a Message</h2>
+                        <p>We'll get back to you as soon as possible</p>
+                    </div>
+
+                    <form class="contact-form" id="contactForm" method="post" action="{% url 'school:contact' %}">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <input type="text" class="form-control" id="firstName" name="first_name" placeholder=" " required>
+                                    <label class="form-label" for="firstName">First Name</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <input type="text" class="form-control" id="lastName" name="last_name" placeholder=" " required>
+                                    <label class="form-label" for="lastName">Last Name</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <input type="email" class="form-control" id="email" name="email" placeholder=" " required>
+                                    <label class="form-label" for="email">Email Address</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <input type="tel" class="form-control" id="phone" name="phone" placeholder=" " required>
+                                    <label class="form-label" for="phone">Phone Number</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <select class="form-control" id="subject" name="subject" required>
+                                <option value="" disabled selected hidden></option>
+                                <option value="admissions">Admissions Inquiry</option>
+                                <option value="academic">Academic Information</option>
+                                <option value="fees">Fee Structure</option>
+                                <option value="technical">Technical Support</option>
+                                <option value="other">Other</option>
+                            </select>
+                            <label class="form-label" for="subject">Subject</label>
+                        </div>
+
+                        <div class="form-group">
+                            <textarea class="form-control" id="message" name="message" placeholder=" " rows="5" required></textarea>
+                            <label class="form-label" for="message">Your Message</label>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="privacy" name="privacy" required>
+                                <label class="form-check-label" for="privacy">
+                                    I consent to being contacted
+                                </label>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="submit-btn" id="submitBtn">
+                            <span>Send Message</span>
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="hours-card" data-aos="fade-left">
+                    <h3>
+                        <i class="fas fa-clock"></i>
+                        Business Hours
+                    </h3>
+                    <ul class="hours-list">
+                        <li>
+                            <span class="day"><i class="fas fa-calendar-day me-2"></i>Monday - Friday</span>
+                            <span class="time">
+                                {% if school %}
+                                    {{ school.opening_time|time:"g:i A" }} - {{ school.closing_time|time:"g:i A" }}
+                                {% else %}
+                                    8:00 AM - 3:00 PM
+                                {% endif %}
+                            </span>
+                        </li>
+                        <li>
+                            <span class="day"><i class="fas fa-calendar-day me-2"></i>Saturday</span>
+                            <span class="closed">Closed</span>
+                        </li>
+                        <li>
+                            <span class="day"><i class="fas fa-calendar-day me-2"></i>Sunday</span>
+                            <span class="closed">Closed</span>
+                        </li>
+                        {% if school and school.half_day_opening %}
+                        <li>
+                            <span class="day"><i class="fas fa-calendar-day me-2"></i>Half Day</span>
+                            <span class="time">
+                                {{ school.half_day_opening|time:"g:i A" }} - {{ school.half_day_closing|time:"g:i A" }}
+                            </span>
+                        </li>
+                        {% endif %}
+                    </ul>
+
+                    {% if school and school.next_term_begins %}
+                    <div class="special-note">
+                        <i class="fas fa-calendar-check me-2"></i>
+                        <strong>Next Term Begins:</strong> {{ school.next_term_begins|date:"F d, Y" }}
+                    </div>
+                    {% endif %}
+
+                    <div class="special-note mt-3">
+                        <i class="fas fa-clock me-2"></i>
+                        <strong>Response Time:</strong> Within 24 hours on weekdays
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Map Section -->
+<section class="map-section" id="map">
+    <div class="container">
+        <div class="map-container" data-aos="zoom-in">
+            <iframe 
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d253682.4619117283!2d3.11990695!3d6.548036549999999!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x103b8b2ae68280c1%3A0xdc9e87a367c3d9cb!2sLagos!5e0!3m2!1sen!2sng!4v1620000000000!5m2!1sen!2sng" 
+                allowfullscreen="" 
+                loading="lazy">
+            </iframe>
+            <div class="map-overlay">
+                <h4><i class="fas fa-map-pin text-pink me-2"></i>Our Location</h4>
+                <p><i class="fas fa-building me-2"></i>Main Campus</p>
+                <p><i class="fas fa-car me-2"></i>Free parking available</p>
+                <p><i class="fas fa-bus me-2"></i>Near public transport</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FAQ Section -->
+<section class="faq-section">
+    <div class="container">
+        <div class="section-title" data-aos="fade-up">
+            <h2>Frequently Asked Questions</h2>
+            <p>Quick answers to common questions</p>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="faq-item" data-aos="fade-up" data-aos-delay="100">
+                    <div class="faq-question">
+                        <span>What are the admission requirements?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Admission requirements vary by class level. Generally, we require:
+                            <br>- Completed application form
+                            <br>- Previous academic records
+                            <br>- Birth certificate
+                            <br>- Passport photographs
+                            <br>- Entrance examination (for secondary levels)
+                        </p>
+                    </div>
+                </div>
+
+                <div class="faq-item" data-aos="fade-up" data-aos-delay="200">
+                    <div class="faq-question">
+                        <span>How do I apply for admission?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>You can apply online through our <a href="{% url 'admissions:admission_form' %}" class="text-pink">Admissions Portal</a>. The process is simple:
+                            <br>1. Fill out the online application form
+                            <br>2. Upload required documents
+                            <br>3. Pay application fee
+                            <br>4. Schedule entrance exam (if applicable)
+                        </p>
+                    </div>
+                </div>
+
+                <div class="faq-item" data-aos="fade-up" data-aos-delay="300">
+                    <div class="faq-question">
+                        <span>What is the school fee structure?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Our fee structure varies by class level and includes tuition, development levy, and activity fees. Please contact our admissions office or visit the school for detailed fee information. We also offer payment plans and scholarships for qualifying students.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item" data-aos="fade-up" data-aos-delay="400">
+                    <div class="faq-question">
+                        <span>Do you offer scholarships?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Yes, we offer merit-based scholarships for outstanding students and need-based financial aid. Scholarship applications are reviewed twice a year. Contact our financial aid office for more information.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Social Media Section -->
+<section class="social-section">
+    <div class="container">
+        <div class="section-title" data-aos="fade-up">
+            <h2>Connect With Us</h2>
+            <p>Follow us on social media for updates and news</p>
+        </div>
+
+        <div class="social-links-large" data-aos="fade-up" data-aos-delay="100">
+            {% if school.facebook %}
+            <a href="{{ school.facebook }}" class="social-link-large" target="_blank">
+                <i class="fab fa-facebook-f"></i>
+            </a>
+            {% endif %}
+            {% if school.twitter %}
+            <a href="{{ school.twitter }}" class="social-link-large" target="_blank">
+                <i class="fab fa-twitter"></i>
+            </a>
+            {% endif %}
+            {% if school.instagram %}
+            <a href="{{ school.instagram }}" class="social-link-large" target="_blank">
+                <i class="fab fa-instagram"></i>
+            </a>
+            {% endif %}
+            {% if school.youtube %}
+            <a href="{{ school.youtube }}" class="social-link-large" target="_blank">
+                <i class="fab fa-youtube"></i>
+            </a>
+            {% endif %}
+            <a href="#" class="social-link-large" target="_blank">
+                <i class="fab fa-linkedin-in"></i>
+            </a>
+            <a href="#" class="social-link-large" target="_blank">
+                <i class="fab fa-whatsapp"></i>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Success Modal -->
+<div class="modal fade success-modal" id="successModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="success-icon">
+                    <i class="fas fa-check"></i>
+                </div>
+                <h3>Message Sent!</h3>
+                <p>Thank you for contacting us. We'll get back to you within 24 hours.</p>
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        // Form submission
+        $('#contactForm').on('submit', function(e) {
+            e.preventDefault();
+            
+            const form = $(this);
+            const btn = $('#submitBtn');
+            
+            // Animate button
+            btn.html('<i class="fas fa-spinner fa-spin"></i> Sending...');
+            btn.prop('disabled', true);
+            
+            // Simulate AJAX request (replace with actual form submission)
+            setTimeout(() => {
+                // Reset button
+                btn.html('<span>Send Message</span> <i class="fas fa-paper-plane"></i>');
+                btn.prop('disabled', false);
+                
+                // Show success modal
+                $('#successModal').modal('show');
+                
+                // Reset form
+                form[0].reset();
+                
+                // Show notification
+                showNotification('Your message has been sent successfully!', 'success');
+            }, 1500);
+        });
+
+        // FAQ Accordion
+        $('.faq-question').on('click', function() {
+            const answer = $(this).next('.faq-answer');
+            const icon = $(this).find('i');
+            
+            // Close other open FAQs
+            $('.faq-question').not(this).removeClass('active');
+            $('.faq-answer').not(answer).removeClass('show');
+            $('.faq-question').not(this).find('i').css('transform', 'rotate(0deg)');
+            
+            // Toggle current FAQ
+            $(this).toggleClass('active');
+            answer.toggleClass('show');
+            icon.css('transform', $(this).hasClass('active') ? 'rotate(180deg)' : 'rotate(0deg)');
+        });
+
+        // Floating label enhancement
+        $('.form-control').on('blur', function() {
+            if ($(this).val()) {
+                $(this).addClass('filled');
+            } else {
+                $(this).removeClass('filled');
+            }
+        });
+
+        // Phone number formatting
+        $('#phone').on('input', function() {
+            let number = $(this).val().replace(/\D/g, '');
+            if (number.length > 0) {
+                if (number.length <= 3) {
+                    number = number;
+                } else if (number.length <= 6) {
+                    number = number.slice(0, 3) + '-' + number.slice(3);
+                } else {
+                    number = number.slice(0, 3) + '-' + number.slice(3, 6) + '-' + number.slice(6, 10);
+                }
+                $(this).val(number);
+            }
+        });
+
+        // Animate on scroll for info cards
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.info-card').forEach(card => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            card.style.transition = 'all 0.6s ease';
+            observer.observe(card);
+        });
+
+        // Map hover effect
+        $('.map-container').on('mouseenter', function() {
+            $(this).find('iframe').css('filter', 'brightness(1.1)');
+        }).on('mouseleave', function() {
+            $(this).find('iframe').css('filter', 'brightness(1)');
+        });
+
+        // Copy address to clipboard
+        $('.contact-link[href*="directions"]').on('click', function(e) {
+            e.preventDefault();
+            const address = "{% if school %}{{ school.address }}{% else %}123 Education Avenue, Lagos, Nigeria{% endif %}";
+            
+            navigator.clipboard.writeText(address).then(() => {
+                showNotification('Address copied to clipboard!', 'success');
+            });
+        });
+
+        // Dynamic office hours based on current day
+        const today = new Date().getDay(); // 0 = Sunday, 1 = Monday, etc.
+        const hoursItems = document.querySelectorAll('.hours-list li');
+        
+        hoursItems.forEach((item, index) => {
+            if ((today >= 1 && today <= 5 && index === 0) || // Weekdays
+                (today === 6 && index === 1) || // Saturday
+                (today === 0 && index === 2)) { // Sunday
+                item.style.background = 'rgba(255, 105, 180, 0.1)';
+                item.style.borderRadius = '10px';
+                item.style.padding = '15px';
+            }
+        });
+
+        // Real-time form validation
+        const formInputs = document.querySelectorAll('.contact-form .form-control');
+        formInputs.forEach(input => {
+            input.addEventListener('input', function() {
+                if (this.validity.valid) {
+                    this.style.borderColor = '#00b894';
+                } else {
+                    this.style.borderColor = '#d63031';
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

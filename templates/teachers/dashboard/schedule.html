@@ -1,0 +1,51 @@
+{% load static %}
+{% extends 'base.html' %}
+
+{% block title %}Schedule{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <h1 class="display-4 text-center mb-4" data-aos="fade-down">Schedule</h1>
+    <div class="table-responsive" data-aos="fade-up" data-aos-delay="200">
+        <table class="table table-bordered text-center align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Time</th>
+                    {% for day in days %}<th>{{ day }}</th>{% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for slot in slots %}
+                <tr>
+                    <td class="fw-bold">{{ slot.time }}</td>
+                    {% for day in days %}
+                    <td>
+                        {{ schedule|get_item:day|get_item:slot.time|default:"–" }}
+                    </td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.table th, .table td { vertical-align: middle; }
+.table tbody tr:hover { background: rgba(123,44,191,0.05); }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+AOS.init();
+// highlight current day column
+(function() {
+    const today = new Date().toLocaleDateString('en-US', { weekday: 'long' });
+    const idx = [...document.querySelectorAll('thead th')].findIndex(th=>th.textContent.trim()===today);
+    if(idx>0) document.querySelectorAll('tbody tr').forEach(r=>r.children[idx].classList.add('table-primary'));
+})();
+</script>
+{% endblock %}

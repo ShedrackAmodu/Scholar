@@ -1,0 +1,42 @@
+{% load static %}
+{% extends 'base.html' %}
+
+{% block title %}Documents{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <h1 class="display-4 text-center mb-4" data-aos="fade-down">Documents</h1>
+    <div class="row">
+        {% for doc in documents %}
+        <div class="col-md-4 mb-3" data-aos="fade-up">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">{{ doc.name }}</h5>
+                    <p class="card-text"><i class="fas fa-file-alt"></i> {{ doc.uploaded_at|date:'M d, Y' }}</p>
+                    <a href="{{ doc.file.url }}" class="btn btn-outline-primary"><i class="fas fa-download"></i> Download</a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center py-5">
+            <p class="lead">No documents uploaded yet.</p>
+        </div>
+        {% endfor %}
+    </div>
+    <div class="mt-4 text-center">
+        <a href="{% url 'students:upload_document' %}" class="btn btn-success"><i class="fas fa-upload"></i> Upload New</a>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.card:hover { transform: translateY(-3px); transition: var(--transition-smooth); }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+AOS.init();
+</script>
+{% endblock %}

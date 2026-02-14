@@ -1,0 +1,36 @@
+{% load static %}
+{% extends 'base.html' %}
+
+{% block title %}Fee Structure Confirm Delete{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6" data-aos="zoom-in">
+            <div class="card shadow text-center">
+                <div class="card-body">
+                    <h2 class="card-title mb-4">Delete Fee Structure?</h2>
+                    <p>Are you sure you want to delete <strong>{{ object }}</strong>? This action cannot be undone.</p>
+                    <form method="post">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger me-2"><i class="fas fa-trash-alt"></i> Yes, delete</button>
+                        <a href="{% url 'payments:admin:fee_structure_list' %}" class="btn btn-secondary"><i class="fas fa-times"></i> Cancel</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.card { border-radius: 1rem; }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+AOS.init();
+</script>
+{% endblock %}

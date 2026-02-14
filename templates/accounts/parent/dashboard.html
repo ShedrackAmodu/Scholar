@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Parent Dashboard - {{ parent.user.get_full_name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .parent-dashboard { padding: 120px 0 80px; min-height: 100vh; background: var(--bg-gradient); }
+    .welcome-banner { background: linear-gradient(135deg, var(--primary-pink), var(--dark-pink)); border-radius: 30px; padding: 40px; margin-bottom: 40px; color: white; position: relative; overflow: hidden; animation: slideInDown 0.8s ease; }
+    @keyframes slideInDown { from { opacity: 0; transform: translateY(-50px); } to { opacity: 1; transform: translateY(0); } }
+    .welcome-title { font-size: 2.5rem; font-weight: 700; margin-bottom: 10px; font-family: 'Playfair Display', serif; }
+    .welcome-subtitle { font-size: 1.1rem; opacity: 0.9; margin-bottom: 20px; }
+    .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px,1fr)); gap: 25px; }
+    .card { background: var(--card-bg); border-radius: 20px; padding: 25px; box-shadow: var(--shadow); border: var(--border); transition: all 0.3s ease; position: relative; overflow: hidden; animation: fadeInUp 0.8s ease; }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+    .card-icon { width: 50px; height: 50px; background: linear-gradient(135deg, var(--primary-pink), var(--dark-pink)); border-radius: 15px; display: flex; align-items: center; justify-content: center; margin-bottom: 15px; color: white; font-size: 1.5rem; transition: all 0.3s ease; }
+    .card-value { font-size: 1.8rem; font-weight: 700; color: var(--text-primary); margin-bottom: 5px; font-family: 'Playfair Display', serif; }
+    .card-label { color: var(--text-secondary); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; }
+    .children-list { margin-top: 30px; }
+    .child-card { background: var(--card-bg); padding: 20px; border-radius: 15px; box-shadow: var(--shadow); margin-bottom: 15px; transition: all 0.3s ease; }
+    .child-card:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+    .child-name { font-weight: 600; color: var(--text-primary); }
+    .child-meta { font-size: 0.85rem; color: var(--text-secondary); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="parent-dashboard">
+    <div class="container">
+        <div class="welcome-banner">
+            <div class="welcome-content">
+                <h1 class="welcome-title">Welcome, {{ parent.user.first_name }}!</h1>
+                <p class="welcome-subtitle">Your children's updates are below.</p>
+            </div>
+        </div>
+        <div class="cards-grid">
+            <div class="card">
+                <div class="card-icon"><i class="fas fa-users"></i></div>
+                <div class="card-value">{{ children.count }}</div>
+                <div class="card-label">Children</div>
+            </div>
+            <div class="card">
+                <div class="card-icon"><i class="fas fa-bell"></i></div>
+                <div class="card-value">{{ notifications.count }}</div>
+                <div class="card-label">Notifications</div>
+            </div>
+        </div>
+        <div class="children-list">
+            {% for child in children %}
+            <div class="child-card">
+                <div class="child-name">{{ child.user.get_full_name }}</div>
+                <div class="child-meta">
+                    {{ child.current_class }} &bull; Grade {{ child.grade }}
+                </div>
+            </div>
+            {% empty %}
+            <p class="text-secondary">No children linked to your account.</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Optional parent JS
+</script>
+{% endblock %}

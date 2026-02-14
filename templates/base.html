@@ -1,0 +1,1555 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}School Management System{% endblock %}</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- AOS Animation Library -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    
+    <!-- Animate.css -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    
+    <!-- Hover.css -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/hover.css/2.3.1/css/hover-min.css">
+    
+    <style>
+        :root {
+            /* Light Mode Colors - Purple/Blue Theme */
+            --primary-pink: #7B2CBF;          /* deep violet (replacing pink) */
+            --secondary-pink: #4A90E2;        /* vivid blue (replacing secondary pink) */
+            --light-pink: #e0c3fc;
+            --dark-pink: #5a189a;
+            --soft-pink: #e6f0ff;
+            --bg-gradient-light: linear-gradient(135deg, #f0f0ff 0%, #d0e1ff 100%);
+            --card-bg-light: rgba(255, 255, 255, 0.95);
+            --text-primary-light: #2d3436;
+            --text-secondary-light: #636e72;
+            --shadow-light: 0 10px 30px rgba(75, 57, 180, 0.15);
+            --border-light: 1px solid rgba(75, 57, 180, 0.2);
+            --navbar-bg-light: rgba(255, 255, 255, 0.95);
+            --footer-bg-light: #2d3436;
+            --footer-text-light: #ffffff;
+            
+            /* Dark Mode Colors */
+            --primary-dark: #9d4edd;             /* brighter purple */
+            --secondary-dark: #3a0ca3;          /* dark indigo */
+            --bg-gradient-dark: linear-gradient(135deg, #1a1a2e 0%, #2e1363 100%);
+            --card-bg-dark: rgba(26, 26, 46, 0.95);
+            --text-primary-dark: #f5f5f5;
+            --text-secondary-dark: #b0b0b0;
+            --shadow-dark: 0 10px 30px rgba(0, 0, 0, 0.3);
+            --border-dark: 1px solid rgba(157, 78, 221, 0.2);
+            --navbar-bg-dark: rgba(26, 26, 46, 0.95);
+            --footer-bg-dark: #0a0a1a;
+            --footer-text-dark: #ffffff;
+            
+            /* Common Colors */
+            --success: #00b894;
+            --warning: #fdcb6e;
+            --danger: #d63031;
+            --info: #0984e3;
+            
+            /* Transitions */
+            --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-bounce: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        /* Light Mode */
+        [data-bs-theme="light"] {
+            --bg-gradient: var(--bg-gradient-light);
+            --card-bg: var(--card-bg-light);
+            --text-primary: var(--text-primary-light);
+            --text-secondary: var(--text-secondary-light);
+            --shadow: var(--shadow-light);
+            --border: var(--border-light);
+            --navbar-bg: var(--navbar-bg-light);
+            --footer-bg: var(--footer-bg-light);
+            --footer-text: var(--footer-text-light);
+        }
+
+        /* Dark Mode */
+        [data-bs-theme="dark"] {
+            --bg-gradient: var(--bg-gradient-dark);
+            --card-bg: var(--card-bg-dark);
+            --text-primary: var(--text-primary-dark);
+            --text-secondary: var(--text-secondary-dark);
+            --shadow: var(--shadow-dark);
+            --border: var(--border-dark);
+            --navbar-bg: var(--navbar-bg-dark);
+            --footer-bg: var(--footer-bg-dark);
+            --footer-text: var(--footer-text-dark);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            transition: var(--transition-smooth);
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-primary);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Animated Background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 20% 20%, rgba(123, 44, 191, 0.1) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 80%, rgba(74, 144, 226, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+            animation: backgroundPulse 10s ease-in-out infinite;
+        }
+
+        @keyframes backgroundPulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        /* Floating Shapes */
+        .floating-shape {
+            position: fixed;
+            background: linear-gradient(135deg, var(--primary-pink), var(--secondary-pink));
+            border-radius: 50%;
+            filter: blur(60px);
+            opacity: 0.1;
+            z-index: -1;
+            animation: float 20s ease-in-out infinite;
+        }
+
+        .shape-1 {
+            width: 300px;
+            height: 300px;
+            top: -100px;
+            left: -100px;
+        }
+
+        .shape-2 {
+            width: 400px;
+            height: 400px;
+            bottom: -150px;
+            right: -150px;
+            animation-delay: -5s;
+        }
+
+        .shape-3 {
+            width: 200px;
+            height: 200px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation-delay: -10s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            25% { transform: translate(30px, 30px) rotate(5deg); }
+            50% { transform: translate(-20px, 50px) rotate(-5deg); }
+            75% { transform: translate(40px, -20px) rotate(3deg); }
+        }
+
+        /* Navigation Bar */
+        .navbar {
+            background: var(--navbar-bg) !important;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: var(--shadow);
+            padding: 1rem 2rem;
+            transition: var(--transition-smooth);
+            border-bottom: var(--border);
+        }
+
+        .navbar.scrolled {
+            padding: 0.5rem 2rem;
+            background: var(--navbar-bg) !important;
+            box-shadow: 0 5px 20px rgba(123, 44, 191, 0.2);
+        }
+
+        .navbar-brand {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary-pink), var(--dark-pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            transition: var(--transition-smooth);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .navbar-brand::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(135deg, var(--primary-pink), var(--dark-pink));
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+        }
+
+        .navbar-brand:hover::after {
+            transform: translateX(0);
+        }
+
+        .nav-link {
+            color: var(--text-primary) !important;
+            font-weight: 500;
+            padding: 0.5rem 1rem !important;
+            margin: 0 0.2rem;
+            position: relative;
+            transition: var(--transition-smooth);
+            border-radius: 25px;
+        }
+
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(135deg, var(--primary-pink), var(--dark-pink));
+            transition: var(--transition-smooth);
+            transform: translateX(-50%);
+        }
+
+        .nav-link:hover::before {
+            width: 80%;
+        }
+
+        .nav-link:hover {
+            color: var(--primary-pink) !important;
+            transform: translateY(-2px);
+            background: rgba(123, 44, 191, 0.1);
+        }
+
+        .nav-link.active {
+            color: var(--primary-pink) !important;
+            background: rgba(123, 44, 191, 0.15);
+        }
+
+        /* Theme Toggle Button */
+        .theme-toggle {
+            background: none;
+            border: 2px solid var(--primary-pink);
+            border-radius: 50px;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-primary);
+            font-weight: 500;
+            transition: var(--transition-bounce);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .theme-toggle::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(123, 44, 191, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .theme-toggle:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(123, 44, 191, 0.5);
+        }
+
+        .theme-toggle i {
+            font-size: 1.2rem;
+            color: var(--primary-pink);
+            transition: var(--transition-bounce);
+        }
+
+        .theme-toggle:hover i {
+            transform: rotate(360deg);
+        }
+
+        /* Main Content */
+        .main-content {
+            min-height: calc(100vh - 300px);
+            padding: 2rem 0;
+            position: relative;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: var(--border);
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            transition: var(--transition-bounce);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(123, 44, 191, 0.1), rgba(74, 144, 226, 0.1));
+            opacity: 0;
+            transition: var(--transition-smooth);
+        }
+
+        .card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(123, 44, 191, 0.3);
+        }
+
+        .card:hover::before {
+            opacity: 1;
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, var(--primary-pink), var(--dark-pink));
+            color: white;
+            border: none;
+            padding: 1rem 1.5rem;
+            font-weight: 600;
+        }
+
+        .card-body {
+            padding: 1.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 0.8rem 2rem;
+            border-radius: 50px;
+            font-weight: 500;
+            transition: var(--transition-bounce);
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+            border: none;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+            z-index: -1;
+        }
+
+        .btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-pink), var(--dark-pink));
+            color: white;
+            box-shadow: 0 5px 15px rgba(123, 44, 191, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 10px 25px rgba(123, 44, 191, 0.6);
+        }
+
+        .btn-outline-primary {
+            background: transparent;
+            border: 2px solid var(--primary-pink);
+            color: var(--primary-pink);
+        }
+
+        .btn-outline-primary:hover {
+            background: linear-gradient(135deg, var(--primary-pink), var(--dark-pink));
+            color: white;
+            transform: translateY(-3px);
+            border-color: transparent;
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--footer-bg);
+            color: var(--footer-text);
+            padding: 4rem 0 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, var(--primary-pink), var(--secondary-pink), var(--primary-pink));
+            animation: gradientMove 3s linear infinite;
+            background-size: 200% 100%;
+        }
+
+        @keyframes gradientMove {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 200% 50%; }
+        }
+
+        .footer h5 {
+            color: var(--primary-pink);
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            position: relative;
+            display: inline-block;
+        }
+
+        .footer h5::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 50px;
+            height: 2px;
+            background: var(--primary-pink);
+            animation: lineExpand 2s ease-in-out infinite;
+        }
+
+        @keyframes lineExpand {
+            0%, 100% { width: 50px; }
+            50% { width: 100px; }
+        }
+
+        .footer-links {
+            list-style: none;
+            padding: 0;
+        }
+
+        .footer-links li {
+            margin-bottom: 0.8rem;
+        }
+
+        .footer-links a {
+            color: var(--footer-text);
+            text-decoration: none;
+            transition: var(--transition-smooth);
+            display: inline-block;
+            position: relative;
+            padding-left: 0;
+        }
+
+        .footer-links a::before {
+            content: '→';
+            position: absolute;
+            left: -20px;
+            opacity: 0;
+            transition: var(--transition-smooth);
+            color: var(--primary-pink);
+        }
+
+        .footer-links a:hover {
+            color: var(--primary-pink);
+            transform: translateX(20px);
+        }
+
+        .footer-links a:hover::before {
+            opacity: 1;
+            left: -5px;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .social-links a {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-decoration: none;
+            transition: var(--transition-bounce);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .social-links a::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-pink), var(--dark-pink));
+            transform: translate(-50%, -50%);
+            transition: width 0.4s, height 0.4s;
+            z-index: -1;
+        }
+
+        .social-links a:hover::before {
+            width: 100px;
+            height: 100px;
+        }
+
+        .social-links a:hover {
+            transform: translateY(-5px) rotate(360deg);
+            color: white;
+        }
+
+        /* Alerts */
+        .alert {
+            border: none;
+            border-radius: 15px;
+            padding: 1rem 1.5rem;
+            margin-bottom: 1rem;
+            position: relative;
+            overflow: hidden;
+            animation: slideInDown 0.5s ease;
+        }
+
+        .alert::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 100%;
+            background: currentColor;
+        }
+
+        .alert-success {
+            background: linear-gradient(135deg, rgba(0, 184, 148, 0.1), rgba(0, 184, 148, 0.2));
+            color: var(--success);
+        }
+
+        .alert-danger {
+            background: linear-gradient(135deg, rgba(214, 48, 49, 0.1), rgba(214, 48, 49, 0.2));
+            color: var(--danger);
+        }
+
+        .alert-warning {
+            background: linear-gradient(135deg, rgba(253, 203, 110, 0.1), rgba(253, 203, 110, 0.2));
+            color: var(--warning);
+        }
+
+        .alert-info {
+            background: linear-gradient(135deg, rgba(9, 132, 227, 0.1), rgba(9, 132, 227, 0.2));
+            color: var(--info);
+        }
+
+        @keyframes slideInDown {
+            from {
+                transform: translateY(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* Forms */
+        .form-control {
+            background: var(--card-bg);
+            border: var(--border);
+            border-radius: 15px;
+            padding: 0.8rem 1.2rem;
+            color: var(--text-primary);
+            transition: var(--transition-smooth);
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-pink);
+            box-shadow: 0 0 0 0.2rem rgba(123, 44, 191, 0.25);
+            transform: translateY(-2px);
+        }
+
+        .form-label {
+            color: var(--text-primary);
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Loading Spinner */
+        .spinner-wrapper {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-gradient);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s;
+        }
+
+        .spinner {
+            width: 80px;
+            height: 80px;
+            border: 5px solid rgba(123, 44, 191, 0.3);
+            border-top-color: var(--primary-pink);
+            border-radius: 50%;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Scroll to Top Button */
+        .scroll-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-pink), var(--dark-pink));
+            color: white;
+            border: none;
+            cursor: pointer;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            transition: var(--transition-bounce);
+            box-shadow: 0 5px 20px rgba(123, 44, 191, 0.4);
+        }
+
+        .scroll-top:hover {
+            transform: translateY(-5px) scale(1.1);
+            box-shadow: 0 10px 30px rgba(123, 44, 191, 0.6);
+        }
+
+        .scroll-top.show {
+            display: flex;
+            animation: bounceIn 0.5s ease;
+        }
+
+        @keyframes bounceIn {
+            0% {
+                transform: scale(0);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.2);
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .navbar-brand {
+                font-size: 1.4rem;
+            }
+            
+            .navbar {
+                padding: 0.8rem 1rem;
+            }
+            
+            .navbar.scrolled {
+                padding: 0.5rem 1rem;
+            }
+            
+            .footer {
+                padding: 3rem 0 1.5rem;
+            }
+            
+            .card:hover {
+                transform: translateY(-5px) scale(1.01);
+            }
+            
+            .scroll-top {
+                bottom: 20px;
+                right: 20px;
+                width: 40px;
+                height: 40px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .navbar-brand {
+                font-size: 1.2rem;
+            }
+            
+            .theme-toggle span {
+                display: none;
+            }
+            
+            .theme-toggle {
+                padding: 0.5rem;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .btn {
+                padding: 0.6rem 1.5rem;
+            }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-gradient);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, var(--primary-pink), var(--dark-pink));
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, var(--dark-pink), var(--primary-pink));
+        }
+
+        /* Text Selection */
+        ::selection {
+            background: var(--primary-pink);
+            color: white;
+        }
+
+        /* Loading Skeleton */
+        .skeleton {
+            background: linear-gradient(
+                90deg,
+                var(--card-bg) 25%,
+                rgba(123, 44, 191, 0.1) 50%,
+                var(--card-bg) 75%
+            );
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+        }
+
+        @keyframes loading {
+            0% {
+                background-position: 200% 0;
+            }
+            100% {
+                background-position: -200% 0;
+            }
+        }
+
+        /* Page Transitions */
+        .page-transition {
+            animation: pageFade 0.5s ease;
+        }
+
+        @keyframes pageFade {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Glassmorphism Effect */
+        .glass {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: var(--border);
+            box-shadow: var(--shadow);
+        }
+
+        /* Animated Gradient Text */
+        .gradient-text {
+            background: linear-gradient(
+                135deg,
+                var(--primary-pink),
+                var(--dark-pink),
+                var(--secondary-pink),
+                var(--primary-pink)
+            );
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradientShift 5s ease infinite;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+        }
+
+        /* Pulse Animation */
+        .pulse {
+            animation: pulse 2s ease infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        /* Shimmer Effect */
+        .shimmer {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .shimmer::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                to right,
+                transparent,
+                rgba(255, 255, 255, 0.3),
+                transparent
+            );
+            transform: rotate(30deg);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0% {
+                transform: translateX(-100%) rotate(30deg);
+            }
+            100% {
+                transform: translateX(100%) rotate(30deg);
+            }
+        }
+    </style>
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Floating Shapes -->
+    <div class="floating-shape shape-1"></div>
+    <div class="floating-shape shape-2"></div>
+    <div class="floating-shape shape-3"></div>
+
+    <!-- Loading Spinner -->
+    <div class="spinner-wrapper" id="loading-spinner">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg fixed-top" id="main-nav">
+        <div class="container">
+            <a class="navbar-brand hvr-wobble-horizontal" href="{% url 'school:home' %}">
+                <i class="fas fa-graduation-cap me-2"></i>
+                {% if school %}
+                    {{ school.name }}
+                {% else %}
+                    School Manager
+                {% endif %}
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <li class="nav-item">
+                        <a class="nav-link hvr-underline-from-center {% if request.path == '/' %}active{% endif %}" href="{% url 'school:home' %}">
+                            <i class="fas fa-home me-1"></i> Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link hvr-underline-from-center {% if '/admissions/' in request.path %}active{% endif %}" href="{% url 'admissions:admission_form' %}">
+                            <i class="fas fa-edit me-1"></i> Admissions
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link hvr-underline-from-center {% if '/contact/' in request.path %}active{% endif %}" href="{% url 'school:contact' %}">
+                            <i class="fas fa-envelope me-1"></i> Contact
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link hvr-underline-from-center {% if '/about/' in request.path %}active{% endif %}" href="{% url 'school:about' %}">
+                            <i class="fas fa-info-circle me-1"></i> About
+                        </a>
+                    </li>
+                    
+                    {% if user.is_authenticated %}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-user-circle me-1"></i> {{ user.get_full_name|default:user.username }}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end animate__animated animate__fadeIn">
+                                <li><a class="dropdown-item" href="{% url 'accounts:profile' %}"><i class="fas fa-user me-2"></i>Profile</a></li>
+                                {% if user.is_teacher %}
+                                    <li><a class="dropdown-item" href="{% url 'accounts:teacher_dashboard' %}"><i class="fas fa-tachometer-alt me-2"></i>Dashboard</a></li>
+                                {% elif user.is_student %}
+                                    <li><a class="dropdown-item" href="{% url 'accounts:student_dashboard' %}"><i class="fas fa-tachometer-alt me-2"></i>Dashboard</a></li>
+                                {% elif user.is_parent %}
+                                    <li><a class="dropdown-item" href="{% url 'accounts:parent_dashboard' %}"><i class="fas fa-tachometer-alt me-2"></i>Dashboard</a></li>
+                                {% elif user.is_principal %}
+                                    <li><a class="dropdown-item" href="{% url 'accounts:principal_dashboard' %}"><i class="fas fa-tachometer-alt me-2"></i>Dashboard</a></li>
+                                {% elif user.is_vice_principal %}
+                                    <li><a class="dropdown-item" href="{% url 'accounts:vice_principal_dashboard' %}"><i class="fas fa-tachometer-alt me-2"></i>Dashboard</a></li>
+                                {% elif user.is_director %}
+                                    <li><a class="dropdown-item" href="{% url 'accounts:director_dashboard' %}"><i class="fas fa-tachometer-alt me-2"></i>Dashboard</a></li>
+                                {% else %}
+                                    <li><a class="dropdown-item" href="{% url 'accounts:admin_dashboard' %}"><i class="fas fa-tachometer-alt me-2"></i>Dashboard</a></li>
+                                {% endif %}
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-danger" href="{% url 'accounts:logout' %}"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                            </ul>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'accounts:login' %}">
+                                <button class="btn btn-primary btn-sm pulse">
+                                    <i class="fas fa-sign-in-alt me-1"></i> Login
+                                </button>
+                            </a>
+                        </li>
+                    {% endif %}
+                    
+                    <li class="nav-item ms-2">
+                        <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
+                            <i class="fas fa-sun" id="theme-icon"></i>
+                            <span id="theme-text">Light</span>
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content page-transition" id="main-content">
+        <!-- Messages/Alerts -->
+        {% if messages %}
+            <div class="container mt-5 pt-4">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show animate__animated animate__fadeInDown" role="alert">
+                        <i class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}exclamation-circle{% elif message.tags == 'warning' %}exclamation-triangle{% else %}info-circle{% endif %} me-2"></i>
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
+                    <h5 class="hvr-underline-from-center">
+                        <i class="fas fa-graduation-cap me-2"></i>
+                        {% if school %}{{ school.name }}{% else %}School Manager{% endif %}
+                    </h5>
+                    <p class="text-white-50 mb-4">
+                        Providing quality education and nurturing future leaders since 2020.
+                    </p>
+                    {% if school %}
+                        <div class="mb-2">
+                            <i class="fas fa-map-marker-alt text-pink me-2"></i>
+                            <span class="text-white-50">{{ school.address }}</span>
+                        </div>
+                        <div class="mb-2">
+                            <i class="fas fa-phone text-pink me-2"></i>
+                            <span class="text-white-50">{{ school.phone }}</span>
+                        </div>
+                        <div class="mb-2">
+                            <i class="fas fa-envelope text-pink me-2"></i>
+                            <span class="text-white-50">{{ school.email }}</span>
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="col-lg-2 col-md-6" data-aos="fade-up" data-aos-delay="200">
+                    <h5>Quick Links</h5>
+                    <ul class="footer-links">
+                        <li><a href="{% url 'school:home' %}"><i class="fas fa-chevron-right me-2"></i>Home</a></li>
+                        <li><a href="{% url 'admissions:admission_form' %}"><i class="fas fa-chevron-right me-2"></i>Admissions</a></li>
+                        <li><a href="{% url 'school:noticeboard' %}"><i class="fas fa-chevron-right me-2"></i>Noticeboard</a></li>
+                        <li><a href="{% url 'school:events' %}"><i class="fas fa-chevron-right me-2"></i>Events</a></li>
+                        <li><a href="{% url 'school:contact' %}"><i class="fas fa-chevron-right me-2"></i>Contact</a></li>
+                        <li><a href="{% url 'school:about' %}"><i class="fas fa-chevron-right me-2"></i>About</a></li>
+                            <li><a href="{% url 'school:home' %}"><i class="fas fa-chevron-right me-2"></i>Home</a></li>
+                            <li><a href="{% url 'admissions:admission_form' %}"><i class="fas fa-chevron-right me-2"></i>Admissions</a></li>
+                            <li><a href="{% url 'school:noticeboard' %}"><i class="fas fa-chevron-right me-2"></i>Noticeboard</a></li>
+                            <li><a href="{% url 'school:events' %}"><i class="fas fa-chevron-right me-2"></i>Events</a></li>
+                            <li><a href="{% url 'school:contact' %}"><i class="fas fa-chevron-right me-2"></i>Contact</a></li>
+                            <li><a href="{% url 'school:about' %}"><i class="fas fa-chevron-right me-2"></i>About</a></li>
+                    </ul>
+                </div>
+                
+                <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="300">
+                    <h5>School Hours</h5>
+                    <ul class="list-unstyled text-white-50">
+                        <li class="mb-2">
+                            <i class="fas fa-clock text-pink me-2"></i>
+                            Monday - Friday: 
+                            {% if school %}
+                                {{ school.opening_time|time:"g:i A" }} - {{ school.closing_time|time:"g:i A" }}
+                            {% else %}
+                                8:00 AM - 3:00 PM
+                            {% endif %}
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-clock text-pink me-2"></i>
+                            Saturday: Closed
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-clock text-pink me-2"></i>
+                            Sunday: Closed
+                        </li>
+                    </ul>
+                    
+                    <div class="social-links">
+                        {% if school.facebook %}
+                            <a href="{{ school.facebook }}" target="_blank" class="hvr-bounce-in">
+                                <i class="fab fa-facebook-f"></i>
+                            </a>
+                        {% endif %}
+                        {% if school.twitter %}
+                            <a href="{{ school.twitter }}" target="_blank" class="hvr-bounce-in">
+                                <i class="fab fa-twitter"></i>
+                            </a>
+                        {% endif %}
+                        {% if school.instagram %}
+                            <a href="{{ school.instagram }}" target="_blank" class="hvr-bounce-in">
+                                <i class="fab fa-instagram"></i>
+                            </a>
+                        {% endif %}
+                        {% if school.youtube %}
+                            <a href="{{ school.youtube }}" target="_blank" class="hvr-bounce-in">
+                                <i class="fab fa-youtube"></i>
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="400">
+                    <h5>Newsletter</h5>
+                    <p class="text-white-50">Subscribe to get updates about events and news</p>
+                    <form class="newsletter-form" id="newsletter-form">
+                        {% csrf_token %}
+                        <div class="input-group">
+                            <input type="email" class="form-control" placeholder="Your email" required>
+                            <button class="btn btn-primary" type="submit">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <hr class="my-4 bg-white-50">
+            
+            <div class="row">
+                <div class="col-md-6 text-center text-md-start">
+                    <p class="text-white-50 mb-0">
+                        &copy; {% now "Y" %} {% if school %}{{ school.name }}{% else %}School Manager{% endif %}. 
+                        All rights reserved.
+                    </p>
+                </div>
+                <div class="col-md-6 text-center text-md-end">
+                    <p class="text-white-50 mb-0">
+                        Designed with <i class="fas fa-heart text-pink pulse"></i> for education
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scroll to Top Button -->
+    <button class="scroll-top" id="scroll-top" aria-label="Scroll to top">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- AOS Animation Library -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    
+    <!-- Particles.js -->
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    
+    <script>
+        // Initialize AOS
+        AOS.init({
+            duration: 1000,
+            once: true,
+            offset: 100,
+            easing: 'ease-in-out'
+        });
+
+        // Theme Toggle Functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const themeToggle = document.getElementById('theme-toggle');
+            const themeIcon = document.getElementById('theme-icon');
+            const themeText = document.getElementById('theme-text');
+            const htmlElement = document.documentElement;
+            
+            // Check for saved theme preference
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            htmlElement.setAttribute('data-bs-theme', savedTheme);
+            updateThemeIcon(savedTheme);
+            
+            themeToggle.addEventListener('click', function() {
+                const currentTheme = htmlElement.getAttribute('data-bs-theme');
+                const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+                
+                // Animate theme toggle
+                themeToggle.classList.add('animate__animated', 'animate__pulse');
+                setTimeout(() => {
+                    themeToggle.classList.remove('animate__animated', 'animate__pulse');
+                }, 500);
+                
+                // Update theme
+                htmlElement.setAttribute('data-bs-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+                updateThemeIcon(newTheme);
+                
+                // Trigger event for other components
+                document.dispatchEvent(new CustomEvent('themeChanged', { detail: { theme: newTheme } }));
+            });
+            
+            function updateThemeIcon(theme) {
+                if (theme === 'dark') {
+                    themeIcon.className = 'fas fa-moon';
+                    themeText.textContent = 'Dark';
+                } else {
+                    themeIcon.className = 'fas fa-sun';
+                    themeText.textContent = 'Light';
+                }
+            }
+        });
+
+        // Loading Spinner
+        window.addEventListener('load', function() {
+            const spinner = document.getElementById('loading-spinner');
+            setTimeout(() => {
+                spinner.style.opacity = '0';
+                setTimeout(() => {
+                    spinner.style.display = 'none';
+                }, 500);
+            }, 500);
+        });
+
+        // Navbar Scroll Effect
+        window.addEventListener('scroll', function() {
+            const navbar = document.getElementById('main-nav');
+            const scrollTop = document.getElementById('scroll-top');
+            
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+            
+            // Show/hide scroll to top button
+            if (window.scrollY > 300) {
+                scrollTop.classList.add('show');
+            } else {
+                scrollTop.classList.remove('show');
+            }
+        });
+
+        // Smooth Scroll to Top
+        document.getElementById('scroll-top').addEventListener('click', function() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+
+        // Smooth Scroll for Anchor Links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Newsletter Form Submission
+        $('#newsletter-form').on('submit', function(e) {
+            e.preventDefault();
+            const email = $(this).find('input[type="email"]').val();
+            
+            // Animate button
+            const btn = $(this).find('button');
+            btn.html('<i class="fas fa-spinner fa-spin"></i>');
+            btn.prop('disabled', true);
+            
+            // Simulate AJAX request
+            setTimeout(() => {
+                btn.html('<i class="fas fa-check"></i>');
+                btn.removeClass('btn-primary').addClass('btn-success');
+                
+                // Show success message
+                showNotification('Successfully subscribed to newsletter!', 'success');
+                
+                // Reset after 2 seconds
+                setTimeout(() => {
+                    btn.html('<i class="fas fa-paper-plane"></i>');
+                    btn.removeClass('btn-success').addClass('btn-primary');
+                    btn.prop('disabled', false);
+                    $(this).find('input[type="email"]').val('');
+                }, 2000);
+            }, 1500);
+        });
+
+        // Notification System
+        function showNotification(message, type = 'info') {
+            const icons = {
+                success: 'check-circle',
+                error: 'exclamation-circle',
+                warning: 'exclamation-triangle',
+                info: 'info-circle'
+            };
+            
+            const notification = $(`
+                <div class="alert alert-${type} alert-dismissible fade show animate__animated animate__fadeInRight" 
+                     role="alert" style="position: fixed; top: 100px; right: 20px; z-index: 9999; min-width: 300px;">
+                    <i class="fas fa-${icons[type]} me-2"></i>
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `);
+            
+            $('body').append(notification);
+            
+            setTimeout(() => {
+                notification.animate({ right: '-100%' }, 500, function() {
+                    $(this).remove();
+                });
+            }, 5000);
+        }
+
+        // Page Transition Effect
+        document.addEventListener('DOMContentLoaded', function() {
+            document.body.classList.add('page-loaded');
+            
+            // Add fade-in effect to main content
+            const mainContent = document.getElementById('main-content');
+            mainContent.style.opacity = '0';
+            setTimeout(() => {
+                mainContent.style.transition = 'opacity 0.5s ease';
+                mainContent.style.opacity = '1';
+            }, 100);
+        });
+
+        // Lazy Loading Images
+        const images = document.querySelectorAll('img[data-src]');
+        const imageObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const img = entry.target;
+                    img.src = img.dataset.src;
+                    img.classList.add('animate__animated', 'animate__fadeIn');
+                    observer.unobserve(img);
+                }
+            });
+        });
+
+        images.forEach(img => imageObserver.observe(img));
+
+        // Parallax Effect
+        window.addEventListener('scroll', () => {
+            const scrolled = window.pageYOffset;
+            const parallax = document.querySelectorAll('.parallax');
+            
+            parallax.forEach(element => {
+                const speed = element.dataset.speed || 0.5;
+                element.style.transform = `translateY(${scrolled * speed}px)`;
+            });
+        });
+
+        // Typewriter Effect
+        class Typewriter {
+            constructor(element, words, wait = 3000) {
+                this.element = element;
+                this.words = words;
+                this.text = '';
+                this.wordIndex = 0;
+                this.wait = parseInt(wait, 10);
+                this.type();
+                this.isDeleting = false;
+            }
+
+            type() {
+                const current = this.wordIndex % this.words.length;
+                const fullTxt = this.words[current];
+
+                if (this.isDeleting) {
+                    this.text = fullTxt.substring(0, this.text.length - 1);
+                } else {
+                    this.text = fullTxt.substring(0, this.text.length + 1);
+                }
+
+                this.element.innerHTML = `<span class="txt">${this.text}</span>`;
+
+                let typeSpeed = 100;
+
+                if (this.isDeleting) {
+                    typeSpeed /= 2;
+                }
+
+                if (!this.isDeleting && this.text === fullTxt) {
+                    typeSpeed = this.wait;
+                    this.isDeleting = true;
+                } else if (this.isDeleting && this.text === '') {
+                    this.isDeleting = false;
+                    this.wordIndex++;
+                    typeSpeed = 500;
+                }
+
+                setTimeout(() => this.type(), typeSpeed);
+            }
+        }
+
+        // Initialize typewriter if element exists
+        if (document.querySelector('.typewriter')) {
+            const typewriterElement = document.querySelector('.typewriter');
+            const words = JSON.parse(typewriterElement.dataset.words || '["Education", "Excellence", "Innovation"]');
+            new Typewriter(typewriterElement, words);
+        }
+
+        // Tooltip Initialization
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+
+        // Popover Initialization
+        var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
+        var popoverList = popoverTriggerList.map(function(popoverTriggerEl) {
+            return new bootstrap.Popover(popoverTriggerEl);
+        });
+
+        // Counter Animation
+        function animateCounter(element, start, end, duration) {
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                element.innerText = Math.floor(progress * (end - start) + start);
+                if (progress < 1) {
+                    window.requestAnimationFrame(step);
+                }
+            };
+            window.requestAnimationFrame(step);
+        }
+
+        // Initialize counters when in viewport
+        const counterObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const counters = entry.target.querySelectorAll('.counter');
+                    counters.forEach(counter => {
+                        const target = parseInt(counter.innerText);
+                        animateCounter(counter, 0, target, 2000);
+                    });
+                    counterObserver.unobserve(entry.target);
+                }
+            });
+        });
+
+        document.querySelectorAll('.counter-section').forEach(section => {
+            counterObserver.observe(section);
+        });
+
+        // Particle Background
+        if (document.getElementById('particles-js')) {
+            particlesJS('particles-js', {
+                particles: {
+                    number: { value: 80, density: { enable: true, value_area: 800 } },
+                    color: { value: '#ff69b4' },
+                    shape: { type: 'circle' },
+                    opacity: { value: 0.5, random: false },
+                    size: { value: 3, random: true },
+                    line_linked: {
+                        enable: true,
+                        distance: 150,
+                        color: '#ff69b4',
+                        opacity: 0.4,
+                        width: 1
+                    },
+                    move: {
+                        enable: true,
+                        speed: 6,
+                        direction: 'none',
+                        random: false,
+                        straight: false,
+                        out_mode: 'out',
+                        bounce: false
+                    }
+                },
+                interactivity: {
+                    detect_on: 'canvas',
+                    events: {
+                        onhover: { enable: true, mode: 'repulse' },
+                        onclick: { enable: true, mode: 'push' },
+                        resize: true
+                    },
+                    modes: {
+                        repulse: { distance: 100, duration: 0.4 },
+                        push: { particles_nb: 4 }
+                    }
+                },
+                retina_detect: true
+            });
+        }
+
+        // Dynamic Theme Colors
+        document.addEventListener('themeChanged', function(e) {
+            const theme = e.detail.theme;
+            
+            // Update chart colors if charts exist
+            if (window.updateChartsTheme) {
+                window.updateChartsTheme(theme);
+            }
+            
+            // Update particles color if particles exist
+            if (window.pJSDom && window.pJSDom[0]) {
+                const particles = window.pJSDom[0].pJS;
+                particles.particles.color.value = theme === 'dark' ? '#ff85c0' : '#ff69b4';
+                particles.particles.line_linked.color = theme === 'dark' ? '#ff85c0' : '#ff69b4';
+                particles.fn.particlesRefresh();
+            }
+        });
+
+        // Keyboard Shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Ctrl + K for search
+            if (e.ctrlKey && e.key === 'k') {
+                e.preventDefault();
+                document.querySelector('input[type="search"]')?.focus();
+            }
+            
+            // Ctrl + / for shortcuts help
+            if (e.ctrlKey && e.key === '/') {
+                e.preventDefault();
+                showNotification('Keyboard shortcuts: Ctrl+K (Search), Ctrl+T (Theme toggle)', 'info');
+            }
+            
+            // Ctrl + T for theme toggle
+            if (e.ctrlKey && e.key === 't') {
+                e.preventDefault();
+                document.getElementById('theme-toggle').click();
+            }
+        });
+
+        // Responsive Table Handling
+        document.querySelectorAll('table').forEach(table => {
+            if (!table.classList.contains('table-responsive')) {
+                const wrapper = document.createElement('div');
+                wrapper.classList.add('table-responsive');
+                table.parentNode.insertBefore(wrapper, table);
+                wrapper.appendChild(table);
+            }
+        });
+
+        // Form Validation Styling
+        document.querySelectorAll('form').forEach(form => {
+            form.addEventListener('submit', function(e) {
+                if (!form.checkValidity()) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    // Find first invalid field
+                    const invalidField = form.querySelector(':invalid');
+                    if (invalidField) {
+                        invalidField.focus();
+                        invalidField.classList.add('is-invalid');
+                        
+                        // Show error notification
+                        showNotification('Please fill in all required fields correctly', 'error');
+                    }
+                }
+                
+                form.classList.add('was-validated');
+            });
+        });
+
+        // Export functions for use in other templates
+        window.showNotification = showNotification;
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
