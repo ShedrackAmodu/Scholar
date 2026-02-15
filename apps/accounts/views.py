@@ -5,7 +5,7 @@ from django.contrib import messages
 from django.contrib.auth.views import PasswordResetView, PasswordChangeView
 from django.contrib.messages.views import SuccessMessageMixin
 from django.contrib.auth.forms import PasswordResetForm
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse, NoReverseMatch
 from django.views.generic import CreateView, UpdateView, ListView, DetailView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q
@@ -13,6 +13,7 @@ from django.http import JsonResponse
 from django.utils import timezone
 
 from .models import User, LoginHistory, Role, Permission
+from django.contrib import admin as django_admin
 from .forms import (
     CustomAuthenticationForm, CustomUserCreationForm, CustomUserChangeForm,
     ProfileUpdateForm, RoleForm, PermissionForm, CustomPasswordResetForm
@@ -167,6 +168,30 @@ def admin_dashboard(request):
     # Recent activities
     recent_logins = LoginHistory.objects.select_related('user').order_by('-login_time')[:10]
     
+    # Build list of all models registered with Django admin and any matching custom admin CRUD links
+    registered = []
+    for model, model_admin in django_admin.site._registry.items():
+        opts = model._meta
+        app_label = opts.app_label
+        model_name = opts.model_name
+        try:
+            django_admin_url = reverse('admin:%s_%s_changelist' % (app_label, model_name))
+        except NoReverseMatch:
+            django_admin_url = None
+        custom_url = None
+        try:
+            custom_url = reverse(f"{app_label}:admin_{model_name}_list")
+        except NoReverseMatch:
+            custom_url = None
+
+        registered.append({
+            'app_label': app_label,
+            'model_name': model_name,
+            'verbose_name': getattr(opts, 'verbose_name_plural', model_name).title(),
+            'django_admin_url': django_admin_url,
+            'custom_url': custom_url,
+        })
+
     context = {
         'school': school,
         'total_students': total_students,
@@ -174,7 +199,8 @@ def admin_dashboard(request):
         'total_parents': total_parents,
         'total_staff': total_staff,
         'recent_logins': recent_logins,
-        'title': 'Admin Dashboard'
+        'title': 'Admin Dashboard',
+        'registered_admin_models': registered,
     }
     return render(request, 'accounts/admin/dashboard.html', context)
 

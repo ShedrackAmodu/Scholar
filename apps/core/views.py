@@ -7,6 +7,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.db.models import Q
+from django.utils import timezone
 from django.contrib.auth import get_user_model
 from apps.academics.models import Subject, Assessment
 from apps.classes.models import Class
@@ -152,15 +153,34 @@ def home_view(request):
     # Get school information for public display
     try:
         from apps.school.models import SchoolProfile
-        school_profile = SchoolProfile.objects.first()
+        school = SchoolProfile.objects.first()
     except:
-        school_profile = None
+        school = None
+    
+    # Get featured events
+    try:
+        from apps.announcements.models import Event
+        featured_events = Event.objects.filter(
+            is_published=True,
+            start_date__gte=timezone.now()
+        ).order_by('start_date')[:3]
+    except:
+        featured_events = []
+    
+    # Get recent notices
+    try:
+        from apps.announcements.models import Notice
+        recent_notices = Notice.objects.filter(
+            is_published=True
+        ).order_by('-publish_date')[:5]
+    except:
+        recent_notices = []
     
     context = {
-        'school_profile': school_profile,
+        'school': school,
+        'featured_events': featured_events,
+        'recent_notices': recent_notices,
         'show_login': True
     }
     
     return render(request, 'home.html', context)
-
-

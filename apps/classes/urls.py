@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from . import admin_views
 
 app_name = 'classes'
 
@@ -32,6 +33,31 @@ urlpatterns = [
     path('allocations/create/', views.SubjectAllocationCreateView.as_view(), name='allocation_create'),
     path('allocations/<int:pk>/edit/', views.SubjectAllocationUpdateView.as_view(), name='allocation_edit'),
     path('allocations/<int:pk>/delete/', views.SubjectAllocationDeleteView.as_view(), name='allocation_delete'),
+    
+    # Admin CRUD routes for Django admin models
+    path('admin/crud/class-levels/', admin_views.ClassLevelAdminListView.as_view(), name='admin_classlevel_list'),
+    path('admin/crud/class-levels/create/', admin_views.ClassLevelAdminCreateView.as_view(), name='admin_classlevel_create'),
+    path('admin/crud/class-levels/<int:pk>/', admin_views.ClassLevelAdminDetailView.as_view(), name='admin_classlevel_detail'),
+    path('admin/crud/class-levels/<int:pk>/edit/', admin_views.ClassLevelAdminUpdateView.as_view(), name='admin_classlevel_edit'),
+    path('admin/crud/class-levels/<int:pk>/delete/', admin_views.ClassLevelAdminDeleteView.as_view(), name='admin_classlevel_delete'),
+    
+    path('admin/crud/classes/', admin_views.ClassAdminListView.as_view(), name='admin_class_list'),
+    path('admin/crud/classes/create/', admin_views.ClassAdminCreateView.as_view(), name='admin_class_create'),
+    path('admin/crud/classes/<int:pk>/', admin_views.ClassAdminDetailView.as_view(), name='admin_class_detail'),
+    path('admin/crud/classes/<int:pk>/edit/', admin_views.ClassAdminUpdateView.as_view(), name='admin_class_edit'),
+    path('admin/crud/classes/<int:pk>/delete/', admin_views.ClassAdminDeleteView.as_view(), name='admin_class_delete'),
+    
+    path('admin/crud/subjects/', admin_views.SubjectAdminListView.as_view(), name='admin_subject_list'),
+    path('admin/crud/subjects/create/', admin_views.SubjectAdminCreateView.as_view(), name='admin_subject_create'),
+    path('admin/crud/subjects/<int:pk>/', admin_views.SubjectAdminDetailView.as_view(), name='admin_subject_detail'),
+    path('admin/crud/subjects/<int:pk>/edit/', admin_views.SubjectAdminUpdateView.as_view(), name='admin_subject_edit'),
+    path('admin/crud/subjects/<int:pk>/delete/', admin_views.SubjectAdminDeleteView.as_view(), name='admin_subject_delete'),
+    
+    path('admin/crud/allocations/', admin_views.SubjectAllocationAdminListView.as_view(), name='admin_subjectallocation_list'),
+    path('admin/crud/allocations/create/', admin_views.SubjectAllocationAdminCreateView.as_view(), name='admin_subjectallocation_create'),
+    path('admin/crud/allocations/<int:pk>/', admin_views.SubjectAllocationAdminDetailView.as_view(), name='admin_subjectallocation_detail'),
+    path('admin/crud/allocations/<int:pk>/edit/', admin_views.SubjectAllocationAdminUpdateView.as_view(), name='admin_subjectallocation_edit'),
+    path('admin/crud/allocations/<int:pk>/delete/', admin_views.SubjectAllocationAdminDeleteView.as_view(), name='admin_subjectallocation_delete'),
     
     # Bulk Operations
     path('bulk/assignment/', views.bulk_class_assignment, name='bulk_class_assignment'),

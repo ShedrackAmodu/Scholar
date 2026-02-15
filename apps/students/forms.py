@@ -132,3 +132,19 @@ class BulkStudentUploadForm(forms.Form):
         if not file.name.endswith('.csv'):
             raise ValidationError("Please upload a CSV file.")
         return file
+
+
+class StudentHistoryForm(forms.ModelForm):
+    """Form for student history records"""
+    
+    class Meta:
+        model = StudentHistory
+        fields = ('student', 'class_assigned', 'academic_year', 'date_from', 'date_to', 'reason')
+        widgets = {
+            'student': forms.Select(attrs={'class': 'form-control'}),
+            'class_assigned': forms.Select(attrs={'class': 'form-control'}),
+            'academic_year': forms.Select(attrs={'class': 'form-control'}),
+            'date_from': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'date_to': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'reason': forms.TextInput(attrs={'class': 'form-control'}),
+        }

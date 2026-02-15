@@ -621,6 +621,43 @@
             </div>
             <!-- additional statistic cards can be added here -->
         </div> <!-- end stats-grid -->
+            <!-- Registered models (Django admin) -->
+            <div class="mt-4 dashboard-card">
+                <div class="card-header">
+                    <div class="card-title"><i class="fas fa-cogs"></i> Registered Admin Models</div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Model</th>
+                                    <th>App</th>
+                                    <th>Links</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for m in registered_admin_models %}
+                                <tr>
+                                    <td>{{ m.verbose_name }}</td>
+                                    <td>{{ m.app_label }}</td>
+                                    <td>
+                                        {% if m.custom_url %}
+                                            <a href="{{ m.custom_url }}" class="btn btn-sm btn-primary">Custom CRUD</a>
+                                        {% endif %}
+                                        {% if m.django_admin_url %}
+                                            <a href="{{ m.django_admin_url }}" class="btn btn-sm btn-secondary">Django Admin</a>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="3">No admin-registered models found.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
     </div> <!-- end container -->
 </div> <!-- end admin-dashboard -->
 

@@ -57,12 +57,14 @@
                     {% endif %}
                 </div>
                 <div class="card-footer">
-                    <a href="{% url 'announcements:assignment_edit' assignment.pk %}" class="btn btn-warning">
-                        <i class="fas fa-edit"></i> Edit
-                    </a>
-                    <a href="{% url 'announcements:assignment_delete' assignment.pk %}" class="btn btn-danger">
-                        <i class="fas fa-trash"></i> Delete
-                    </a>
+                    {% if user.is_teacher %}
+                        <a href="{% url 'announcements:assignment_edit' assignment.pk %}" class="btn btn-warning">
+                            <i class="fas fa-edit"></i> Edit
+                        </a>
+                        <a href="{% url 'announcements:assignment_delete' assignment.pk %}" class="btn btn-danger">
+                            <i class="fas fa-trash"></i> Delete
+                        </a>
+                    {% endif %}
                     <a href="{% url 'announcements:assignment_list' %}" class="btn btn-secondary">
                         <i class="fas fa-arrow-left"></i> Back to List
                     </a>

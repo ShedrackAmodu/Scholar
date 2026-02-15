@@ -9,9 +9,11 @@
         <div class="col-md-12">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h1>Notices</h1>
-                <a href="{% url 'announcements:notice_create' %}" class="btn btn-primary">
-                    <i class="fas fa-plus"></i> Create Notice
-                </a>
+                {% if user.is_admin %}
+                    <a href="{% url 'announcements:notice_create' %}" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Create Notice
+                    </a>
+                {% endif %}
             </div>
 
             {% if notices %}
@@ -47,12 +49,14 @@
                                         <a href="{% url 'announcements:notice_detail' notice.pk %}" class="btn btn-sm btn-info" title="View">
                                             <i class="fas fa-eye"></i>
                                         </a>
-                                        <a href="{% url 'announcements:notice_edit' notice.pk %}" class="btn btn-sm btn-warning" title="Edit">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                        <a href="{% url 'announcements:notice_delete' notice.pk %}" class="btn btn-sm btn-danger" title="Delete">
-                                            <i class="fas fa-trash"></i>
-                                        </a>
+                                        {% if user.is_admin %}
+                                            <a href="{% url 'announcements:notice_edit' notice.pk %}" class="btn btn-sm btn-warning" title="Edit">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <a href="{% url 'announcements:notice_delete' notice.pk %}" class="btn btn-sm btn-danger" title="Delete">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
+                                        {% endif %}
                                     </td>
                                 </tr>
                             {% endfor %}
@@ -61,7 +65,7 @@
                 </div>
             {% else %}
                 <div class="alert alert-info">
-                    No notices created yet. <a href="{% url 'announcements:notice_create' %}">Create one now</a>
+                    No notices created yet. {% if user.is_admin %}<a href="{% url 'announcements:notice_create' %}">Create one now</a>{% endif %}
                 </div>
             {% endif %}
         </div>

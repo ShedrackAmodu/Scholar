@@ -14,7 +14,7 @@
         justify-content: center;
         overflow: hidden;
         padding: 120px 0 80px;
-        background: linear-gradient(135deg, rgba(123, 44, 191, 0.1), rgba(74, 144, 226, 0.1));
+        background: linear-gradient(135deg, rgba(255, 105, 180, 0.1), rgba(255, 182, 193, 0.1));
     }
 
     .hero-content {
@@ -172,7 +172,7 @@
 
     .event-card:hover {
         transform: translateY(-15px);
-        box-shadow: 0 20px 40px rgba(123, 44, 191, 0.3);
+        box-shadow: 0 20px 40px rgba(255, 105, 180, 0.3);
     }
 
     .event-image {
@@ -201,7 +201,7 @@
         padding: 10px 15px;
         border-radius: 10px;
         text-align: center;
-        box-shadow: 0 5px 15px rgba(123, 44, 191, 0.3);
+        box-shadow: 0 5px 15px rgba(255, 105, 180, 0.3);
         z-index: 2;
     }
 
@@ -276,7 +276,7 @@
     /* Noticeboard Section */
     .noticeboard-section {
         padding: 80px 0;
-        background: linear-gradient(135deg, rgba(123, 44, 191, 0.05), rgba(74, 144, 226, 0.05));
+        background: linear-gradient(135deg, rgba(255, 105, 180, 0.05), rgba(255, 182, 193, 0.05));
     }
 
     .notice-card {
@@ -305,7 +305,7 @@
 
     .notice-card:hover {
         transform: translateX(10px);
-        box-shadow: 0 10px 30px rgba(123, 44, 191, 0.2);
+        box-shadow: 0 10px 30px rgba(255, 105, 180, 0.2);
     }
 
     .notice-card.pinned {
@@ -446,7 +446,7 @@
 
     .testimonial-card:hover {
         transform: translateY(-10px);
-        box-shadow: 0 20px 40px rgba(123, 44, 191, 0.2);
+        box-shadow: 0 20px 40px rgba(255, 105, 180, 0.2);
     }
 
     .testimonial-quote {
@@ -533,7 +533,7 @@
         width: 0;
         height: 0;
         border-radius: 50%;
-        background: radial-gradient(circle, rgba(123, 44, 191, 0.2), transparent);
+        background: radial-gradient(circle, rgba(255, 105, 180, 0.2), transparent);
         transform: translate(-50%, -50%);
         transition: width 0.8s, height 0.8s;
     }
@@ -557,7 +557,7 @@
         font-size: 2.5rem;
         border-radius: 50%;
         margin: 0 auto 25px;
-        box-shadow: 0 10px 20px rgba(123, 44, 191, 0.3);
+        box-shadow: 0 10px 20px rgba(255, 105, 180, 0.3);
         transition: var(--transition-bounce);
     }
 
@@ -755,6 +755,11 @@
                     <span class="typewriter" data-words='["Nurturing Brilliance", "Building Futures", "Inspiring Excellence"]'></span>
                 </p>
                 <div class="hero-cta">
+                    {% if not user.is_authenticated %}
+                        <a href="{% url 'accounts:login' %}" class="btn btn-outline-primary btn-lg pulse">
+                            <i class="fas fa-sign-in-alt me-2"></i>Login
+                        </a>
+                    {% endif %}
                     <a href="{% url 'admissions:admission_form' %}" class="btn btn-primary btn-lg pulse">
                         <i class="fas fa-edit me-2"></i>Apply Now
                     </a>

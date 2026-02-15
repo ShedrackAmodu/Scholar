@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from . import admin_views
 
 app_name = 'academics'
 
@@ -35,7 +36,7 @@ urlpatterns = [
     path('api/assessments/', views.get_assessments_for_subject, name='api_get_assessments_for_subject'),
     path('api/students-with-scores/', views.get_students_with_scores, name='api_get_students_with_scores'),
 
-    # Admin URLs
+    # Admin URLs (existing)
     path('admin/assessments/', views.AssessmentListView.as_view(), name='assessment_list'),
     path('admin/assessments/create/', views.AssessmentCreateView.as_view(), name='assessment_create'),
     path('admin/assessments/<int:pk>/edit/', views.AssessmentUpdateView.as_view(), name='assessment_edit'),
@@ -44,4 +45,32 @@ urlpatterns = [
     path('admin/subject-assessments/create/', views.SubjectAssessmentCreateView.as_view(), name='subject_assessment_create'),
     path('admin/subject-assessments/<int:pk>/edit/', views.SubjectAssessmentUpdateView.as_view(), name='subject_assessment_edit'),
     path('admin/subject-assessments/<int:pk>/delete/', views.SubjectAssessmentDeleteView.as_view(), name='subject_assessment_delete'),
+
+    # New Admin CRUD URLs (mirroring Django admin)
+    path('admin/crud/assessments/', admin_views.AssessmentAdminListView.as_view(), name='admin_assessment_list'),
+    path('admin/crud/assessments/create/', admin_views.AssessmentAdminCreateView.as_view(), name='admin_assessment_create'),
+    path('admin/crud/assessments/<int:pk>/edit/', admin_views.AssessmentAdminUpdateView.as_view(), name='admin_assessment_edit'),
+    path('admin/crud/assessments/<int:pk>/', admin_views.AssessmentAdminDetailView.as_view(), name='admin_assessment_detail'),
+    path('admin/crud/assessments/<int:pk>/delete/', admin_views.AssessmentAdminDeleteView.as_view(), name='admin_assessment_delete'),
+
+    path('admin/crud/subject-assessments/', admin_views.SubjectAssessmentAdminListView.as_view(), name='admin_subject_assessment_list'),
+    path('admin/crud/subject-assessments/create/', admin_views.SubjectAssessmentAdminCreateView.as_view(), name='admin_subject_assessment_create'),
+    path('admin/crud/subject-assessments/<int:pk>/edit/', admin_views.SubjectAssessmentAdminUpdateView.as_view(), name='admin_subject_assessment_edit'),
+    path('admin/crud/subject-assessments/<int:pk>/', admin_views.SubjectAssessmentAdminDetailView.as_view(), name='admin_subject_assessment_detail'),
+    path('admin/crud/subject-assessments/<int:pk>/delete/', admin_views.SubjectAssessmentAdminDeleteView.as_view(), name='admin_subject_assessment_delete'),
+
+    path('admin/crud/scores/', admin_views.ScoreAdminListView.as_view(), name='admin_score_list'),
+    path('admin/crud/scores/<int:pk>/', admin_views.ScoreAdminDetailView.as_view(), name='admin_score_detail'),
+    path('admin/crud/scores/<int:pk>/delete/', admin_views.ScoreAdminDeleteView.as_view(), name='admin_score_delete'),
+
+    path('admin/crud/subject-scores/', admin_views.SubjectScoreAdminListView.as_view(), name='admin_subject_score_list'),
+    path('admin/crud/subject-scores/<int:pk>/', admin_views.SubjectScoreAdminDetailView.as_view(), name='admin_subject_score_detail'),
+
+    path('admin/crud/report-cards/', admin_views.ReportCardAdminListView.as_view(), name='admin_report_card_list'),
+    path('admin/crud/report-cards/<int:pk>/', admin_views.ReportCardAdminDetailView.as_view(), name='admin_report_card_detail'),
+    path('admin/crud/report-cards/<int:pk>/delete/', admin_views.ReportCardAdminDeleteView.as_view(), name='admin_report_card_delete'),
+
+    path('admin/crud/class-performances/', admin_views.ClassPerformanceAdminListView.as_view(), name='admin_class_performance_list'),
+    path('admin/crud/class-performances/<int:pk>/', admin_views.ClassPerformanceAdminDetailView.as_view(), name='admin_class_performance_detail'),
+    path('admin/crud/class-performances/<int:pk>/delete/', admin_views.ClassPerformanceAdminDeleteView.as_view(), name='admin_class_performance_delete'),
 ]
