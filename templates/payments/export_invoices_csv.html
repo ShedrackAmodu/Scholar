@@ -1,0 +1,754 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Export Invoices - CSV Export{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Page Header */
+    .page-header {
+        background: linear-gradient(135deg, rgba(123, 44, 191, 0.1), rgba(74, 144, 226, 0.1));
+        padding: 40px 0;
+        margin-bottom: 40px;
+        position: relative;
+        overflow: hidden;
+        border-radius: 0 0 50px 50px;
+    }
+
+    /* Export Container */
+    .export-container {
+        max-width: 800px;
+        margin: 0 auto;
+        animation: fadeInUp 0.8s ease;
+    }
+
+    /* Export Card */
+    .export-card {
+        background: var(--card-bg);
+        backdrop-filter: blur(10px);
+        border: var(--border);
+        border-radius: 30px;
+        padding: 40px;
+        box-shadow: var(--shadow);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .export-card::before {
+        content: '';
+        position: absolute;
+        top: -50px;
+        right: -50px;
+        width: 200px;
+        height: 200px;
+        background: linear-gradient(135deg, var(--primary-pink), var(--secondary-pink));
+        border-radius: 50%;
+        opacity: 0.05;
+        animation: float 15s ease-in-out infinite;
+    }
+
+    /* Export Icon */
+    .export-icon {
+        width: 100px;
+        height: 100px;
+        background: linear-gradient(135deg, var(--primary-pink), var(--dark-pink));
+        border-radius: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 30px;
+        color: white;
+        font-size: 3rem;
+        transform: rotate(-5deg);
+        transition: var(--transition-bounce);
+        animation: float 5s ease-in-out infinite;
+    }
+
+    .export-icon:hover {
+        transform: rotate(0deg) scale(1.1);
+    }
+
+    /* Export Title */
+    .export-title {
+        text-align: center;
+        margin-bottom: 40px;
+    }
+
+    .export-title h2 {
+        font-family: 'Playfair Display', serif;
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 15px;
+        background: linear-gradient(135deg, var(--primary-pink), var(--dark-pink));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .export-title p {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+    }
+
+    /* Filter Section */
+    .filter-section {
+        background: rgba(123, 44, 191, 0.05);
+        border-radius: 20px;
+        padding: 30px;
+        margin-bottom: 30px;
+    }
+
+    .filter-title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 25px;
+    }
+
+    .filter-title i {
+        font-size: 1.5rem;
+        color: var(--primary-pink);
+    }
+
+    .filter-title h4 {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin: 0;
+    }
+
+    /* Form Groups */
+    .form-group {
+        margin-bottom: 20px;
+        animation: fadeInUp 0.5s ease;
+        animation-fill-mode: both;
+    }
+
+    .form-group:nth-child(1) { animation-delay: 0.1s; }
+    .form-group:nth-child(2) { animation-delay: 0.15s; }
+    .form-group:nth-child(3) { animation-delay: 0.2s; }
+    .form-group:nth-child(4) { animation-delay: 0.25s; }
+
+    .form-label {
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 10px;
+        display: block;
+    }
+
+    .form-label i {
+        color: var(--primary-pink);
+        margin-right: 8px;
+    }
+
+    .form-control, .form-select {
+        background: var(--card-bg);
+        border: 2px solid rgba(123, 44, 191, 0.1);
+        border-radius: 15px;
+        padding: 12px 20px;
+        color: var(--text-primary);
+        transition: var(--transition-smooth);
+        width: 100%;
+    }
+
+    .form-control:focus, .form-select:focus {
+        outline: none;
+        border-color: var(--primary-pink);
+        box-shadow: 0 0 0 5px rgba(123, 44, 191, 0.1);
+        transform: translateY(-2px);
+    }
+
+    /* Date Range */
+    .date-range {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+    }
+
+    /* Export Options */
+    .export-options {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin: 30px 0;
+    }
+
+    .export-option {
+        position: relative;
+        cursor: pointer;
+    }
+
+    .export-option input[type="radio"] {
+        position: absolute;
+        opacity: 0;
+    }
+
+    .option-card {
+        background: var(--card-bg);
+        border: 2px solid rgba(123, 44, 191, 0.1);
+        border-radius: 15px;
+        padding: 20px;
+        text-align: center;
+        transition: var(--transition-bounce);
+    }
+
+    .export-option input[type="radio"]:checked + .option-card {
+        border-color: var(--primary-pink);
+        background: rgba(123, 44, 191, 0.05);
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(123, 44, 191, 0.2);
+    }
+
+    .option-icon {
+        font-size: 2rem;
+        color: var(--primary-pink);
+        margin-bottom: 10px;
+    }
+
+    .option-name {
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 5px;
+    }
+
+    .option-desc {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+    }
+
+    /* Export Button */
+    .export-btn {
+        background: linear-gradient(135deg, var(--primary-pink), var(--dark-pink));
+        color: white;
+        border: none;
+        border-radius: 15px;
+        padding: 18px 40px;
+        font-size: 1.2rem;
+        font-weight: 600;
+        width: 100%;
+        transition: var(--transition-bounce);
+        position: relative;
+        overflow: hidden;
+        margin-top: 20px;
+    }
+
+    .export-btn::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        transform: translate(-50%, -50%);
+        transition: width 0.6s, height 0.6s;
+    }
+
+    .export-btn:hover::before {
+        width: 300px;
+        height: 300px;
+    }
+
+    .export-btn:hover {
+        transform: translateY(-3px) scale(1.02);
+        box-shadow: 0 10px 30px rgba(123, 44, 191, 0.4);
+    }
+
+    .export-btn i {
+        margin-right: 10px;
+    }
+
+    /* Preview Table */
+    .preview-section {
+        margin-top: 40px;
+        padding-top: 40px;
+        border-top: var(--border);
+    }
+
+    .preview-title {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 20px;
+    }
+
+    .preview-title h4 {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin: 0;
+    }
+
+    .preview-badge {
+        background: linear-gradient(135deg, var(--primary-pink), var(--dark-pink));
+        color: white;
+        padding: 5px 15px;
+        border-radius: 50px;
+        font-size: 0.9rem;
+    }
+
+    .preview-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.9rem;
+    }
+
+    .preview-table th {
+        background: rgba(123, 44, 191, 0.1);
+        padding: 12px;
+        text-align: left;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .preview-table td {
+        padding: 12px;
+        border-bottom: var(--border);
+        color: var(--text-secondary);
+    }
+
+    /* Animations */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translate(0, 0) rotate(0deg); }
+        25% { transform: translate(30px, 30px) rotate(5deg); }
+        50% { transform: translate(-20px, 50px) rotate(-5deg); }
+        75% { transform: translate(40px, -20px) rotate(3deg); }
+    }
+
+    /* Progress Bar */
+    .export-progress {
+        display: none;
+        margin-top: 20px;
+    }
+
+    .progress {
+        height: 10px;
+        background: rgba(123, 44, 191, 0.1);
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .progress-bar {
+        height: 100%;
+        background: linear-gradient(135deg, var(--primary-pink), var(--dark-pink));
+        width: 0%;
+        transition: width 0.3s ease;
+    }
+
+    .progress-text {
+        text-align: center;
+        margin-top: 10px;
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .export-card {
+            padding: 25px;
+        }
+        
+        .date-range {
+            grid-template-columns: 1fr;
+        }
+        
+        .export-options {
+            grid-template-columns: 1fr;
+        }
+        
+        .export-title h2 {
+            font-size: 2rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="page-header">
+    <div class="container">
+        <h1 class="page-title gradient-text">
+            <i class="fas fa-file-export me-3"></i>Export Invoices
+        </h1>
+        <div class="page-breadcrumb">
+            <a href="{% url 'school:home' %}">Home</a>
+            <span class="separator"><i class="fas fa-chevron-right"></i></span>
+            <a href="{% url 'accounts:admin_dashboard' %}">Dashboard</a>
+            <span class="separator"><i class="fas fa-chevron-right"></i></span>
+            <a href="{% url 'payments:fee_categories' %}">Payments</a>
+            <span class="separator"><i class="fas fa-chevron-right"></i></span>
+            <span class="active">Export Invoices</span>
+        </div>
+    </div>
+</div>
+
+<div class="container mb-5">
+    <div class="export-container">
+        <!-- Export Card -->
+        <div class="export-card">
+            <div class="export-icon">
+                <i class="fas fa-file-csv"></i>
+            </div>
+
+            <div class="export-title">
+                <h2>Export Invoices to CSV</h2>
+                <p>Select your export preferences and download invoice data</p>
+            </div>
+
+            <form id="exportForm" method="post" action="{% url 'payments:export_invoices_csv' %}">
+                {% csrf_token %}
+                
+                <!-- Filter Section -->
+                <div class="filter-section">
+                    <div class="filter-title">
+                        <i class="fas fa-filter"></i>
+                        <h4>Filter Options</h4>
+                    </div>
+
+                    <!-- Date Range -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-calendar-alt"></i>Date Range
+                        </label>
+                        <div class="date-range">
+                            <input type="date" class="form-control" name="date_from" placeholder="From Date">
+                            <input type="date" class="form-control" name="date_to" placeholder="To Date">
+                        </div>
+                    </div>
+
+                    <!-- Status Filter -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-tag"></i>Invoice Status
+                        </label>
+                        <select class="form-select" name="status">
+                            <option value="all">All Statuses</option>
+                            <option value="PAID">Paid</option>
+                            <option value="PART">Partially Paid</option>
+                            <option value="PEND">Pending</option>
+                            <option value="OVER">Overdue</option>
+                        </select>
+                    </div>
+
+                    <!-- Class Filter -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-users"></i>Class
+                        </label>
+                        <select class="form-select" name="class">
+                            <option value="all">All Classes</option>
+                            {% for class in classes %}
+                            <option value="{{ class.id }}">{{ class.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Term Filter -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-clock"></i>Term
+                        </label>
+                        <select class="form-select" name="term">
+                            <option value="all">All Terms</option>
+                            <option value="1ST">First Term</option>
+                            <option value="2ND">Second Term</option>
+                            <option value="3RD">Third Term</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Export Options -->
+                <div class="export-options">
+                    <label class="export-option">
+                        <input type="radio" name="export_type" value="summary" checked>
+                        <div class="option-card">
+                            <div class="option-icon">
+                                <i class="fas fa-chart-pie"></i>
+                            </div>
+                            <div class="option-name">Summary Report</div>
+                            <div class="option-desc">Overall invoice summary</div>
+                        </div>
+                    </label>
+
+                    <label class="export-option">
+                        <input type="radio" name="export_type" value="detailed">
+                        <div class="option-card">
+                            <div class="option-icon">
+                                <i class="fas fa-list"></i>
+                            </div>
+                            <div class="option-name">Detailed Report</div>
+                            <div class="option-desc">All invoice details</div>
+                        </div>
+                    </label>
+
+                    <label class="export-option">
+                        <input type="radio" name="export_type" value="payments">
+                        <div class="option-card">
+                            <div class="option-icon">
+                                <i class="fas fa-credit-card"></i>
+                            </div>
+                            <div class="option-name">Payments Only</div>
+                            <div class="option-desc">Payment transactions</div>
+                        </div>
+                    </label>
+
+                    <label class="export-option">
+                        <input type="radio" name="export_type" value="defaulters">
+                        <div class="option-card">
+                            <div class="option-icon">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
+                            <div class="option-name">Defaulters</div>
+                            <div class="option-desc">Students with overdue</div>
+                        </div>
+                    </label>
+                </div>
+
+                <!-- Include Headers Checkbox -->
+                <div class="form-check mb-3">
+                    <input type="checkbox" class="form-check-input" name="include_headers" id="includeHeaders" checked>
+                    <label class="form-check-label" for="includeHeaders">
+                        Include column headers in CSV
+                    </label>
+                </div>
+
+                <!-- Export Button -->
+                <button type="submit" class="export-btn" id="exportBtn">
+                    <i class="fas fa-download"></i>
+                    <span id="exportBtnText">Generate Export</span>
+                </button>
+
+                <!-- Progress Bar -->
+                <div class="export-progress" id="exportProgress">
+                    <div class="progress">
+                        <div class="progress-bar" id="progressBar"></div>
+                    </div>
+                    <div class="progress-text" id="progressText">Preparing export...</div>
+                </div>
+            </form>
+
+            <!-- Preview Section -->
+            <div class="preview-section">
+                <div class="preview-title">
+                    <h4><i class="fas fa-eye me-2" style="color: var(--primary-pink);"></i>Preview</h4>
+                    <span class="preview-badge">{{ total_invoices }} Invoices Found</span>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="preview-table">
+                        <thead>
+                            <tr>
+                                <th>Invoice #</th>
+                                <th>Student</th>
+                                <th>Class</th>
+                                <th>Amount</th>
+                                <th>Paid</th>
+                                <th>Balance</th>
+                                <th>Status</th>
+                                <th>Due Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for invoice in recent_invoices|slice:":5" %}
+                            <tr>
+                                <td><strong>{{ invoice.invoice_number }}</strong></td>
+                                <td>{{ invoice.student.user.get_full_name }}</td>
+                                <td>{{ invoice.student.class_assigned.name }}</td>
+                                <td>₦{{ invoice.total_amount|floatformat:2 }}</td>
+                                <td>₦{{ invoice.amount_paid|floatformat:2 }}</td>
+                                <td>₦{{ invoice.balance|floatformat:2 }}</td>
+                                <td>
+                                    <span class="badge bg-{% if invoice.status == 'PAID' %}success{% elif invoice.status == 'PART' %}warning{% elif invoice.status == 'OVER' %}danger{% else %}info{% endif %}">
+                                        {{ invoice.get_status_display }}
+                                    </span>
+                                </td>
+                                <td>{{ invoice.due_date|date:"Y-m-d" }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="8" class="text-center py-4">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    No invoices found
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                {% if total_invoices > 5 %}
+                <div class="text-center mt-3">
+                    <small class="text-muted">
+                        Showing 5 of {{ total_invoices }} invoices. All will be included in export.
+                    </small>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Info Cards -->
+        <div class="row mt-4">
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-file-csv fa-2x mb-3" style="color: var(--primary-pink);"></i>
+                        <h6>CSV Format</h6>
+                        <p class="text-muted small">Compatible with Excel, Google Sheets, and other spreadsheet software</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-clock fa-2x mb-3" style="color: var(--primary-pink);"></i>
+                        <h6>Real-time Data</h6>
+                        <p class="text-muted small">Export includes the most up-to-date invoice information</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-shield-alt fa-2x mb-3" style="color: var(--primary-pink);"></i>
+                        <h6>Secure Export</h6>
+                        <p class="text-muted small">All data is encrypted during transfer and download</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.getElementById('exportForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Show progress bar
+        const progress = document.getElementById('exportProgress');
+        const exportBtn = document.getElementById('exportBtn');
+        const exportBtnText = document.getElementById('exportBtnText');
+        
+        progress.style.display = 'block';
+        exportBtn.disabled = true;
+        exportBtnText.textContent = 'Exporting...';
+        
+        // Simulate progress
+        let width = 0;
+        const progressBar = document.getElementById('progressBar');
+        const progressText = document.getElementById('progressText');
+        
+        const interval = setInterval(() => {
+            if (width >= 100) {
+                clearInterval(interval);
+                progressText.textContent = 'Export complete! Downloading...';
+                
+                // Submit the form
+                setTimeout(() => {
+                    document.getElementById('exportForm').submit();
+                }, 500);
+            } else {
+                width += 10;
+                progressBar.style.width = width + '%';
+                progressText.textContent = `Preparing export... ${width}%`;
+            }
+        }, 300);
+    });
+
+    // Update preview based on filters (simulated)
+    document.querySelectorAll('.form-select, .form-control').forEach(input => {
+        input.addEventListener('change', function() {
+            showNotification('Preview updated based on filters', 'info');
+        });
+    });
+
+    // Export type selection animation
+    document.querySelectorAll('.export-option input[type="radio"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            const optionCard = this.nextElementSibling;
+            optionCard.style.animation = 'pulse 0.5s ease';
+            setTimeout(() => {
+                optionCard.style.animation = '';
+            }, 500);
+        });
+    });
+
+    // Date range validation
+    const dateFrom = document.querySelector('input[name="date_from"]');
+    const dateTo = document.querySelector('input[name="date_to"]');
+    
+    dateTo.addEventListener('change', function() {
+        if (dateFrom.value && this.value && this.value < dateFrom.value) {
+            showNotification('To date must be after from date', 'error');
+            this.value = '';
+        }
+    });
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        // Ctrl + E to export
+        if (e.ctrlKey && e.key === 'e') {
+            e.preventDefault();
+            document.getElementById('exportForm').submit();
+        }
+        
+        // Ctrl + R to reset filters
+        if (e.ctrlKey && e.key === 'r') {
+            e.preventDefault();
+            document.querySelectorAll('.form-control, .form-select').forEach(input => {
+                input.value = '';
+            });
+            document.querySelector('input[name="export_type"][value="summary"]').checked = true;
+            showNotification('Filters reset', 'info');
+        }
+    });
+
+    // Show export summary
+    function showExportSummary() {
+        const exportType = document.querySelector('input[name="export_type"]:checked').nextElementSibling.querySelector('.option-name').textContent;
+        const status = document.querySelector('select[name="status"]').options[document.querySelector('select[name="status"]').selectedIndex].text;
+        
+        showNotification(`Preparing ${exportType} for ${status} invoices`, 'info');
+    }
+
+    // Initialize tooltips
+    document.addEventListener('DOMContentLoaded', function() {
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'));
+        tooltipTriggerList.map(function(tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    });
+
+    // Download counter
+    let downloadCount = parseInt(localStorage.getItem('exportCount') || '0');
+    
+    document.getElementById('exportForm').addEventListener('submit', function() {
+        downloadCount++;
+        localStorage.setItem('exportCount', downloadCount);
+        
+        if (downloadCount === 5) {
+            showNotification('You\'ve made 5 exports today! Consider scheduling regular reports.', 'info');
+        }
+    });
+
+    // Format file name with timestamp
+    function getFormattedFileName() {
+        const now = new Date();
+        const timestamp = now.toISOString().slice(0,19).replace(/[-:T]/g, '');
+        const exportType = document.querySelector('input[name="export_type"]:checked').nextElementSibling.querySelector('.option-name').textContent.toLowerCase().replace(' ', '_');
+        return `invoices_${exportType}_${timestamp}.csv`;
+    }
+</script>
+{% endblock %}

@@ -1,24 +1,612 @@
-{% load static %}
 {% extends 'base.html' %}
+{% load static %}
 
-{% block title %}Assessment Confirm Delete{% endblock %}
-
-{% block content %}
-<div class="container py-5">
-    <h1 class="display-4 text-center mb-4" data-aos="fade-down">Assessment Confirm Delete</h1>
-    <p class="lead text-center" data-aos="fade-up" data-aos-delay="200">This is the Assessment Confirm Delete page. Customize the structure and content here as needed.</p>
-    <!-- Add your form, table, or other components below -->
-</div>
-{% endblock %}
+{% block title %}Delete Assessment{% endblock %}
 
 {% block extra_css %}
 <style>
-/* Styles specific to Assessment Confirm Delete */
+    /* Page Header */
+    .page-header {
+        background: linear-gradient(135deg, #e17055, #d63031);
+        padding: 50px 0;
+        margin-bottom: 40px;
+        border-radius: 0 0 50px 50px;
+        color: white;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .page-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -30%;
+        width: 400px;
+        height: 400px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        animation: float 20s ease-in-out infinite;
+    }
+
+    .header-content {
+        position: relative;
+        z-index: 2;
+    }
+
+    .header-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 15px;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .header-subtitle {
+        font-size: 1.1rem;
+        opacity: 0.95;
+    }
+
+    /* Warning Card */
+    .warning-card {
+        background: var(--card-bg);
+        border: var(--border);
+        border-radius: 30px;
+        padding: 40px;
+        box-shadow: var(--shadow);
+        margin-bottom: 40px;
+        position: relative;
+        overflow: hidden;
+        border-left: 5px solid #e17055;
+    }
+
+    .warning-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 150px;
+        height: 150px;
+        background: linear-gradient(135deg, #e17055, #d63031);
+        opacity: 0.1;
+        border-radius: 0 0 0 100%;
+    }
+
+    .warning-header {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+
+    .warning-icon {
+        width: 60px;
+        height: 60px;
+        line-height: 60px;
+        text-align: center;
+        background: linear-gradient(135deg, #e17055, #d63031);
+        color: white;
+        border-radius: 20px;
+        font-size: 1.8rem;
+        transition: var(--transition-bounce);
+    }
+
+    .warning-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0;
+    }
+
+    .warning-subtitle {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        margin: 0;
+    }
+
+    /* Assessment Info */
+    .assessment-info {
+        background: rgba(225, 112, 85, 0.1);
+        border-radius: 20px;
+        padding: 25px;
+        margin-bottom: 30px;
+        border: 2px solid rgba(225, 112, 85, 0.3);
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+    }
+
+    .info-item {
+        background: var(--card-bg);
+        border: var(--border);
+        border-radius: 15px;
+        padding: 20px;
+        text-align: center;
+    }
+
+    .info-label {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        margin-bottom: 5px;
+        display: block;
+    }
+
+    .info-value {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .type-badge {
+        display: inline-block;
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+    }
+
+    .badge-test { background: linear-gradient(135deg, #00b894, #00cec9); color: white; }
+    .badge-exam { background: linear-gradient(135deg, #0984e3, #74b9ff); color: white; }
+    .badge-project { background: linear-gradient(135deg, #fdcb6e, #ffeaa7); color: #2d3436; }
+    .badge-assignment { background: linear-gradient(135deg, #e17055, #fab1a0); color: white; }
+
+    /* Impact Section */
+    .impact-section {
+        background: rgba(225, 112, 85, 0.1);
+        border-radius: 20px;
+        padding: 25px;
+        margin-bottom: 30px;
+        border: 2px solid rgba(225, 112, 85, 0.3);
+    }
+
+    .impact-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #e17055;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .impact-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .impact-list li {
+        padding: 10px 0;
+        border-bottom: 1px solid rgba(225, 112, 85, 0.3);
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .impact-list li:last-child {
+        border-bottom: none;
+    }
+
+    .impact-icon {
+        width: 30px;
+        height: 30px;
+        line-height: 30px;
+        text-align: center;
+        background: rgba(225, 112, 85, 0.2);
+        color: #e17055;
+        border-radius: 50%;
+        font-size: 0.9rem;
+    }
+
+    .impact-text {
+        color: var(--text-primary);
+        font-weight: 500;
+    }
+
+    /* Confirmation Section */
+    .confirmation-section {
+        background: rgba(225, 112, 85, 0.1);
+        border-radius: 20px;
+        padding: 25px;
+        margin-bottom: 30px;
+        border: 2px solid rgba(225, 112, 85, 0.3);
+    }
+
+    .confirmation-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 15px;
+    }
+
+    .confirmation-text {
+        color: var(--text-secondary);
+        margin-bottom: 20px;
+        line-height: 1.6;
+    }
+
+    .confirmation-input {
+        background: var(--card-bg);
+        border: 2px solid var(--border);
+        border-radius: 15px;
+        padding: 15px 20px;
+        color: var(--text-primary);
+        font-size: 1rem;
+        width: 100%;
+        transition: var(--transition-smooth);
+    }
+
+    .confirmation-input:focus {
+        border-color: #e17055;
+        box-shadow: 0 0 0 0.2rem rgba(225, 112, 85, 0.25);
+        outline: none;
+    }
+
+    .confirmation-input.is-valid {
+        border-color: #00b894;
+        box-shadow: 0 0 0 0.2rem rgba(0, 184, 148, 0.25);
+    }
+
+    .confirmation-input.is-invalid {
+        border-color: #e17055;
+        box-shadow: 0 0 0 0.2rem rgba(225, 112, 85, 0.25);
+    }
+
+    /* Action Buttons */
+    .action-buttons {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        margin-top: 40px;
+    }
+
+    .btn-danger {
+        background: linear-gradient(135deg, #e17055, #d63031);
+        color: white;
+        padding: 15px 40px;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 1.1rem;
+        border: none;
+        cursor: pointer;
+        transition: var(--transition-bounce);
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        opacity: 0.5;
+        pointer-events: none;
+    }
+
+    .btn-danger.enabled {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    .btn-danger.enabled:hover {
+        transform: translateY(-3px) scale(1.02);
+        box-shadow: 0 20px 40px rgba(225, 112, 85, 0.4);
+    }
+
+    .btn-danger::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.3);
+        transform: translate(-50%, -50%);
+        transition: width 0.6s, height 0.6s;
+        z-index: 0;
+    }
+
+    .btn-danger:hover::before {
+        width: 300px;
+        height: 300px;
+    }
+
+    .btn-danger i, .btn-danger span {
+        position: relative;
+        z-index: 2;
+    }
+
+    .btn-secondary {
+        background: var(--card-bg);
+        border: 2px solid #e17055;
+        color: #e17055;
+        padding: 15px 40px;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: var(--transition-smooth);
+    }
+
+    .btn-secondary:hover {
+        background: linear-gradient(135deg, #e17055, #d63031);
+        color: white;
+        transform: translateY(-3px);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .header-title {
+            font-size: 2rem;
+        }
+
+        .warning-card {
+            padding: 25px;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+        }
+
+        .btn-danger, .btn-secondary {
+            width: 100%;
+        }
+    }
 </style>
+{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<section class="page-header">
+    <div class="container header-content">
+        <h1 class="header-title animate__animated animate__fadeInDown">
+            <i class="fas fa-exclamation-triangle me-3"></i>Delete Assessment
+        </h1>
+        <p class="header-subtitle animate__animated animate__fadeInUp">
+            This action cannot be undone. Please review the impact before proceeding.
+        </p>
+    </div>
+</section>
+
+<div class="container">
+    <div class="warning-card animate__animated animate__fadeInUp">
+        <div class="warning-header">
+            <div class="warning-icon">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <div>
+                <h2 class="warning-title">Confirm Assessment Deletion</h2>
+                <p class="warning-subtitle">You are about to delete an assessment that may affect multiple records</p>
+            </div>
+        </div>
+
+        <!-- Assessment Information -->
+        <div class="assessment-info">
+            <h3 class="mb-3">Assessment Details</h3>
+            <div class="info-grid">
+                <div class="info-item">
+                    <span class="info-label">Assessment Name</span>
+                    <span class="info-value">{{ object.name }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Type</span>
+                    <span class="type-badge badge-{{ object.assessment_type|lower }}">
+                        <i class="fas fa-{{ object.get_assessment_type_icon }}"></i>
+                        {{ object.get_assessment_type_display }}
+                    </span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Class Level</span>
+                    <span class="info-value">{{ object.class_level.name }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Weight</span>
+                    <span class="info-value">{{ object.weight_percentage }}%</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Impact Section -->
+        <div class="impact-section">
+            <div class="impact-title">
+                <i class="fas fa-info-circle"></i>
+                Impact of Deletion
+            </div>
+            <ul class="impact-list">
+                <li>
+                    <div class="impact-icon">
+                        <i class="fas fa-database"></i>
+                    </div>
+                    <div class="impact-text">
+                        All subject assessments linked to this assessment will be deleted
+                    </div>
+                </li>
+                <li>
+                    <div class="impact-icon">
+                        <i class="fas fa-chart-bar"></i>
+                    </div>
+                    <div class="impact-text">
+                        All student scores for this assessment will be permanently removed
+                    </div>
+                </li>
+                <li>
+                    <div class="impact-icon">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+                    <div class="impact-text">
+                        Report cards containing scores from this assessment will be affected
+                    </div>
+                </li>
+                <li>
+                    <div class="impact-icon">
+                        <i class="fas fa-calculator"></i>
+                    </div>
+                    <div class="impact-text">
+                        Class averages and student averages will be recalculated
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Confirmation Section -->
+        <div class="confirmation-section">
+            <div class="confirmation-title">Confirmation Required</div>
+            <div class="confirmation-text">
+                To confirm deletion, please type the assessment name below:
+            </div>
+            <input type="text" 
+                   class="confirmation-input" 
+                   id="confirmationInput" 
+                   placeholder="Type '{{ object.name }}' to confirm"
+                   autocomplete="off">
+        </div>
+
+        <!-- Form -->
+        <form method="post" id="deleteForm">
+            {% csrf_token %}
+            
+            <div class="action-buttons">
+                <a href="{% url 'academics:assessment_list' %}" class="btn-secondary">
+                    <i class="fas fa-arrow-left"></i>
+                    <span>Cancel</span>
+                </a>
+                <button type="submit" class="btn-danger" id="deleteButton" disabled>
+                    <i class="fas fa-trash"></i>
+                    <span>Delete Assessment</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Success Modal -->
+<div class="modal fade" id="successModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content text-center">
+            <div class="modal-body p-5">
+                <div class="mb-4">
+                    <i class="fas fa-check-circle text-success" style="font-size: 4rem;"></i>
+                </div>
+                <h4 class="modal-title mb-2">Assessment Deleted Successfully!</h4>
+                <p class="text-secondary">The assessment has been permanently deleted from the system.</p>
+                <div class="d-flex gap-2 justify-content-center mt-4">
+                    <a href="{% url 'academics:assessment_list' %}" class="btn btn-primary">
+                        <i class="fas fa-list me-2"></i>View All Assessments
+                    </a>
+                    <a href="{% url 'academics:assessment_create' %}" class="btn btn-outline-primary">
+                        <i class="fas fa-plus me-2"></i>Create New
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Error Modal -->
+<div class="modal fade" id="errorModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content text-center">
+            <div class="modal-body p-5">
+                <div class="mb-4">
+                    <i class="fas fa-exclamation-triangle text-warning" style="font-size: 4rem;"></i>
+                </div>
+                <h4 class="modal-title mb-2">Cannot Delete Assessment</h4>
+                <p class="text-secondary">This assessment cannot be deleted because it has associated records.</p>
+                <div class="alert alert-warning mt-3">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Please remove all associated scores and subject assessments first.
+                </div>
+                <div class="d-flex gap-2 justify-content-center mt-4">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
+                        <i class="fas fa-check me-2"></i>OK
+                    </button>
+                    <a href="{% url 'academics:assessment_list' %}" class="btn btn-outline-primary">
+                        <i class="fas fa-list me-2"></i>Back to List
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-// JS for Assessment Confirm Delete
+    // Confirmation input validation
+    const confirmationInput = document.getElementById('confirmationInput');
+    const deleteButton = document.getElementById('deleteButton');
+    const assessmentName = "{{ object.name }}";
+
+    confirmationInput.addEventListener('input', function() {
+        const value = this.value.trim();
+        
+        if (value === assessmentName) {
+            this.classList.remove('is-invalid');
+            this.classList.add('is-valid');
+            deleteButton.classList.add('enabled');
+            deleteButton.disabled = false;
+        } else {
+            this.classList.remove('is-valid');
+            this.classList.add('is-invalid');
+            deleteButton.classList.remove('enabled');
+            deleteButton.disabled = true;
+        }
+    });
+
+    // Form submission
+    document.getElementById('deleteForm').addEventListener('submit', function(e) {
+        if (!deleteButton.disabled) {
+            // Show loading state
+            deleteButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Deleting...</span>';
+            deleteButton.disabled = true;
+            
+            // Simulate server response (in real implementation, this would be handled by Django)
+            setTimeout(() => {
+                const modal = new bootstrap.Modal(document.getElementById('successModal'));
+                modal.show();
+            }, 1000);
+        } else {
+            e.preventDefault();
+            showNotification('Please confirm by typing the assessment name', 'error');
+        }
+    });
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        // Ctrl + D to focus confirmation
+        if (e.ctrlKey && e.key === 'd') {
+            e.preventDefault();
+            confirmationInput.focus();
+        }
+        
+        // Enter to submit if confirmed
+        if (e.key === 'Enter' && !deleteButton.disabled) {
+            e.preventDefault();
+            document.getElementById('deleteForm').requestSubmit();
+        }
+    });
+
+    // Initialize tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+
+    // Hover effects
+    deleteButton.addEventListener('mouseenter', function() {
+        if (this.classList.contains('enabled')) {
+            this.style.transform = 'translateY(-5px) scale(1.05)';
+        }
+    });
+    
+    deleteButton.addEventListener('mouseleave', function() {
+        this.style.transform = 'translateY(0) scale(1)';
+    });
+
+    // Show notification
+    function showNotification(message, type) {
+        // You can implement a toast notification here
+        console.log(`${type}: ${message}`);
+    }
 </script>
 {% endblock %}

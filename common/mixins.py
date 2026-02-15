@@ -12,7 +12,7 @@ class RoleRequiredMixin(UserPassesTestMixin):
     
     def handle_no_permission(self):
         messages.error(self.request, "You don't have permission to access this page.")
-        return redirect('dashboard:home')
+        return redirect('core:dashboard')
 
 
 class AdminRequiredMixin(RoleRequiredMixin):

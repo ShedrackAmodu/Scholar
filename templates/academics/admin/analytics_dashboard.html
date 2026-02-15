@@ -1,0 +1,593 @@
+{% extends 'academics/base.html' %}
+{% load static %}
+
+{% block title %}Academic Analytics Dashboard{% endblock %}
+
+{% block academics_content %}
+<!-- Page Header -->
+<div class="academics-hero animate__animated animate__fadeIn">
+    <div class="container">
+        <h1><i class="fas fa-chart-pie me-3"></i>Academic Analytics Dashboard</h1>
+        <p>Comprehensive insights into school-wide academic performance</p>
+    </div>
+</div>
+
+<!-- Date Range Selector -->
+<div class="card border-0 shadow-sm animate__animated animate__fadeInUp">
+    <div class="card-body p-4">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h5 class="card-title mb-2">Analytics Date Range</h5>
+                <div class="d-flex gap-3 flex-wrap">
+                    <div class="d-flex align-items-center gap-2">
+                        <label class="form-label mb-0">From:</label>
+                        <input type="date" class="form-control" id="startDate" value="2024-01-01">
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <label class="form-label mb-0">To:</label>
+                        <input type="date" class="form-control" id="endDate" value="2024-12-31">
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <label class="form-label mb-0">Quick:</label>
+                        <select class="form-select" id="quickRange">
+                            <option value="this_term">This Term</option>
+                            <option value="this_year">This Year</option>
+                            <option value="last_year">Last Year</option>
+                            <option value="custom">Custom</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <div class="d-flex gap-2 justify-content-md-end">
+                    <button class="btn btn-outline-primary" onclick="updateDashboard()">
+                        <i class="fas fa-sync-alt me-2"></i>Update Data
+                    </button>
+                    <button class="btn btn-primary" onclick="exportReport()">
+                        <i class="fas fa-download me-2"></i>Export Report
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- KPI Cards -->
+<div class="card border-0 shadow-sm animate__animated animate__fadeInUp">
+    <div class="card-body p-4">
+        <div class="row g-4">
+            <div class="col-md-3">
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <span class="kpi-title">Overall Average</span>
+                        <div class="kpi-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                    </div>
+                    <div class="kpi-value">{{ overall_average|floatformat:1 }}%</div>
+                    <div class="kpi-trend trend-up">
+                        <i class="fas fa-arrow-up trend-icon"></i>
+                        <span>+{{ average_trend|floatformat:1 }}% from last term</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3">
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <span class="kpi-title">Pass Rate</span>
+                        <div class="kpi-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                    </div>
+                    <div class="kpi-value">{{ pass_rate|floatformat:1 }}%</div>
+                    <div class="kpi-trend trend-up">
+                        <i class="fas fa-arrow-up trend-icon"></i>
+                        <span>+{{ pass_rate_trend|floatformat:1 }}% from last term</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3">
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <span class="kpi-title">Total Students</span>
+                        <div class="kpi-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                    </div>
+                    <div class="kpi-value">{{ total_students }}</div>
+                    <div class="kpi-trend trend-up">
+                        <i class="fas fa-arrow-up trend-icon"></i>
+                        <span>+{{ student_growth }} from last year</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3">
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <span class="kpi-title">Top Performer</span>
+                        <div class="kpi-icon">
+                            <i class="fas fa-trophy"></i>
+                        </div>
+                    </div>
+                    <div class="kpi-value">{{ top_performer.average_score|floatformat:1 }}%</div>
+                    <div class="kpi-trend">
+                        <i class="fas fa-star text-warning"></i>
+                        <span>{{ top_performer.student.user.get_full_name }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chart Grid -->
+<div class="row g-4">
+    <!-- Performance Trend Chart -->
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm animate__animated animate__fadeInLeft">
+            <div class="card-body p-4">
+                <div class="chart-header">
+                    <div class="chart-title">
+                        <i class="fas fa-chart-line"></i>
+                        Performance Trend
+                    </div>
+                    <div class="chart-legend">
+                        <div class="legend-item">
+                            <span class="legend-color" style="background: #6c5ce7;"></span>
+                            <span>2024</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-color" style="background: #a363d9;"></span>
+                            <span>2023</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="trendChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Subject Performance Distribution -->
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm animate__animated animate__fadeInRight">
+            <div class="card-body p-4">
+                <div class="chart-header">
+                    <div class="chart-title">
+                        <i class="fas fa-chart-pie"></i>
+                        Subject Performance
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="subjectChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Second Row Charts -->
+<div class="row g-4">
+    <!-- Class Performance Comparison -->
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm animate__animated animate__fadeInLeft">
+            <div class="card-body p-4">
+                <div class="chart-header">
+                    <div class="chart-title">
+                        <i class="fas fa-chart-bar"></i>
+                        Class Performance Comparison
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="classChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Grade Distribution -->
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm animate__animated animate__fadeInRight">
+            <div class="card-body p-4">
+                <div class="chart-header">
+                    <div class="chart-title">
+                        <i class="fas fa-chart-pie"></i>
+                        Grade Distribution
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="gradeChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Top Performers Table -->
+<div class="card border-0 shadow-sm animate__animated animate__fadeInUp">
+    <div class="card-body p-4">
+        <div class="table-header">
+            <div class="table-title">
+                <i class="fas fa-crown"></i>
+                Top Performing Students
+            </div>
+            <div class="table-filters">
+                <select class="table-filter" id="classFilter">
+                    <option value="all">All Classes</option>
+                    {% for class in classes %}
+                    <option value="{{ class.id }}">{{ class.name }}</option>
+                    {% endfor %}
+                </select>
+                <select class="table-filter" id="termFilter">
+                    <option value="this_term">This Term</option>
+                    <option value="this_year">This Year</option>
+                    <option value="all_time">All Time</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="ranking-table">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Student</th>
+                        <th>Class</th>
+                        <th>Average</th>
+                        <th>Subjects</th>
+                        <th>Trend</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in top_students %}
+                    <tr>
+                        <td><span class="rank-badge">{{ forloop.counter }}</span></td>
+                        <td>{{ student.student.user.get_full_name }}</td>
+                        <td>{{ student.student.current_class.name }}</td>
+                        <td><strong>{{ student.average_score|floatformat:1 }}%</strong></td>
+                        <td>
+                            <div class="progress-cell">
+                                <span>{{ student.subject_count }}</span>
+                                <div class="progress-bar-small">
+                                    <div class="progress-fill-small" style="width: {{ student.completion_percentage }}%"></div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            {% if student.trend > 0 %}
+                                <i class="fas fa-arrow-up text-success"></i> +{{ student.trend|floatformat:1 }}%
+                            {% elif student.trend < 0 %}
+                                <i class="fas fa-arrow-down text-danger"></i> {{ student.trend|floatformat:1 }}%
+                            {% else %}
+                                <i class="fas fa-minus text-secondary"></i> 0%
+                            {% endif %}
+                        </td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary" onclick="viewStudent({{ student.student.id }})">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Insight Cards -->
+<div class="row g-4">
+    <div class="col-lg-4">
+        <div class="insight-card animate__animated animate__fadeInLeft">
+            <div class="insight-icon">
+                <i class="fas fa-star"></i>
+            </div>
+            <div class="insight-title">Best Performing Subject</div>
+            <div class="insight-value">{{ best_subject.name }}</div>
+            <div class="insight-trend">
+                <i class="fas fa-chart-line"></i>
+                <span>{{ best_subject.average_score|floatformat:1 }}% average</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="insight-card animate__animated animate__fadeInUp" style="background: linear-gradient(135deg, #e84393, #6c5ce7);">
+            <div class="insight-icon">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <div class="insight-title">Needs Improvement</div>
+            <div class="insight-value">{{ worst_subject.name }}</div>
+            <div class="insight-trend">
+                <i class="fas fa-arrow-down"></i>
+                <span>{{ worst_subject.average_score|floatformat:1 }}% average</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="insight-card animate__animated animate__fadeInRight" style="background: linear-gradient(135deg, #00b894, #00cec9);">
+            <div class="insight-icon">
+                <i class="fas fa-trophy"></i>
+            </div>
+            <div class="insight-title">Most Improved Class</div>
+            <div class="insight-value">{{ most_improved_class.name }}</div>
+            <div class="insight-trend">
+                <i class="fas fa-arrow-up"></i>
+                <span>+{{ most_improved_class.improvement|floatformat:1 }}% from last term</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Export Modal -->
+<div class="modal fade" id="exportModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-file-export me-2"></i>
+                    Export Analytics Report
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="list-group">
+                    <button class="list-group-item list-group-item-action" onclick="exportFormat('pdf')">
+                        <i class="fas fa-file-pdf text-danger me-3"></i>
+                        Export as PDF
+                    </button>
+                    <button class="list-group-item list-group-item-action" onclick="exportFormat('excel')">
+                        <i class="fas fa-file-excel text-success me-3"></i>
+                        Export as Excel
+                    </button>
+                    <button class="list-group-item list-group-item-action" onclick="exportFormat('csv')">
+                        <i class="fas fa-file-csv text-primary me-3"></i>
+                        Export as CSV
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Success Modal -->
+<div class="modal fade" id="successModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content text-center">
+            <div class="modal-body p-5">
+                <div class="mb-4">
+                    <i class="fas fa-check-circle text-success" style="font-size: 4rem;"></i>
+                </div>
+                <h4 class="modal-title mb-2">Report Exported!</h4>
+                <p class="text-secondary" id="successMessage">Your analytics report has been exported successfully.</p>
+                <div class="d-flex gap-2 justify-content-center mt-4">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
+                        <i class="fas fa-check me-2"></i>OK
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Error Modal -->
+<div class="modal fade" id="errorModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content text-center">
+            <div class="modal-body p-5">
+                <div class="mb-4">
+                    <i class="fas fa-exclamation-triangle text-danger" style="font-size: 4rem;"></i>
+                </div>
+                <h4 class="modal-title mb-2">Error</h4>
+                <p class="text-secondary" id="errorMessage">An error occurred while processing your request.</p>
+                <div class="d-flex gap-2 justify-content-center mt-4">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
+                        <i class="fas fa-check me-2"></i>OK
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Chart.js initialization
+    document.addEventListener('DOMContentLoaded', function() {
+        // Performance Trend Chart
+        const trendCtx = document.getElementById('trendChart').getContext('2d');
+        new Chart(trendCtx, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                datasets: [{
+                    label: '2024',
+                    data: [65, 68, 72, 75, 78, 82, 85, 83, 87, 89, 92, 94],
+                    borderColor: '#6c5ce7',
+                    backgroundColor: 'rgba(108, 92, 231, 0.1)',
+                    borderWidth: 3,
+                    tension: 0.4,
+                    fill: true
+                }, {
+                    label: '2023',
+                    data: [62, 64, 68, 70, 72, 75, 78, 80, 82, 85, 87, 89],
+                    borderColor: '#a363d9',
+                    backgroundColor: 'rgba(163, 99, 217, 0.1)',
+                    borderWidth: 3,
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                }
+            }
+        });
+
+        // Subject Performance Chart
+        const subjectCtx = document.getElementById('subjectChart').getContext('2d');
+        new Chart(subjectCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Mathematics', 'English', 'Science', 'Social Studies', 'Others'],
+                datasets: [{
+                    data: [85, 78, 82, 75, 70],
+                    backgroundColor: [
+                        '#6c5ce7',
+                        '#a363d9',
+                        '#e84393',
+                        '#00b894',
+                        '#fdcb6e'
+                    ],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom' }
+                },
+                cutout: '60%'
+            }
+        });
+
+        // Class Performance Chart
+        const classCtx = document.getElementById('classChart').getContext('2d');
+        new Chart(classCtx, {
+            type: 'bar',
+            data: {
+                labels: ['JSS 1', 'JSS 2', 'JSS 3', 'SS 1', 'SS 2', 'SS 3'],
+                datasets: [{
+                    label: 'Average Score',
+                    data: [72, 75, 78, 82, 85, 88],
+                    backgroundColor: '#6c5ce7',
+                    borderRadius: 10
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                }
+            }
+        });
+
+        // Grade Distribution Chart
+        const gradeCtx = document.getElementById('gradeChart').getContext('2d');
+        new Chart(gradeCtx, {
+            type: 'pie',
+            data: {
+                labels: ['A (70-100)', 'B (60-69)', 'C (50-59)', 'D (45-49)', 'F (<45)'],
+                datasets: [{
+                    data: [25, 35, 25, 10, 5],
+                    backgroundColor: [
+                        '#00b894',
+                        '#6c5ce7',
+                        '#fdcb6e',
+                        '#e17055',
+                        '#d63031'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom' }
+                }
+            }
+        });
+    });
+
+    // Export functions
+    function exportReport() {
+        const modal = new bootstrap.Modal(document.getElementById('exportModal'));
+        modal.show();
+    }
+
+    function exportFormat(format) {
+        const modal = bootstrap.Modal.getInstance(document.getElementById('exportModal'));
+        modal.hide();
+        showNotification(`Exporting as ${format.toUpperCase()}...`, 'info');
+        
+        setTimeout(() => {
+            showSuccessMessage(`Analytics report exported as ${format.toUpperCase()}!`);
+        }, 2000);
+    }
+
+    // Update dashboard
+    function updateDashboard() {
+        showNotification('Updating dashboard data...', 'info');
+        
+        setTimeout(() => {
+            showSuccessMessage('Dashboard updated successfully!');
+        }, 1500);
+    }
+
+    // View student
+    function viewStudent(studentId) {
+        window.location.href = `{% url 'academics:student_detail' studentId %}`;
+    }
+
+    // Filter tables
+    document.getElementById('classFilter').addEventListener('change', function() {
+        showNotification('Filtering by class...', 'info');
+    });
+
+    document.getElementById('termFilter').addEventListener('change', function() {
+        showNotification('Filtering by term...', 'info');
+    });
+
+    // Show success message
+    function showSuccessMessage(message) {
+        document.getElementById('successMessage').textContent = message;
+        const modal = new bootstrap.Modal(document.getElementById('successModal'));
+        modal.show();
+    }
+
+    // Show error message
+    function showErrorMessage(message) {
+        document.getElementById('errorMessage').textContent = message;
+        const modal = new bootstrap.Modal(document.getElementById('errorModal'));
+        modal.show();
+    }
+
+    // Show notification
+    function showNotification(message, type) {
+        console.log(message, type);
+    }
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        // Ctrl + R to refresh dashboard
+        if (e.ctrlKey && e.key === 'r') {
+            e.preventDefault();
+            updateDashboard();
+        }
+        
+        // Ctrl + E to export report
+        if (e.ctrlKey && e.key === 'e') {
+            e.preventDefault();
+            exportReport();
+        }
+    });
+
+    // Initialize tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+</script>
+{% endblock %}

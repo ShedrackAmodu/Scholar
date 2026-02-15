@@ -1,0 +1,465 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Payment Failed{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Failed Animation */
+    .failed-animation {
+        margin: 50px auto;
+        width: 150px;
+        height: 150px;
+        position: relative;
+    }
+
+    .crossmark-circle {
+        width: 150px;
+        height: 150px;
+        position: relative;
+        display: inline-block;
+        vertical-align: top;
+    }
+
+    .crossmark-circle .background {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #d63031, #e17055);
+        position: absolute;
+        animation: pulse 2s ease infinite;
+    }
+
+    .crossmark-circle .crossmark {
+        border-radius: 50%;
+        width: 150px;
+        height: 150px;
+        display: block;
+        stroke-width: 4;
+        stroke: #fff;
+        stroke-miterlimit: 10;
+        box-shadow: inset 0px 0px 0px #d63031;
+        animation: fill 0.4s ease-in-out 0.4s forwards, scale 0.3s ease-in-out 0.9s both;
+    }
+
+    .crossmark-circle .crossmark__line {
+        transform-origin: 50% 50%;
+        stroke-dasharray: 48;
+        stroke-dashoffset: 48;
+        animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.8s forwards;
+    }
+
+    .crossmark-circle .crossmark__line2 {
+        transform: rotate(90deg);
+        transform-origin: 50% 50%;
+    }
+
+    @keyframes stroke {
+        100% { stroke-dashoffset: 0; }
+    }
+
+    @keyframes scale {
+        0%, 100% { transform: none; }
+        50% { transform: scale3d(1.1, 1.1, 1); }
+    }
+
+    @keyframes fill {
+        100% { box-shadow: inset 0px 0px 0px 30px #d63031; }
+    }
+
+    /* Failed Card */
+    .failed-card {
+        background: var(--card-bg);
+        backdrop-filter: blur(10px);
+        border: var(--border);
+        border-radius: 40px;
+        padding: 50px;
+        box-shadow: var(--shadow);
+        max-width: 700px;
+        margin: 0 auto;
+        position: relative;
+        overflow: hidden;
+        animation: slideInUp 0.8s ease;
+    }
+
+    .failed-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 2.5rem;
+        font-weight: 700;
+        text-align: center;
+        margin-bottom: 20px;
+        background: linear-gradient(135deg, #d63031, #e17055);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .error-code {
+        text-align: center;
+        font-family: monospace;
+        font-size: 1.1rem;
+        color: var(--text-secondary);
+        margin-bottom: 20px;
+        padding: 10px;
+        background: rgba(214, 48, 49, 0.1);
+        border-radius: 50px;
+        display: inline-block;
+        margin: 0 auto 20px;
+    }
+
+    /* Error Details */
+    .error-details {
+        background: rgba(214, 48, 49, 0.05);
+        border-radius: 20px;
+        padding: 30px;
+        margin: 30px 0;
+    }
+
+    .error-message {
+        font-size: 1.1rem;
+        color: var(--text-primary);
+        margin-bottom: 20px;
+        padding-bottom: 20px;
+        border-bottom: var(--border);
+    }
+
+    .suggestions {
+        list-style: none;
+        padding: 0;
+    }
+
+    .suggestions li {
+        padding: 10px 0;
+        display: flex;
+        align-items: center;
+        color: var(--text-secondary);
+    }
+
+    .suggestions li i {
+        color: #d63031;
+        margin-right: 15px;
+        font-size: 1.1rem;
+    }
+
+    /* Troubleshooting Steps */
+    .troubleshoot-steps {
+        margin: 40px 0;
+    }
+
+    .step {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 20px;
+        padding: 20px;
+        background: var(--card-bg);
+        border-radius: 15px;
+        transition: var(--transition-smooth);
+        cursor: pointer;
+    }
+
+    .step:hover {
+        transform: translateX(10px);
+        background: rgba(123, 44, 191, 0.05);
+    }
+
+    .step-number {
+        width: 40px;
+        height: 40px;
+        background: linear-gradient(135deg, #d63031, #e17055);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 700;
+        margin-right: 20px;
+        flex-shrink: 0;
+    }
+
+    .step-content {
+        flex: 1;
+    }
+
+    .step-title {
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 5px;
+    }
+
+    .step-description {
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+    }
+
+    /* Action Buttons */
+    .action-buttons {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        margin-top: 40px;
+        flex-wrap: wrap;
+    }
+
+    .action-btn {
+        padding: 15px 35px;
+        border-radius: 50px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: var(--transition-bounce);
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .action-btn.primary {
+        background: linear-gradient(135deg, var(--primary-pink), var(--dark-pink));
+        color: white;
+    }
+
+    .action-btn.secondary {
+        background: var(--card-bg);
+        border: 2px solid var(--primary-pink);
+        color: var(--primary-pink);
+    }
+
+    .action-btn:hover {
+        transform: translateY(-5px) scale(1.05);
+        box-shadow: 0 10px 30px rgba(123, 44, 191, 0.3);
+    }
+
+    /* Support Card */
+    .support-card {
+        background: linear-gradient(135deg, rgba(123, 44, 191, 0.05), rgba(214, 48, 49, 0.05));
+        border-radius: 20px;
+        padding: 30px;
+        text-align: center;
+        margin-top: 40px;
+    }
+
+    .support-icon {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, var(--primary-pink), var(--dark-pink));
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+        color: white;
+        font-size: 1.5rem;
+    }
+
+    .support-text {
+        color: var(--text-primary);
+        margin-bottom: 20px;
+    }
+
+    .support-btn {
+        background: linear-gradient(135deg, var(--primary-pink), var(--dark-pink));
+        color: white;
+        padding: 12px 30px;
+        border-radius: 50px;
+        text-decoration: none;
+        display: inline-block;
+        transition: var(--transition-bounce);
+    }
+
+    .support-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(123, 44, 191, 0.3);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .failed-card {
+            padding: 30px;
+        }
+        
+        .failed-title {
+            font-size: 2rem;
+        }
+        
+        .action-buttons {
+            flex-direction: column;
+        }
+        
+        .action-btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5 pt-5">
+    <div class="failed-card">
+        <!-- Failed Animation -->
+        <div class="failed-animation">
+            <div class="crossmark-circle">
+                <div class="background"></div>
+                <svg class="crossmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+                    <circle class="crossmark__circle" cx="26" cy="26" r="25" fill="none"/>
+                    <path class="crossmark__line" fill="none" d="M16 16 36 36"/>
+                    <path class="crossmark__line crossmark__line2" fill="none" d="M16 16 36 36"/>
+                </svg>
+            </div>
+        </div>
+
+        <h1 class="failed-title">Payment Failed</h1>
+        
+        <div class="text-center">
+            <span class="error-code">Error Code: {{ error_code|default:"PAY-001" }}</span>
+        </div>
+
+        <p class="text-center text-muted mb-4">
+            We couldn't process your payment. Please try again or contact support.
+        </p>
+
+        <!-- Error Details -->
+        <div class="error-details">
+            <div class="error-message">
+                <i class="fas fa-exclamation-circle me-2" style="color: #d63031;"></i>
+                {{ error_message|default:"Your payment could not be processed due to an error with your bank." }}
+            </div>
+
+            <ul class="suggestions">
+                <li>
+                    <i class="fas fa-times-circle"></i>
+                    Check if your card has sufficient funds
+                </li>
+                <li>
+                    <i class="fas fa-times-circle"></i>
+                    Verify your card details are correct
+                </li>
+                <li>
+                    <i class="fas fa-times-circle"></i>
+                    Try using a different payment method
+                </li>
+                <li>
+                    <i class="fas fa-times-circle"></i>
+                    Contact your bank to authorize the transaction
+                </li>
+            </ul>
+        </div>
+
+        <!-- Troubleshooting Steps -->
+        <h5 class="mb-3">Try these steps:</h5>
+        <div class="troubleshoot-steps">
+            <div class="step" onclick="retryPayment()">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <div class="step-title">Retry Payment</div>
+                    <div class="step-description">Click here to try processing your payment again</div>
+                </div>
+            </div>
+
+            <div class="step" onclick="changeMethod()">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <div class="step-title">Use Different Payment Method</div>
+                    <div class="step-description">Try paying with another card or bank transfer</div>
+                </div>
+            </div>
+
+            <div class="step" onclick="contactSupport()">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <div class="step-title">Contact Support</div>
+                    <div class="step-description">Get help from our support team</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+            <a href="{% url 'payments:make_payment' invoice.id %}" class="action-btn primary">
+                <i class="fas fa-redo-alt"></i>
+                Try Again
+            </a>
+            <a href="{% url 'payments:invoice_detail' invoice.id %}" class="action-btn secondary">
+                <i class="fas fa-file-invoice"></i>
+                View Invoice
+            </a>
+            <a href="{% url 'school:home' %}" class="action-btn secondary">
+                <i class="fas fa-home"></i>
+                Go Home
+            </a>
+        </div>
+
+        <!-- Support Card -->
+        <div class="support-card">
+            <div class="support-icon">
+                <i class="fas fa-headset"></i>
+            </div>
+            <h5 class="support-text">Need immediate assistance?</h5>
+            <p class="text-muted mb-3">
+                Our support team is available 24/7 to help you with payment issues.
+            </p>
+            <a href="tel:+2341234567890" class="support-btn mb-2">
+                <i class="fas fa-phone-alt me-2"></i>Call Support
+            </a>
+            <br>
+            <small class="text-muted">Or email: finance@school.com</small>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function retryPayment() {
+        showNotification('Redirecting to payment page...', 'info');
+        setTimeout(() => {
+            window.location.href = "{% url 'payments:make_payment' invoice.id %}";
+        }, 1000);
+    }
+
+    function changeMethod() {
+        showNotification('Choose a different payment method', 'info');
+        window.location.href = "{% url 'payments:make_payment' invoice.id %}?change_method=1";
+    }
+
+    function contactSupport() {
+        window.location.href = "{% url 'school:contact' %}?subject=Payment%20Issue&invoice={{ invoice.invoice_number }}";
+    }
+
+    // Log error for debugging
+    console.error('Payment failed for invoice {{ invoice.invoice_number }}: {{ error_message }}');
+
+    // Track failed payment in analytics
+    if (typeof gtag !== 'undefined') {
+        gtag('event', 'exception', {
+            'description': 'Payment failed',
+            'fatal': false
+        });
+    }
+
+    // Auto-refresh after 30 seconds (optional)
+    // setTimeout(() => {
+    //     if (confirm('Would you like to retry the payment?')) {
+    //         retryPayment();
+    //     }
+    // }, 30000);
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        // Ctrl + R to retry
+        if (e.ctrlKey && e.key === 'r') {
+            e.preventDefault();
+            retryPayment();
+        }
+        
+        // Ctrl + H for home
+        if (e.ctrlKey && e.key === 'h') {
+            e.preventDefault();
+            window.location.href = "{% url 'school:home' %}";
+        }
+        
+        // Ctrl + S for support
+        if (e.ctrlKey && e.key === 's') {
+            e.preventDefault();
+            contactSupport();
+        }
+    });
+</script>
+{% endblock %}

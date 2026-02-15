@@ -23,8 +23,11 @@ from django.conf.urls.static import static
 urlpatterns = [
     path("admin/", admin.site.urls),
     
-    # School app (home page) with namespace so reverse('school:...') works
-    path('', include('apps.school.urls', namespace='school')),
+    # Core app (dashboard and core functionality) with namespace
+    path('', include('apps.core.urls', namespace='core')),
+    
+    # School app (public pages) with namespace so reverse('school:...') works
+    path('school/', include('apps.school.urls', namespace='school')),
     
     # Other app URLs (namespaced for reversing)
     path('accounts/', include('apps.accounts.urls', namespace='accounts')),

@@ -1,0 +1,1146 @@
+{% comment %}
+Updated Comprehensive Sidebar for School Management System
+Role-based navigation with user profile, notifications, and quick actions
+{% endcomment %}
+
+<div id="comprehensive-sidebar" class="comprehensive-sidebar" data-bs-theme="light">
+    <!-- Sidebar Header with User Profile -->
+    <div class="sidebar-header">
+        <div class="user-profile">
+            <div class="avatar-container">
+                {% if user.profile.profile_picture %}
+                    <img src="{{ user.profile.profile_picture.url }}" alt="Profile Picture" class="user-avatar">
+                {% else %}
+                    <div class="user-avatar default-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                {% endif %}
+                <div class="online-status" title="Online"></div>
+            </div>
+            <div class="user-info">
+                <h6 class="user-name">{{ user.get_full_name|default:user.username }}</h6>
+                <span class="user-role" style="color: var(--primary-pink);">
+                    <i class="fas fa-circle" style="font-size: 8px; margin-right: 5px;"></i>
+                    {{ user.profile.role|title }}
+                </span>
+            </div>
+            <button class="profile-actions-btn" id="profile-actions-btn" aria-label="Profile Actions">
+                <i class="fas fa-ellipsis-v"></i>
+            </button>
+        </div>
+        
+        <!-- Quick Stats -->
+        <div class="user-stats">
+            {% if user.profile.role == 'teacher' %}
+                <div class="stat-item">
+                    <span class="stat-label">Classes</span>
+                    <span class="stat-value">{{ user_stats.classes|default:0 }}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Students</span>
+                    <span class="stat-value">{{ user_stats.students|default:0 }}</span>
+                </div>
+            {% elif user.profile.role == 'parent' %}
+                <div class="stat-item">
+                    <span class="stat-label">Children</span>
+                    <span class="stat-value">{{ user_stats.children|default:0 }}</span>
+                </div>
+            {% elif user.profile.role == 'student' %}
+                <div class="stat-item">
+                    <span class="stat-label">Class</span>
+                    <span class="stat-value">{{ user_stats.class_name|default:'Not Assigned' }}</span>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="sidebar-search">
+        <div class="search-container">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" id="sidebar-search" placeholder="Search students, classes, subjects..." class="search-input">
+            <button class="search-clear" id="search-clear" style="display: none;">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div id="search-results" class="search-results"></div>
+    </div>
+
+    <!-- Main Navigation -->
+    <nav class="sidebar-nav">
+        <ul class="nav-list">
+            <!-- Dashboard -->
+            <li class="nav-item">
+                <a href="{% url 'core:dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+                    <i class="fas fa-tachometer-alt nav-icon"></i>
+                    <span class="nav-text">Dashboard</span>
+                </a>
+            </li>
+
+            <!-- Role-Based Navigation -->
+            {% if user.profile.role == 'superadmin' or user.profile.role == 'admin' %}
+                <!-- Admin Menu -->
+                <li class="nav-header">Administration</li>
+                
+                <li class="nav-item">
+                    <a href="{% url 'accounts:admin_dashboard' %}" class="nav-link {% if 'admin' in request.resolver_match.url_name %}active{% endif %}">
+                        <i class="fas fa-user-shield nav-icon"></i>
+                        <span class="nav-text">Admin Panel</span>
+                    </a>
+                </li>
+                
+                <li class="nav-item has-submenu">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-users nav-icon"></i>
+                        <span class="nav-text">User Management</span>
+                        <i class="fas fa-chevron-down submenu-arrow"></i>
+                    </a>
+                    <ul class="submenu">
+                        <li><a href="{% url 'accounts:user_create' %}"><i class="fas fa-user-plus"></i> Add User</a></li>
+                        <li><a href="{% url 'accounts:user_list' %}"><i class="fas fa-list"></i> User List</a></li>
+                        <li><a href="{% url 'accounts:role_create' %}"><i class="fas fa-id-badge"></i> Create Role</a></li>
+                    </ul>
+                </li>
+
+                <li class="nav-item has-submenu">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-school nav-icon"></i>
+                        <span class="nav-text">Classes & Subjects</span>
+                        <i class="fas fa-chevron-down submenu-arrow"></i>
+                    </a>
+                    <ul class="submenu">
+                        <li><a href="{% url 'classes:class_create' %}"><i class="fas fa-plus-circle"></i> Create Class</a></li>
+                        <li><a href="{% url 'classes:class_list' %}"><i class="fas fa-list"></i> Class List</a></li>
+                        <li><a href="{% url 'classes:subject_create' %}"><i class="fas fa-book"></i> Manage Subjects</a></li>
+                    </ul>
+                </li>
+
+                <li class="nav-item">
+                    <a href="{% url 'admissions:application_list' %}" class="nav-link {% if 'admission' in request.resolver_match.url_name %}active{% endif %}">
+                        <i class="fas fa-user-plus nav-icon"></i>
+                        <span class="nav-text">Admissions</span>
+                        {% if pending_applications_count > 0 %}
+                            <span class="nav-badge">{{ pending_applications_count }}</span>
+                        {% endif %}
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="{% url 'announcements:event_list' %}" class="nav-link {% if 'announcement' in request.resolver_match.url_name %}active{% endif %}">
+                        <i class="fas fa-bullhorn nav-icon"></i>
+                        <span class="nav-text">Announcements</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="{% url 'payments:fee_categories' %}" class="nav-link {% if 'payment' in request.resolver_match.url_name %}active{% endif %}">
+                        <i class="fas fa-money-bill-wave nav-icon"></i>
+                        <span class="nav-text">Fee Management</span>
+                    </a>
+                </li>
+
+            {% elif user.profile.role == 'teacher' %}
+                <!-- Teacher Menu -->
+                <li class="nav-header">Teaching</li>
+                
+                <li class="nav-item">
+                    <a href="{% url 'accounts:teacher_dashboard' %}" class="nav-link {% if 'teacher' in request.resolver_match.url_name %}active{% endif %}">
+                        <i class="fas fa-chalkboard-teacher nav-icon"></i>
+                        <span class="nav-text">Teacher Dashboard</span>
+                    </a>
+                </li>
+
+                <li class="nav-item has-submenu">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-edit nav-icon"></i>
+                        <span class="nav-text">Score Management</span>
+                        <i class="fas fa-chevron-down submenu-arrow"></i>
+                    </a>
+                    <ul class="submenu">
+                        <li><a href="{% url 'academics:score_entry' %}"><i class="fas fa-plus"></i> Enter Scores</a></li>
+                        <li><a href="{% url 'academics:bulk_score_entry' %}"><i class="fas fa-upload"></i> Bulk Entry</a></li>
+                        <li><a href="{% url 'academics:score_entry' %}"><i class="fas fa-edit"></i> Edit Scores</a></li>
+                    </ul>
+                </li>
+
+                <li class="nav-item">
+                    <a href="{% url 'attendance:take_attendance' %}" class="nav-link {% if 'attendance' in request.resolver_match.url_name %}active{% endif %}">
+                        <i class="fas fa-calendar-check nav-icon"></i>
+                        <span class="nav-text">Attendance</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="{% url 'academics:report_card_list' 1 %}" class="nav-link {% if 'report_card' in request.resolver_match.url_name %}active{% endif %}">
+                        <i class="fas fa-file-alt nav-icon"></i>
+                        <span class="nav-text">Report Cards</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="{% url 'academics:score_entry' %}" class="nav-link {% if 'score' in request.resolver_match.url_name %}active{% endif %}">
+                        <i class="fas fa-tasks nav-icon"></i>
+                        <span class="nav-text">Academic Tasks</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="{% url 'academics:academic_calendar' %}" class="nav-link {% if 'calendar' in request.resolver_match.url_name %}active{% endif %}">
+                        <i class="fas fa-calendar-alt nav-icon"></i>
+                        <span class="nav-text">My Schedule</span>
+                    </a>
+                </li>
+
+            {% elif user.profile.role == 'parent' %}
+                <!-- Parent Menu -->
+                <li class="nav-header">Parent Portal</li>
+                
+                <li class="nav-item">
+                    <a href="{% url 'parents:parent_dashboard' %}" class="nav-link {% if 'parent' in request.resolver_match.url_name %}active{% endif %}">
+                        <i class="fas fa-users nav-icon"></i>
+                        <span class="nav-text">Parent Dashboard</span>
+                    </a>
+                </li>
+
+                <li class="nav-item has-submenu">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-child nav-icon"></i>
+                        <span class="nav-text">My Children</span>
+                        <i class="fas fa-chevron-down submenu-arrow"></i>
+                    </a>
+                    <ul class="submenu">
+                        {% for child in user.parent.children.all %}
+                            <li><a href="{% url 'parents:child_scores' child.id %}"><i class="fas fa-user"></i> {{ child.get_full_name }}</a></li>
+                        {% endfor %}
+                    </ul>
+                </li>
+
+                <li class="nav-item">
+                    <a href="{% url 'payments:parent_dashboard' %}" class="nav-link {% if 'payment' in request.resolver_match.url_name %}active{% endif %}">
+                        <i class="fas fa-credit-card nav-icon"></i>
+                        <span class="nav-text">Fee Payments</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="{% url 'parents:messages' %}" class="nav-link {% if 'message' in request.resolver_match.url_name %}active{% endif %}">
+                        <i class="fas fa-envelope nav-icon"></i>
+                        <span class="nav-text">Messages</span>
+                        {% if unread_messages_count > 0 %}
+                            <span class="nav-badge">{{ unread_messages_count }}</span>
+                        {% endif %}
+                    </a>
+                </li>
+
+            {% elif user.profile.role == 'student' %}
+                <!-- Student Menu -->
+                <li class="nav-header">Student Zone</li>
+                
+                <li class="nav-item">
+                    <a href="{% url 'students:student_dashboard' %}" class="nav-link {% if 'student' in request.resolver_match.url_name %}active{% endif %}">
+                        <i class="fas fa-user-graduate nav-icon"></i>
+                        <span class="nav-text">Student Dashboard</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="{% url 'academics:student_performance' %}" class="nav-link {% if 'performance' in request.resolver_match.url_name %}active{% endif %}">
+                        <i class="fas fa-chart-line nav-icon"></i>
+                        <span class="nav-text">My Performance</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="{% url 'academics:student_assignments' %}" class="nav-link {% if 'assignment' in request.resolver_match.url_name %}active{% endif %}">
+                        <i class="fas fa-tasks nav-icon"></i>
+                        <span class="nav-text">My Assignments</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="{% url 'attendance:student_attendance' %}" class="nav-link {% if 'attendance' in request.resolver_match.url_name %}active{% endif %}">
+                        <i class="fas fa-calendar-check nav-icon"></i>
+                        <span class="nav-text">My Attendance</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="{% url 'students:fee_status' %}" class="nav-link {% if 'fee' in request.resolver_match.url_name %}active{% endif %}">
+                        <i class="fas fa-money-bill-wave nav-icon"></i>
+                        <span class="nav-text">Fee Status</span>
+                    </a>
+                </li>
+
+            {% elif user.profile.role == 'principal' or user.profile.role == 'director' %}
+                <!-- Principal/Director Menu -->
+                <li class="nav-header">Administration</li>
+                
+                <li class="nav-item">
+                    <a href="{% url 'academics:class_performance' %}" class="nav-link {% if 'class_performance' in request.resolver_match.url_name %}active{% endif %}">
+                        <i class="fas fa-chart-bar nav-icon"></i>
+                        <span class="nav-text">Class Performance</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="{% url 'academics:analytics_dashboard' %}" class="nav-link {% if 'analytics' in request.resolver_match.url_name %}active{% endif %}">
+                        <i class="fas fa-chart-pie nav-icon"></i>
+                        <span class="nav-text">Analytics</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="{% url 'academics:approve_report_cards' %}" class="nav-link {% if 'approve' in request.resolver_match.url_name %}active{% endif %}">
+                        <i class="fas fa-check-circle nav-icon"></i>
+                        <span class="nav-text">Approve Report Cards</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="{% url 'academics:assessment_list' %}" class="nav-link {% if 'assessment' in request.resolver_match.url_name %}active{% endif %}">
+                        <i class="fas fa-clipboard-list nav-icon"></i>
+                        <span class="nav-text">Assessments</span>
+                    </a>
+                </li>
+
+            {% endif %}
+
+            <!-- Common Features for All Authenticated Users -->
+            <li class="nav-header">Common Features</li>
+            
+            <li class="nav-item">
+                <a href="{% url 'classes:subject_list' %}" class="nav-link {% if 'subject' in request.resolver_match.url_name %}active{% endif %}">
+                    <i class="fas fa-book nav-icon"></i>
+                    <span class="nav-text">Subjects</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a href="{% url 'announcements:noticeboard' %}" class="nav-link {% if 'noticeboard' in request.resolver_match.url_name %}active{% endif %}">
+                    <i class="fas fa-bell nav-icon"></i>
+                    <span class="nav-text">Notices</span>
+                    {% if unread_notices_count > 0 %}
+                        <span class="nav-badge">{{ unread_notices_count }}</span>
+                    {% endif %}
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a href="{% url 'academics:academic_calendar' %}" class="nav-link {% if 'calendar' in request.resolver_match.url_name %}active{% endif %}">
+                    <i class="fas fa-calendar-alt nav-icon"></i>
+                    <span class="nav-text">Academic Calendar</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a href="{% url 'accounts:profile' %}" class="nav-link {% if 'profile' in request.resolver_match.url_name %}active{% endif %}">
+                    <i class="fas fa-user-circle nav-icon"></i>
+                    <span class="nav-text">Profile</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Quick Actions -->
+    <div class="sidebar-quick-actions">
+        <div class="quick-actions-header">
+            <span>Quick Actions</span>
+        </div>
+        <div class="quick-actions-grid">
+            {% if user.profile.role == 'teacher' %}
+                <button class="quick-action-btn" onclick="location.href='{% url 'academics:score_entry' %}'" title="Enter Scores">
+                    <i class="fas fa-plus-circle"></i>
+                </button>
+                <button class="quick-action-btn" onclick="location.href='{% url 'attendance:take_attendance' %}'" title="Take Attendance">
+                    <i class="fas fa-calendar-check"></i>
+                </button>
+                <button class="quick-action-btn" onclick="location.href='{% url 'academics:academic_calendar' %}'" title="Academic Calendar">
+                    <i class="fas fa-tasks"></i>
+                </button>
+            {% elif user.profile.role == 'parent' %}
+                <button class="quick-action-btn" onclick="location.href='{% url 'payments:parent_dashboard' %}'" title="Make Payment">
+                    <i class="fas fa-credit-card"></i>
+                </button>
+                <button class="quick-action-btn" onclick="location.href='{% url 'parents:parent_dashboard' %}'" title="Dashboard">
+                    <i class="fas fa-envelope"></i>
+                </button>
+            {% elif user.profile.role == 'student' %}
+                <button class="quick-action-btn" onclick="location.href='{% url 'academics:student_performance' %}'" title="View Results">
+                    <i class="fas fa-tasks"></i>
+                </button>
+                <button class="quick-action-btn" onclick="location.href='{% url 'academics:student_performance' %}'" title="View Performance">
+                    <i class="fas fa-chart-line"></i>
+                </button>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- System Controls -->
+    <div class="sidebar-controls">
+        <div class="control-item">
+            <button class="control-btn" id="theme-toggle" title="Toggle Theme">
+                <i class="fas fa-moon" id="theme-icon"></i>
+                <span id="theme-text">Dark</span>
+            </button>
+        </div>
+        
+        <div class="control-item">
+            <button class="control-btn" id="notifications-toggle" title="Notifications">
+                <i class="fas fa-bell"></i>
+                <span id="notification-count" class="notification-badge" style="display: none;">0</span>
+            </button>
+        </div>
+
+        <div class="control-item">
+            <button class="control-btn" id="help-toggle" title="Help">
+                <i class="fas fa-question-circle"></i>
+            </button>
+        </div>
+
+        <div class="control-item">
+            <a href="{% url 'accounts:logout' %}" class="control-btn" title="Logout">
+                <i class="fas fa-sign-out-alt"></i>
+            </a>
+        </div>
+    </div>
+
+    <!-- School Information -->
+    <div class="sidebar-footer">
+        <div class="school-info">
+            <div class="school-hours">
+                <i class="fas fa-clock"></i>
+                <div>
+                    <span class="hours-label">School Hours</span>
+                    <span class="hours-value" id="school-hours-display">{{ school_hours|default:'8:00 AM - 3:00 PM' }}</span>
+                </div>
+            </div>
+            <div class="current-term">
+                <i class="fas fa-calendar"></i>
+                <span id="current-term-display">Term: {{ current_term|default:'Not Set' }}</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Sidebar Overlay for Mobile -->
+<div id="sidebar-overlay" class="sidebar-overlay"></div>
+
+<style>
+    /* Comprehensive Sidebar Styles */
+    :root {
+        --sidebar-width: 280px;
+        --sidebar-bg: var(--card-bg);
+        --sidebar-border: var(--border);
+        --text-primary: var(--text-primary);
+        --text-secondary: var(--text-secondary);
+        --primary-pink: #7B2CBF;
+        --secondary-pink: #4A90E2;
+        --sidebar-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .comprehensive-sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
+        height: 100vh;
+        width: var(--sidebar-width);
+        background: var(--sidebar-bg);
+        border-right: var(--sidebar-border);
+        box-shadow: var(--shadow);
+        z-index: 1050;
+        display: flex;
+        flex-direction: column;
+        transition: var(--sidebar-transition);
+        overflow-y: auto;
+    }
+
+    /* Sidebar Header */
+    .sidebar-header {
+        padding: 20px;
+        border-bottom: var(--sidebar-border);
+        background: linear-gradient(135deg, rgba(123, 44, 191, 0.1), rgba(74, 144, 226, 0.1));
+    }
+
+    .user-profile {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 15px;
+    }
+
+    .avatar-container {
+        position: relative;
+    }
+
+    .user-avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid var(--primary-pink);
+    }
+
+    .default-avatar {
+        background: linear-gradient(135deg, var(--primary-pink), var(--secondary-pink));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+    }
+
+    .online-status {
+        position: absolute;
+        bottom: -2px;
+        right: -2px;
+        width: 12px;
+        height: 12px;
+        background: #00b894;
+        border: 2px solid var(--sidebar-bg);
+        border-radius: 50%;
+    }
+
+    .user-info {
+        flex: 1;
+    }
+
+    .user-name {
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0 0 5px 0;
+        font-size: 1.1rem;
+    }
+
+    .user-role {
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+
+    .profile-actions-btn {
+        background: none;
+        border: none;
+        color: var(--text-secondary);
+        cursor: pointer;
+        padding: 5px;
+        border-radius: 50%;
+        transition: var(--sidebar-transition);
+    }
+
+    .profile-actions-btn:hover {
+        background: rgba(123, 44, 191, 0.1);
+        color: var(--primary-pink);
+    }
+
+    .user-stats {
+        display: flex;
+        gap: 15px;
+        padding-top: 10px;
+        border-top: 1px solid rgba(123, 44, 191, 0.2);
+    }
+
+    .stat-item {
+        text-align: center;
+    }
+
+    .stat-label {
+        display: block;
+        font-size: 0.7rem;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .stat-value {
+        display: block;
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--primary-pink);
+    }
+
+    /* Search Bar */
+    .sidebar-search {
+        padding: 15px;
+        border-bottom: var(--sidebar-border);
+    }
+
+    .search-container {
+        position: relative;
+        background: rgba(123, 44, 191, 0.05);
+        border: 1px solid rgba(123, 44, 191, 0.2);
+        border-radius: 25px;
+        padding: 8px 15px;
+    }
+
+    .search-icon {
+        position: absolute;
+        left: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-secondary);
+    }
+
+    .search-input {
+        width: 100%;
+        border: none;
+        outline: none;
+        background: transparent;
+        padding-left: 35px;
+        color: var(--text-primary);
+        font-size: 0.9rem;
+    }
+
+    .search-clear {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: var(--text-secondary);
+        cursor: pointer;
+        padding: 2px;
+        border-radius: 50%;
+    }
+
+    .search-clear:hover {
+        background: rgba(123, 44, 191, 0.2);
+        color: var(--primary-pink);
+    }
+
+    .search-results {
+        margin-top: 10px;
+        max-height: 200px;
+        overflow-y: auto;
+        display: none;
+    }
+
+    .search-result-item {
+        padding: 8px 10px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: var(--sidebar-transition);
+        font-size: 0.9rem;
+    }
+
+    .search-result-item:hover {
+        background: rgba(123, 44, 191, 0.1);
+    }
+
+    .search-result-item a {
+        color: var(--text-primary);
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .result-name {
+        font-weight: 600;
+    }
+
+    .result-desc {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+    }
+
+    /* Navigation */
+    .sidebar-nav {
+        flex: 1;
+        padding: 15px;
+    }
+
+    .nav-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .nav-header {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--text-secondary);
+        margin: 15px 0 10px 0;
+        font-weight: 600;
+        padding-left: 5px;
+    }
+
+    .nav-item {
+        margin-bottom: 5px;
+    }
+
+    .nav-link {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 15px;
+        color: var(--text-primary);
+        text-decoration: none;
+        border-radius: 10px;
+        transition: var(--sidebar-transition);
+        font-weight: 500;
+        position: relative;
+    }
+
+    .nav-link:hover {
+        background: rgba(123, 44, 191, 0.1);
+        color: var(--primary-pink);
+    }
+
+    .nav-link.active {
+        background: linear-gradient(135deg, rgba(123, 44, 191, 0.2), rgba(74, 144, 226, 0.2));
+        color: var(--primary-pink);
+        box-shadow: inset 2px 0 0 var(--primary-pink);
+    }
+
+    .nav-icon {
+        font-size: 1.1rem;
+        width: 20px;
+        text-align: center;
+    }
+
+    .nav-text {
+        flex: 1;
+    }
+
+    .nav-badge {
+        background: var(--primary-pink);
+        color: white;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    /* Submenu */
+    .has-submenu .submenu {
+        list-style: none;
+        padding: 5px 0;
+        margin: 5px 0 0 25px;
+        display: none;
+        border-left: 2px solid rgba(123, 44, 191, 0.2);
+        padding-left: 15px;
+    }
+
+    .has-submenu.active .submenu {
+        display: block;
+    }
+
+    .has-submenu .submenu li {
+        margin-bottom: 3px;
+    }
+
+    .has-submenu .submenu a {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 10px;
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        text-decoration: none;
+        border-radius: 6px;
+        transition: var(--sidebar-transition);
+    }
+
+    .has-submenu .submenu a:hover {
+        background: rgba(123, 44, 191, 0.1);
+        color: var(--primary-pink);
+    }
+
+    .submenu-arrow {
+        font-size: 0.8rem;
+        margin-left: auto;
+        transition: var(--sidebar-transition);
+    }
+
+    .has-submenu.active .submenu-arrow {
+        transform: rotate(180deg);
+    }
+
+    /* Quick Actions */
+    .sidebar-quick-actions {
+        padding: 15px;
+        border-top: var(--sidebar-border);
+        border-bottom: var(--sidebar-border);
+    }
+
+    .quick-actions-header {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        margin-bottom: 10px;
+        font-weight: 600;
+        padding-left: 5px;
+    }
+
+    .quick-actions-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+    }
+
+    .quick-action-btn {
+        background: rgba(123, 44, 191, 0.1);
+        border: 1px solid rgba(123, 44, 191, 0.3);
+        color: var(--primary-pink);
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: var(--sidebar-transition);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .quick-action-btn:hover {
+        background: linear-gradient(135deg, var(--primary-pink), var(--secondary-pink));
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    /* Controls */
+    .sidebar-controls {
+        padding: 15px;
+        border-bottom: var(--sidebar-border);
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .control-item {
+        flex: 1;
+        min-width: 60px;
+    }
+
+    .control-btn {
+        width: 100%;
+        background: rgba(123, 44, 191, 0.1);
+        border: 1px solid rgba(123, 44, 191, 0.3);
+        color: var(--primary-pink);
+        padding: 10px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: var(--sidebar-transition);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        font-size: 0.9rem;
+        text-decoration: none;
+    }
+
+    .control-btn:hover {
+        background: linear-gradient(135deg, var(--primary-pink), var(--secondary-pink));
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .notification-badge {
+        background: var(--danger);
+        color: white;
+        padding: 2px 6px;
+        border-radius: 10px;
+        font-size: 0.7rem;
+        font-weight: 600;
+    }
+
+    /* Footer */
+    .sidebar-footer {
+        padding: 15px;
+        border-top: var(--sidebar-border);
+        background: rgba(123, 44, 191, 0.05);
+    }
+
+    .school-info {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .school-hours, .current-term {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+    }
+
+    .hours-label {
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .hours-value {
+        color: var(--primary-pink);
+        font-weight: 600;
+    }
+
+    /* Mobile Styles */
+    @media (max-width: 991.98px) {
+        .comprehensive-sidebar {
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+        }
+
+        .comprehensive-sidebar.show {
+            transform: translateX(0);
+        }
+
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1040;
+            display: none;
+        }
+
+        .sidebar-overlay.show {
+            display: block;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .comprehensive-sidebar {
+            width: 280px;
+        }
+        
+        .user-stats {
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .quick-actions-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (max-width: 576px) {
+        .comprehensive-sidebar {
+            width: 260px;
+        }
+        
+        .quick-actions-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        
+        .control-item {
+            min-width: 50px;
+        }
+        
+        .control-btn {
+            padding: 8px;
+            font-size: 0.8rem;
+        }
+    }
+</style>
+
+<script>
+    // Comprehensive Sidebar JavaScript
+    document.addEventListener('DOMContentLoaded', function() {
+        const sidebar = document.getElementById('comprehensive-sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+        const themeToggle = document.getElementById('theme-toggle');
+        const themeIcon = document.getElementById('theme-icon');
+        const themeText = document.getElementById('theme-text');
+        const htmlElement = document.documentElement;
+        
+        // Mobile sidebar toggle
+        function toggleSidebar() {
+            sidebar.classList.toggle('show');
+            overlay.classList.toggle('show');
+        }
+
+        // Theme toggle functionality
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        htmlElement.setAttribute('data-bs-theme', savedTheme);
+        updateThemeIcon(savedTheme);
+
+        themeToggle.addEventListener('click', function() {
+            const currentTheme = htmlElement.getAttribute('data-bs-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            
+            // Update local storage
+            localStorage.setItem('theme', newTheme);
+            updateThemeIcon(newTheme);
+            
+            // Make AJAX request to save theme preference
+            fetch('{% url "core:theme_toggle" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                },
+                body: JSON.stringify({ theme: newTheme })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update HTML theme attribute
+                    htmlElement.setAttribute('data-bs-theme', data.theme);
+                    
+                    // Dispatch custom event for other components
+                    document.dispatchEvent(new CustomEvent('themeChanged', { 
+                        detail: { theme: data.theme } 
+                    }));
+                }
+            })
+            .catch(error => {
+                console.error('Theme toggle error:', error);
+                // Fallback to client-side theme switching
+                htmlElement.setAttribute('data-bs-theme', newTheme);
+                document.dispatchEvent(new CustomEvent('themeChanged', { 
+                    detail: { theme: newTheme } 
+                }));
+            });
+        });
+
+        function updateThemeIcon(theme) {
+            if (theme === 'dark') {
+                themeIcon.className = 'fas fa-sun';
+                themeText.textContent = 'Light';
+            } else {
+                themeIcon.className = 'fas fa-moon';
+                themeText.textContent = 'Dark';
+            }
+        }
+
+        // Submenu toggle
+        document.querySelectorAll('.has-submenu').forEach(item => {
+            const link = item.querySelector('.nav-link');
+            const submenu = item.querySelector('.submenu');
+            const arrow = item.querySelector('.submenu-arrow');
+
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                item.classList.toggle('active');
+            });
+        });
+
+        // Search functionality
+        const searchInput = document.getElementById('sidebar-search');
+        const searchClear = document.getElementById('search-clear');
+        const searchResults = document.getElementById('search-results');
+
+        searchInput.addEventListener('input', function() {
+            const query = this.value.trim();
+            
+            if (query.length > 2) {
+                searchClear.style.display = 'block';
+                performSearch(query);
+            } else {
+                searchClear.style.display = 'none';
+                searchResults.style.display = 'none';
+            }
+        });
+
+        searchClear.addEventListener('click', function() {
+            searchInput.value = '';
+            searchClear.style.display = 'none';
+            searchResults.style.display = 'none';
+            searchInput.focus();
+        });
+
+        function performSearch(query) {
+            // Make AJAX request to search endpoint
+            fetch('{% url "core:search" %}?q=' + encodeURIComponent(query))
+                .then(response => response.json())
+                .then(data => {
+                    if (data.results.length > 0) {
+                        searchResults.innerHTML = data.results.map(result => `
+                            <a href="${result.url}" class="search-result-item">
+                                <i class="${result.icon}"></i>
+                                <div>
+                                    <div class="result-name">${result.name}</div>
+                                    <div class="result-desc">${result.description}</div>
+                                </div>
+                            </a>
+                        `).join('');
+                        searchResults.style.display = 'block';
+                    } else {
+                        searchResults.innerHTML = `
+                            <div class="search-result-item">
+                                <i class="fas fa-search"></i>
+                                No results found for "${query}"
+                            </div>
+                        `;
+                        searchResults.style.display = 'block';
+                    }
+                })
+                .catch(error => {
+                    console.error('Search error:', error);
+                    searchResults.innerHTML = `
+                        <div class="search-result-item">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            Search temporarily unavailable
+                        </div>
+                    `;
+                    searchResults.style.display = 'block';
+                });
+        }
+
+        // Profile actions dropdown
+        const profileActionsBtn = document.getElementById('profile-actions-btn');
+        
+        // Notifications system
+        const notificationToggle = document.getElementById('notifications-toggle');
+        const notificationCount = document.getElementById('notification-count');
+
+        // Update school hours from server (would be implemented with context processor)
+        updateSchoolHours();
+
+        function updateSchoolHours() {
+            // This would fetch from your server-side context
+            // For now, using static values
+            const hoursDisplay = document.getElementById('school-hours-display');
+            const termDisplay = document.getElementById('current-term-display');
+            
+            // These would be populated by Django context
+            // hoursDisplay.textContent = '{{ school_hours }}';
+            // termDisplay.textContent = '{{ current_term }}';
+        }
+
+        // Auto-collapse submenus on mobile
+        if (window.innerWidth <= 991.98) {
+            document.querySelectorAll('.has-submenu').forEach(item => {
+                item.classList.remove('active');
+            });
+        }
+
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            if (window.innerWidth > 991.98) {
+                sidebar.classList.add('show');
+                overlay.classList.remove('show');
+            }
+        });
+
+        // Close sidebar when clicking overlay
+        overlay.addEventListener('click', toggleSidebar);
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Ctrl/Cmd + K for search
+            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                e.preventDefault();
+                searchInput.focus();
+            }
+            
+            // Escape to close sidebar on mobile
+            if (e.key === 'Escape' && window.innerWidth <= 991.98) {
+                sidebar.classList.remove('show');
+                overlay.classList.remove('show');
+            }
+        });
+
+        // Initialize tooltips
+        if (typeof bootstrap !== 'undefined') {
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        }
+    });
+</script>

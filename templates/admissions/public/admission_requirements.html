@@ -5,15 +5,169 @@
 
 {% block content %}
 <div class="container py-5">
-    <h1 class="display-4 text-center mb-4" data-aos="fade-down">Admission Requirements</h1>
-    <p class="lead text-center" data-aos="fade-up" data-aos-delay="200">This is the Admission Requirements page. Customize the structure and content here as needed.</p>
-    <!-- Add your form, table, or other components below -->
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+            <!-- No Login Required Alert -->
+            <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+                <i class="fas fa-check-circle me-2"></i>
+                <strong>No Login Required!</strong> Apply directly with no account needed. Check requirements below.
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+
+            <h1 class="display-4 text-center mb-2" data-aos="fade-down">Admission Requirements</h1>
+            <p class="lead text-center text-muted mb-4" data-aos="fade-up" data-aos-delay="200">
+                Everything you need to know before applying - no registration needed
+            </p>
+
+            <!-- Age Requirements -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-birthday-cake me-2"></i>Age Requirements</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="text-center p-3 bg-light rounded">
+                                <h6>Early Childhood</h6>
+                                <h4 class="text-primary">Ages 3-4</h4>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center p-3 bg-light rounded">
+                                <h6>Primary/Elementary</h6>
+                                <h4 class="text-success">Ages 5-11</h4>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center p-3 bg-light rounded">
+                                <h6>Secondary/Middle</h6>
+                                <h4 class="text-info">Ages 12-14</h4>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center p-3 bg-light rounded">
+                                <h6>High School/Senior</h6>
+                                <h4 class="text-warning">Ages 15-18</h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Academic Requirements -->
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header bg-info text-white">
+                            <h5 class="mb-0"><i class="fas fa-book me-2"></i>Academic Requirements</h5>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-unstyled">
+                                <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Minimum literacy level for age</li>
+                                <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>English language proficiency</li>
+                                <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Basic numeracy skills</li>
+                                <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Previous academic records</li>
+                                <li><i class="fas fa-check-circle text-success me-2"></i>Readiness or placement assessment (if required)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header bg-warning text-dark">
+                            <h5 class="mb-0"><i class="fas fa-file-alt me-2"></i>Documentation Requirements</h5>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-unstyled">
+                                <li class="mb-2"><i class="fas fa-file-alt me-2"></i>Birth Certificate</li>
+                                <li class="mb-2"><i class="fas fa-file-alt me-2"></i>Previous School Transcript/Report Card</li>
+                                <li class="mb-2"><i class="fas fa-file-alt me-2"></i>Medical/Health Certificate</li>
+                                <li class="mb-2"><i class="fas fa-file-alt me-2"></i>Immunization Records</li>
+                                <li><i class="fas fa-file-alt me-2"></i>Proof of Residence (utility bill/lease)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Health & Medical Requirements -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0"><i class="fas fa-heartbeat me-2"></i>Health & Medical Requirements</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6><strong>Immunizations Required:</strong></h6>
+                            <ul class="small">
+                                <li>DPT (Diphtheria, Pertussis, Tetanus)</li>
+                                <li>Polio</li>
+                                <li>MMR (Measles, Mumps, Rubella)</li>
+                                <li>Hepatitis B</li>
+                                <li>Varicella (Chickenpox)</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><strong>Medical Clearance:</strong></h6>
+                            <ul class="small">
+                                <li>Medical exam within the past 12 months</li>
+                                <li>Physical fitness assessment (where required)</li>
+                                <li>Vision and hearing screening</li>
+                                <li>Dental exam recommendation</li>
+                                <li>Disclosure of special medical needs</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- How to Apply Section -->
+            <div class="card shadow-sm border-success">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-play-circle me-2"></i>Ready to Apply?</h5>
+                </div>
+                <div class="card-body">
+                    <p class="mb-3">It's easy! No login or registration required. Simply:</p>
+                    <ol class="mb-3">
+                        <li>Click "Begin Application" button below</li>
+                        <li>Fill out the application form with accurate information</li>
+                        <li>Submit - you'll get a confirmation email immediately</li>
+                        <li>Use your reference number to track your application status</li>
+                    </ol>
+                    <div class="text-center">
+                        <a href="{% url 'admissions:application_create' %}" class="btn btn-success btn-lg">
+                            <i class="fas fa-pencil-alt me-2"></i> Start Your Application Now
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Support -->
+            <div class="alert alert-info mt-4" role="alert">
+                <i class="fas fa-question-circle me-2"></i>
+                <strong>Questions?</strong> Contact our admissions office for clarification on any requirements.
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}
 
 {% block extra_css %}
 <style>
-/* Styles specific to Admission Requirements */
+.card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+}
+
+.alert-success {
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+}
 </style>
 {% endblock %}
 

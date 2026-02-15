@@ -5,20 +5,99 @@
 
 {% block content %}
 <div class="container py-5">
-    <h1 class="display-4 text-center mb-4" data-aos="fade-down">Admission Form</h1>
-    <p class="lead text-center" data-aos="fade-up" data-aos-delay="200">This is the Admission Form page. Customize the structure and content here as needed.</p>
-    <!-- Add your form, table, or other components below -->
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <!-- No Login Required Alert -->
+            <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+                <i class="fas fa-check-circle me-2"></i>
+                <strong>Easy Application Process!</strong> No account or login required. Complete the form below and submit directly.
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+
+            <h1 class="display-4 text-center mb-2" data-aos="fade-down">Admission Application Form</h1>
+            <p class="lead text-center text-muted mb-4" data-aos="fade-up" data-aos-delay="200">
+                Apply to {{ school.name|default:"our school" }} - No registration needed, just fill out and submit
+            </p>
+            
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-edit me-2"></i>Application Details</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Application form content will be rendered here -->
+                    <p class="text-center text-muted">Application form component goes here</p>
+                </div>
+            </div>
+
+            <!-- Info Section -->
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <h6 class="card-title"><i class="fas fa-info-circle text-info me-2"></i> Before You Start</h6>
+                            <ul class="small mb-0">
+                                <li>Have your child's birth certificate information ready</li>
+                                <li>Prepare previous school records if transferring</li>
+                                <li>Medical/immunization records if available</li>
+                                <li>Estimated completion time: 10-15 minutes</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <h6 class="card-title"><i class="fas fa-envelope text-success me-2"></i> After Submission</h6>
+                            <ul class="small mb-0">
+                                <li>You'll receive a confirmation email immediately</li>
+                                <li>Your application reference number will be sent to your email</li>
+                                <li>Track application status anytime using your reference number</li>
+                                <li>Our team will review your application within 3-5 business days</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Support Section -->
+            <div class="alert alert-info mt-4" role="alert">
+                <i class="fas fa-question-circle me-2"></i>
+                <strong>Need Help?</strong> Contact our admissions office if you have any questions during the application process.
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}
 
 {% block extra_css %}
 <style>
 /* Styles specific to Admission Form */
+.card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+}
+
+.alert-success {
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+}
+
+.alert-success .alert-heading,
+.alert-success strong {
+    color: #155724;
+}
 </style>
 {% endblock %}
 
 {% block extra_js %}
 <script>
 // JS for Admission Form
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Admission form page loaded - No login required');
+});
 </script>
 {% endblock %}

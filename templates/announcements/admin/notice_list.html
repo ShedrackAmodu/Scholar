@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Notices{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1>Notices</h1>
+                <a href="{% url 'announcements:notice_create' %}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Create Notice
+                </a>
+            </div>
+
+            {% if notices %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Title</th>
+                                <th>Type</th>
+                                <th>Priority</th>
+                                <th>Published</th>
+                                <th>Pinned</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for notice in notices %}
+                                <tr>
+                                    <td><strong>{{ notice.title }}</strong></td>
+                                    <td>{{ notice.notice_type }}</td>
+                                    <td>
+                                        {% if notice.priority == 'HIGH' %}
+                                            <span class="badge bg-danger">High</span>
+                                        {% elif notice.priority == 'MEDIUM' %}
+                                            <span class="badge bg-warning">Medium</span>
+                                        {% else %}
+                                            <span class="badge bg-info">Low</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ notice.publish_date|date:"M j, Y" }}</td>
+                                    <td>{% if notice.is_pinned %}<i class="fas fa-check text-success"></i>{% endif %}</td>
+                                    <td>
+                                        <a href="{% url 'announcements:notice_detail' notice.pk %}" class="btn btn-sm btn-info" title="View">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="{% url 'announcements:notice_edit' notice.pk %}" class="btn btn-sm btn-warning" title="Edit">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a href="{% url 'announcements:notice_delete' notice.pk %}" class="btn btn-sm btn-danger" title="Delete">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="alert alert-info">
+                    No notices created yet. <a href="{% url 'announcements:notice_create' %}">Create one now</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

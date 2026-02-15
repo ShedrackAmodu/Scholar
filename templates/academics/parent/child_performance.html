@@ -1,0 +1,509 @@
+{% extends 'academics/base.html' %}
+{% load static %}
+
+{% block title %}{{ child.user.get_full_name }} - Performance{% endblock %}
+
+{% block academics_content %}
+<!-- Page Header -->
+<div class="academics-hero animate__animated animate__fadeIn">
+    <div class="container">
+        <h1><i class="fas fa-child me-3"></i>My Child's Performance</h1>
+        <p>Monitor {{ child.user.get_full_name }}'s academic progress and achievements</p>
+    </div>
+</div>
+
+<!-- Child Selector -->
+<div class="card border-0 shadow-sm animate__animated animate__fadeInUp">
+    <div class="card-body p-4">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h5 class="card-title mb-2">Viewing Performance for:</h5>
+                <div class="d-flex gap-2 flex-wrap">
+                    {% for child in children %}
+                        <div class="child-badge {% if child.id == selected_child.id %}active{% endif %}" 
+                             onclick="switchChild({{ child.id }})">
+                            <div class="avatar-sm bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2">
+                                {{ child.user.get_full_name|first|upper }}
+                            </div>
+                            <div>
+                                <div class="fw-bold">{{ child.user.get_full_name }}</div>
+                                <small class="text-muted">{{ child.current_class.name }}</small>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <div class="d-flex gap-2 justify-content-md-end">
+                    <button class="btn btn-outline-primary" onclick="downloadReport()">
+                        <i class="fas fa-download me-2"></i>Download Report
+                    </button>
+                    <button class="btn btn-primary" onclick="scheduleMeeting()">
+                        <i class="fas fa-calendar-plus me-2"></i>Schedule Meeting
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Child Profile -->
+<div class="card border-0 shadow-sm animate__animated animate__fadeInUp">
+    <div class="card-body p-4">
+        <div class="row align-items-center">
+            <div class="col-md-2">
+                <div class="avatar-lg bg-primary text-white rounded-circle d-flex align-items-center justify-content-center">
+                    {{ selected_child.user.get_full_name|first|upper }}
+                </div>
+            </div>
+            <div class="col-md-6">
+                <h3 class="mb-1">{{ selected_child.user.get_full_name }}</h3>
+                <p class="text-muted mb-2">
+                    <i class="fas fa-id-card me-2"></i>{{ selected_child.admission_number }} |
+                    <i class="fas fa-users ms-3 me-2"></i>{{ selected_child.current_class.name }} |
+                    <i class="fas fa-user-tie ms-3 me-2"></i>{{ selected_child.current_class.class_teacher.user.get_full_name }}
+                </p>
+                <div class="d-flex gap-3 flex-wrap">
+                    <span class="badge bg-primary">
+                        <i class="fas fa-calendar me-2"></i>Enrolled: {{ selected_child.created_at|date:"M Y" }}
+                    </span>
+                    <span class="badge bg-success">
+                        <i class="fas fa-credit-card me-2"></i>Fee Status: Paid
+                    </span>
+                    <span class="badge bg-info">
+                        <i class="fas fa-map-marker-alt me-2"></i>{{ selected_child.user.profile.get_state_display }}
+                    </span>
+                </div>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <div class="row text-center">
+                    <div class="col-4">
+                        <div class="stat-value text-primary">{{ total_subjects }}</div>
+                        <div class="stat-label">Subjects</div>
+                    </div>
+                    <div class="col-4">
+                        <div class="stat-value text-warning">{{ total_attendance|floatformat:1 }}%</div>
+                        <div class="stat-label">Attendance</div>
+                    </div>
+                    <div class="col-4">
+                        <div class="stat-value text-success">{{ total_scores.count }}</div>
+                        <div class="stat-label">Scores</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Performance Overview -->
+<div class="card border-0 shadow-sm animate__animated animate__fadeInUp">
+    <div class="card-body p-4">
+        <div class="row g-4">
+            <div class="col-md-8">
+                <h5 class="card-title mb-3">
+                    <i class="fas fa-chart-line me-2"></i>Performance Overview
+                </h5>
+                
+                <!-- Performance Gauge -->
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="gauge-container">
+                            <div class="gauge">
+                                <svg viewBox="0 0 200 200">
+                                    <defs>
+                                        <linearGradient id="gauge-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                            <stop offset="0%" stop-color="#00b894" />
+                                            <stop offset="100%" stop-color="#00cec9" />
+                                        </linearGradient>
+                                    </defs>
+                                    <circle class="gauge-bg" cx="100" cy="100" r="80"></circle>
+                                    <circle class="gauge-fill" cx="100" cy="100" r="80"></circle>
+                                </svg>
+                                <div class="gauge-text">
+                                    <div class="gauge-value">{{ overall_average|floatformat:1 }}</div>
+                                    <div class="gauge-label">Average Score</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="stats-mini-grid">
+                            <div class="stat-mini-item">
+                                <div class="stat-mini-value">#{{ class_position }}</div>
+                                <div class="stat-mini-label">Class Position</div>
+                            </div>
+                            <div class="stat-mini-item">
+                                <div class="stat-mini-value">{{ highest_grade }}</div>
+                                <div class="stat-mini-label">Highest Grade</div>
+                            </div>
+                            <div class="stat-mini-item">
+                                <div class="stat-mini-value">{{ excellent_count }}</div>
+                                <div class="stat-mini-label">A Grades</div>
+                            </div>
+                            <div class="stat-mini-item">
+                                <div class="stat-mini-value">{{ needs_attention_count }}</div>
+                                <div class="stat-mini-label">Needs Help</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <h5 class="card-title mb-3">
+                    <i class="fas fa-calendar-check me-2"></i>Attendance Summary
+                </h5>
+                
+                <div class="attendance-circle">
+                    <svg viewBox="0 0 150 150">
+                        <circle class="attendance-bg" cx="75" cy="75" r="60"></circle>
+                        <circle class="attendance-fill" cx="75" cy="75" r="60"></circle>
+                    </svg>
+                    <div class="attendance-text">
+                        <div class="attendance-percent">{{ total_attendance|floatformat:0 }}%</div>
+                        <div class="attendance-label">Attendance Rate</div>
+                    </div>
+                </div>
+                
+                <div class="attendance-stats mt-3">
+                    <div class="row text-center">
+                        <div class="col-4">
+                            <div class="attendance-stat-value">{{ total_days }}</div>
+                            <div class="attendance-stat-label">Total Days</div>
+                        </div>
+                        <div class="col-4">
+                            <div class="attendance-stat-value">{{ present_days }}</div>
+                            <div class="attendance-stat-label">Present</div>
+                        </div>
+                        <div class="col-4">
+                            <div class="attendance-stat-value">{{ absent_days }}</div>
+                            <div class="attendance-stat-label">Absent</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Subject Performance -->
+<div class="card border-0 shadow-sm animate__animated animate__fadeInUp">
+    <div class="card-body p-4">
+        <h5 class="card-title mb-3">
+            <i class="fas fa-book-open me-2"></i>Subject Performance
+        </h5>
+        
+        <div class="subject-grid">
+            {% for subject_score in subject_scores %}
+            <div class="subject-performance-card">
+                <div class="subject-header">
+                    <div class="subject-icon">
+                        <i class="fas fa-{{ subject_score.subject_assessment.subject.icon|default:'book' }}"></i>
+                    </div>
+                    <div>
+                        <div class="subject-name">{{ subject_score.subject_assessment.subject.name }}</div>
+                        <div class="subject-teacher">{{ subject_score.subject_assessment.subject.teacher.user.get_full_name }}</div>
+                    </div>
+                </div>
+                
+                <div class="subject-score-row">
+                    <span class="subject-score-label">{{ subject_score.subject_assessment.assessment.name }}</span>
+                    <span class="subject-score-value">{{ subject_score.score }}/{{ subject_score.subject_assessment.max_score }}</span>
+                </div>
+                
+                <div class="subject-score-row">
+                    <span class="subject-score-label">Grade</span>
+                    <span class="subject-grade badge bg-{{ subject_score.grade|lower }}">
+                        {{ subject_score.grade }}
+                    </span>
+                </div>
+                
+                <div class="subject-score-row">
+                    <span class="subject-score-label">Class Avg</span>
+                    <span class="subject-score-value">{{ subject_score.subject_assessment.subject.get_average_score|floatformat:1 }}%</span>
+                </div>
+                
+                <div class="subject-total">
+                    <span>Performance</span>
+                    <span class="text-{{ subject_score.get_performance_color }}">
+                        {{ subject_score.get_performance_status }}
+                    </span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Report Cards -->
+<div class="card border-0 shadow-sm animate__animated animate__fadeInUp">
+    <div class="card-body p-4">
+        <h5 class="card-title mb-3">
+            <i class="fas fa-scroll me-2"></i>Report Cards
+        </h5>
+        
+        <div class="report-cards-list">
+            {% for report_card in report_cards %}
+            <div class="report-card-item" onclick="viewReportCard({{ report_card.id }})">
+                <div>
+                    <div class="report-term">{{ report_card.term }} Term</div>
+                    <div class="report-year">{{ report_card.academic_year }}</div>
+                </div>
+                <div class="report-average">{{ report_card.average_score|floatformat:1 }}%</div>
+                <i class="fas fa-chevron-right text-primary"></i>
+            </div>
+            {% empty %}
+            <div class="text-center text-muted py-3">
+                <i class="fas fa-inbox fa-2x mb-2"></i>
+                <p>No report cards available yet</p>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div class="text-center mt-3">
+            <a href="{% url 'academics:report_card_list' selected_child.current_class.id %}" class="btn btn-outline-primary btn-sm">
+                View All Reports
+                <i class="fas fa-arrow-right ms-2"></i>
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Notifications -->
+<div class="card border-0 shadow-sm animate__animated animate__fadeInUp">
+    <div class="card-body p-4">
+        <h5 class="card-title mb-3">
+            <i class="fas fa-bell me-2"></i>Recent Updates
+        </h5>
+        
+        <div class="notification-list">
+            {% for notification in notifications %}
+            <div class="notification-item">
+                <div class="notification-icon">
+                    <i class="fas fa-{{ notification.icon }}"></i>
+                </div>
+                <div class="notification-content">
+                    <div class="notification-title">{{ notification.title }}</div>
+                    <div class="notification-time">{{ notification.created_at|timesince }} ago</div>
+                </div>
+                {% if not notification.read %}
+                <div class="notification-badge"></div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Schedule Meeting Modal -->
+<div class="modal fade" id="meetingModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-calendar-plus me-2"></i>
+                    Schedule Parent-Teacher Meeting
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="meetingForm">
+                    <div class="mb-3">
+                        <label for="meetingDate" class="form-label">Preferred Date</label>
+                        <input type="date" class="form-control" id="meetingDate" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="meetingTime" class="form-label">Preferred Time</label>
+                        <select class="form-select" id="meetingTime" required>
+                            <option value="">Select time...</option>
+                            <option value="09:00">09:00 AM</option>
+                            <option value="10:00">10:00 AM</option>
+                            <option value="11:00">11:00 AM</option>
+                            <option value="14:00">02:00 PM</option>
+                            <option value="15:00">03:00 PM</option>
+                            <option value="16:00">04:00 PM</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="meetingReason" class="form-label">Reason for Meeting</label>
+                        <textarea class="form-control" id="meetingReason" rows="3" placeholder="Please describe the reason for this meeting..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="submitMeeting()">
+                    <i class="fas fa-paper-plane me-2"></i>Schedule Meeting
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Success Modal -->
+<div class="modal fade" id="successModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content text-center">
+            <div class="modal-body p-5">
+                <div class="mb-4">
+                    <i class="fas fa-check-circle text-success" style="font-size: 4rem;"></i>
+                </div>
+                <h4 class="modal-title mb-2">Success!</h4>
+                <p class="text-secondary" id="successMessage">Your request has been processed successfully.</p>
+                <div class="d-flex gap-2 justify-content-center mt-4">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
+                        <i class="fas fa-check me-2"></i>OK
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Error Modal -->
+<div class="modal fade" id="errorModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content text-center">
+            <div class="modal-body p-5">
+                <div class="mb-4">
+                    <i class="fas fa-exclamation-triangle text-danger" style="font-size: 4rem;"></i>
+                </div>
+                <h4 class="modal-title mb-2">Error</h4>
+                <p class="text-secondary" id="errorMessage">An error occurred while processing your request.</p>
+                <div class="d-flex gap-2 justify-content-center mt-4">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
+                        <i class="fas fa-check me-2"></i>OK
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // DOM Elements
+    const gaugeFill = document.querySelector('.gauge-fill');
+    const attendanceFill = document.querySelector('.attendance-fill');
+    const overallAverage = {{ overall_average|floatformat:1 }};
+    const attendancePercent = {{ total_attendance|floatformat:0 }};
+
+    // Animate gauges on load
+    document.addEventListener('DOMContentLoaded', function() {
+        // Animate performance gauge
+        if (gaugeFill) {
+            const circumference = 2 * Math.PI * 80;
+            const offset = circumference - (circumference * overallAverage) / 100;
+            gaugeFill.style.strokeDasharray = circumference;
+            gaugeFill.style.strokeDashoffset = offset;
+        }
+
+        // Animate attendance gauge
+        if (attendanceFill) {
+            const circumference = 2 * Math.PI * 60;
+            const offset = circumference - (circumference * attendancePercent) / 100;
+            attendanceFill.style.strokeDasharray = circumference;
+            attendanceFill.style.strokeDashoffset = offset;
+        }
+    });
+
+    // Switch child
+    function switchChild(childId) {
+        // This would typically be an AJAX call to switch the selected child
+        showNotification(`Switching to child ${childId}...`, 'info');
+        setTimeout(() => {
+            showNotification('Child switched successfully', 'success');
+        }, 1000);
+    }
+
+    // Download report
+    function downloadReport() {
+        showNotification('Preparing report for download...', 'info');
+        setTimeout(() => {
+            showNotification('Report downloaded successfully!', 'success');
+        }, 1500);
+    }
+
+    // Schedule meeting
+    function scheduleMeeting() {
+        const modal = new bootstrap.Modal(document.getElementById('meetingModal'));
+        modal.show();
+    }
+
+    // Submit meeting
+    function submitMeeting() {
+        const formData = new FormData();
+        formData.append('date', document.getElementById('meetingDate').value);
+        formData.append('time', document.getElementById('meetingTime').value);
+        formData.append('reason', document.getElementById('meetingReason').value);
+        formData.append('child_id', {{ selected_child.id }});
+        formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+        fetch('{% url "academics:schedule_meeting" %}', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const modal = bootstrap.Modal.getInstance(document.getElementById('meetingModal'));
+                modal.hide();
+                showSuccessMessage('Meeting scheduled successfully!');
+            } else {
+                showErrorMessage(data.error || 'Failed to schedule meeting');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showErrorMessage('An error occurred while scheduling the meeting');
+        });
+    }
+
+    // View report card
+    function viewReportCard(reportId) {
+        window.location.href = `{% url 'academics:report_card_detail' reportId %}`;
+    }
+
+    // Show success message
+    function showSuccessMessage(message) {
+        document.getElementById('successMessage').textContent = message;
+        const modal = new bootstrap.Modal(document.getElementById('successModal'));
+        modal.show();
+    }
+
+    // Show error message
+    function showErrorMessage(message) {
+        document.getElementById('errorMessage').textContent = message;
+        const modal = new bootstrap.Modal(document.getElementById('errorModal'));
+        modal.show();
+    }
+
+    // Show notification
+    function showNotification(message, type) {
+        // This would typically show a toast notification
+        console.log(message, type);
+    }
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        // Ctrl + D to download report
+        if (e.ctrlKey && e.key === 'd') {
+            e.preventDefault();
+            downloadReport();
+        }
+        
+        // Ctrl + M to schedule meeting
+        if (e.ctrlKey && e.key === 'm') {
+            e.preventDefault();
+            scheduleMeeting();
+        }
+    });
+
+    // Initialize tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+</script>
+{% endblock %}

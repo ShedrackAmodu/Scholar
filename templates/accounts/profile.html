@@ -809,171 +809,6 @@
                 <!-- Security Tab -->
                 <div class="tab-pane fade" id="security" role="tabpanel">
                     <div class="form-card">
-
-{% block extra_css %}
-<style>
-   /* Combined profile page styles */
-   .profile-container { padding:2rem; }
-   .profile-header { margin-bottom:2rem; }
-   .profile-avatar { width:120px; height:120px; border-radius:50%; overflow:hidden; border:4px solid var(--primary-gradient); }
-   .profile-avatar img { width:100%; height:100%; object-fit:cover; }
-   .profile-info { margin-top:1rem; }
-   .profile-info h2 { margin-bottom:.5rem; }
-   .profile-info p { color: var(--text-secondary); }
-
-   .profile-card { background: var(--card-bg); border-radius:20px; padding:1.5rem; box-shadow: var(--shadow); border: var(--border); }
-   .card-title { font-size:1.1rem; font-weight:600; display:flex; align-items:center; gap:.5rem; }
-   
-   .security-item, .preference-item, .assignment-item, .device-item { display:flex; align-items:center; justify-content:space-between; padding:.8rem 0; border-bottom: var(--border); }
-   .security-info, .device-info { flex:1; }
-   .device-icon, .assignment-status { width:40px; height:40px; border-radius:50%; background: var(--primary-gradient); display:flex; align-items:center; justify-content:center; color:white; }
-
-   .switch { position: relative; display:inline-block; width:60px; height:34px; }
-   .switch input { opacity:0; width:0; height:0; }
-   .slider { position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background-color:#ccc; transition:.4s; border-radius:34px; }
-   .slider:before { position:absolute; content:''; height:26px; width:26px; left:4px; bottom:4px; background-color:white; transition:.4s; border-radius:50%; }
-   input:checked + .slider { background:var(--primary-gradient); }
-   input:checked + .slider:before { transform: translateX(26px); }
-
-   .assignment-item { display:flex; align-items:center; gap:1rem; padding:.8rem; border-radius:10px; transition:var(--transition-smooth); }
-   .assignment-status { width:10px; height:10px; border-radius:50%; }
-   .status-pending { background: var(--warning); }
-   .status-completed { background: var(--success); }
-   .status-urgent { background: var(--danger); }
-
-   /* hidden/edit mode */
-   #editMode.hidden { display:none; }
-</style>
-{% endblock %}
-
-{% block content %}
-<div class="profile-container">
-    <!-- Profile Header -->
-    <div class="profile-header" data-aos="fade-up">
-        <div class="row align-items-center">
-            <div class="col-md-2 text-center">
-                <div class="profile-avatar">
-                    {% if user.profile_picture %}
-                        <img src="{{ user.profile_picture.url }}" alt="{{ user.get_full_name }}">
-                    {% else %}
-                        <img src="https://ui-avatars.com/api/?name={{ user.get_full_name|urlencode }}&background=7B2CBF&color=fff&size=128" alt="{{ user.get_full_name }}">
-                    {% endif %}
-                </div>
-            </div>
-            <div class="col-md-6 profile-info">
-                <h2>{{ user.get_full_name }}</h2>
-                <p>{{ user.email }}</p>
-                <p class="text-secondary">{{ user.get_role_display }}</p>
-            </div>
-            <div class="col-md-4 text-md-end">
-                <button class="btn btn-outline-primary" onclick="toggleEdit()">
-                    <i class="fas fa-edit me-1"></i>Edit Profile
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Tabs -->
-    <ul class="nav nav-tabs mb-4" id="profileTabs" role="tablist">
-        <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview" type="button" role="tab" aria-controls="overview" aria-selected="true">
-                Overview
-            </button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link" id="security-tab" data-bs-toggle="tab" data-bs-target="#security" type="button" role="tab" aria-controls="security" aria-selected="false">
-                Security
-            </button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link" id="notifications-tab" data-bs-toggle="tab" data-bs-target="#notifications" type="button" role="tab" aria-controls="notifications" aria-selected="false">
-                Notifications
-            </button>
-        </li>
-        {% if user.role == 'STUDENT' or user.role == 'PARENT' %}
-        <li class="nav-item" role="presentation">
-            <button class="nav-link" id="academic-tab" data-bs-toggle="tab" data-bs-target="#academic" type="button" role="tab" aria-controls="academic" aria-selected="false">
-                Academic
-            </button>
-        </li>
-        {% endif %}
-    </ul>
-
-    <div class="tab-content" id="profileTabsContent">
-        <!-- Overview Tab -->
-        <div class="tab-pane fade show active" id="overview" role="tabpanel" aria-labelledby="overview-tab">
-            <div class="row">
-                <div class="col-lg-4">
-                    <div class="profile-card" data-aos="fade-up">
-                        <h5 class="card-title"><i class="fas fa-user"></i> Personal Info</h5>
-                        <p><strong>Name:</strong> {{ user.get_full_name }}</p>
-                        <p><strong>Email:</strong> {{ user.email }}</p>
-                        <p><strong>Role:</strong> {{ user.get_role_display }}</p>
-                    </div>
-                </div>
-                <div class="col-lg-8">
-                    <div id="viewMode">
-                        <div class="profile-card" data-aos="fade-up">
-                            <h5 class="card-title"><i class="fas fa-info-circle"></i> Account Details</h5>
-                            <p>Last login: {{ user.last_login|date:"F d, Y H:i" }}</p>
-                            <p>Joined: {{ user.date_joined|date:"F d, Y" }}</p>
-                        </div>
-                    </div>
-                    <div id="editMode" class="hidden">
-                        <form id="profileForm">
-                            {% csrf_token %}
-                            <div class="mb-3">
-                                <label class="form-label">Full Name</label>
-                                <input type="text" class="form-control" name="full_name" value="{{ user.get_full_name }}">
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Email</label>
-                                <input type="email" class="form-control" name="email" value="{{ user.email }}">
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Phone</label>
-                                <input type="tel" class="form-control" name="phone" value="{{ user.phone }}">
-                            </div>
-                            <button type="submit" class="btn btn-primary">Save Changes</button>
-                            <button type="button" class="btn btn-secondary" onclick="toggleEdit()">Cancel</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Security Tab -->
-        <div class="tab-pane fade" id="security" role="tabpanel" aria-labelledby="security-tab">
-            <div class="row">
-                <div class="col-lg-6">
-                    <div class="profile-card" data-aos="fade-up">
-                        <h5 class="card-title">
-                            <i class="fas fa-mobile-alt"></i>
-                            Connected Devices
-                        </h5>
-
-                        <div class="device-list">
-                            {% for device in other_devices %}
-                            <div class="device-item">
-                                <div class="device-icon">
-                                    <i class="fas fa-{{ device.icon }}"></i>
-                                </div>
-                                <div class="device-info">
-                                    <div class="device-name">{{ device.name }}</div>
-                                    <div class="device-meta">{{ device.os }} • {{ device.browser }} • {{ device.ip }}</div>
-                                    <div class="device-meta">Last active: {{ device.last_active|timesince }} ago</div>
-                                </div>
-                                <button class="btn btn-sm btn-outline-danger" onclick="revokeDevice({{ device.id }})">
-                                    <i class="fas fa-sign-out-alt"></i>
-                                </button>
-                            </div>
-                            {% endfor %}
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-lg-6">
-                    <div class="profile-card" data-aos="fade-up" data-aos-delay="100">
                         <h5 class="card-title">
                             <i class="fas fa-shield-alt"></i>
                             Security Settings
@@ -1015,54 +850,32 @@
                             </label>
                         </div>
                     </div>
-
-                    <!-- Two-Factor Setup (shown when enabling 2FA) -->
-                    <div class="profile-card" id="twoFactorSetup" style="display: none;">
-                        <h5 class="card-title">
-                            <i class="fas fa-qrcode"></i>
-                            Set Up Two-Factor Authentication
-                        </h5>
-                        
-                        <div class="text-center mb-4">
-                            <div class="qr-code">
-                                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data={{ two_factor_secret }}" alt="2FA QR Code">
+                </div>
+                
+                <!-- Activity Tab -->
+                <div class="tab-pane fade" id="activity" role="tabpanel">
+                    <div class="activity-timeline">
+                        {% for activity in user.login_history.all|slice:":10" %}
+                        <div class="timeline-item">
+                            <div class="timeline-date">
+                                <i class="fas fa-clock"></i>
+                                {{ activity.login_time|date:"M d, Y g:i A" }}
                             </div>
-                            <p class="mt-2">Scan this QR code with Google Authenticator</p>
+                            <div class="timeline-title">Login from {{ activity.ip_address }}</div>
+                            <div class="timeline-desc">{{ activity.user_agent|truncatechars:100 }}</div>
                         </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label">Or enter this code manually:</label>
-                            <div class="input-group">
-                                <input type="text" class="form-control" value="{{ two_factor_secret }}" readonly>
-                                <button class="btn btn-outline-primary" onclick="copyToClipboard('{{ two_factor_secret }}')">
-                                    <i class="fas fa-copy"></i>
-                                </button>
-                            </div>
+                        {% empty %}
+                        <div class="text-center text-secondary">
+                            <i class="fas fa-history fa-2x mb-2"></i>
+                            <p>No activity recorded yet</p>
                         </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label">Verification Code</label>
-                            <input type="text" class="form-control" placeholder="Enter 6-digit code" id="verificationCode">
-                        </div>
-                        
-                        <div class="d-flex gap-2">
-                            <button class="btn btn-primary" onclick="verifyTwoFactor()">
-                                <i class="fas fa-check me-2"></i>Verify & Enable
-                            </button>
-                            <button class="btn btn-secondary" onclick="cancelTwoFactor()">
-                                <i class="fas fa-times me-2"></i>Cancel
-                            </button>
-                        </div>
+                        {% endfor %}
                     </div>
                 </div>
-            </div>
-        </div>
-
-        <!-- Notifications Tab -->
-        <div class="tab-pane fade" id="notifications" role="tabpanel">
-            <div class="row">
-                <div class="col-lg-6">
-                    <div class="profile-card" data-aos="fade-up">
+                
+                <!-- Notifications Tab -->
+                <div class="tab-pane fade" id="notifications" role="tabpanel">
+                    <div class="form-card">
                         <h5 class="card-title">
                             <i class="fas fa-bell"></i>
                             Notification Preferences
@@ -1102,64 +915,8 @@
                         </div>
                     </div>
                 </div>
-                
-                <div class="col-lg-6">
-                    <div class="profile-card" data-aos="fade-up" data-aos-delay="100">
-                        <h5 class="card-title">
-                            <i class="fas fa-bell"></i>
-                            Notification Types
-                        </h5>
-                        ... (remaining notification types) ...
-                    </div>
-                </div>
             </div>
         </div>
-
-        <!-- Academic Tab -->
-        {% if user.role == 'STUDENT' or user.role == 'PARENT' %}
-        <div class="tab-pane fade" id="academic" role="tabpanel">
-            <div class="row">
-                <div class="col-lg-6">
-                    <div class="profile-card" data-aos="fade-up">
-                        <h5 class="card-title">
-                            <i class="fas fa-chart-line"></i>
-                            Current Term Performance
-                        </h5>
-                        
-                        <canvas id="academicChart" style="height: 300px;"></canvas>
-                    </div>
-                </div>
-                
-                <div class="col-lg-6">
-                    <div class="profile-card" data-aos="fade-up" data-aos-delay="100">
-                        <h5 class="card-title">
-                            <i class="fas fa-calendar-alt"></i>
-                            Upcoming Assessments
-                        </h5>
-                        
-                        {% for assessment in upcoming_assessments %}
-                            <div class="assignment-item">
-                                <div class="assignment-status status-{{ assessment.status }}"></div>
-                                <div class="assignment-content">
-                                    <div class="assignment-title">{{ assessment.title }}</div>
-                                    <div class="assignment-meta">
-                                        <span><i class="fas fa-book me-1"></i>{{ assessment.subject }}</span>
-                                        <span><i class="fas fa-clock me-1"></i>{{ assessment.date|date:"M d, Y" }}</span>
-                                    </div>
-                                </div>
-                                <div class="assignment-deadline">
-                                    <div class="deadline-date">{{ assessment.date|date:"M d" }}</div>
-                                    <div class="deadline-label">{{ assessment.date|time:"g:i A" }}</div>
-                                </div>
-                            </div>
-                        {% empty %}
-                            <p class="text-secondary text-center">No upcoming assessments</p>
-                        {% endfor %}
-                    </div>
-                </div>
-            </div>
-        </div>
-        {% endif %}
     </div>
 </div>
 
@@ -1195,15 +952,9 @@
 {% endblock %}
 
 {% block extra_js %}
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     // Profile Page JavaScript
     document.addEventListener('DOMContentLoaded', function() {
-        // Initialize academic chart if exists
-        if (document.getElementById('academicChart')) {
-            initAcademicChart();
-        }
-        
         // Check URL hash for tab
         const hash = window.location.hash;
         if (hash) {
@@ -1213,24 +964,6 @@
             }
         }
     });
-
-    let editMode = false;
-
-    function toggleEdit() {
-        const viewMode = document.getElementById('viewMode');
-        const editMode = document.getElementById('editMode');
-        
-        if (!editMode.classList.contains('active')) {
-            viewMode.classList.add('hidden');
-            editMode.classList.add('active');
-            
-            // Animate form entrance
-            editMode.style.animation = 'fadeIn 0.5s ease';
-        } else {
-            viewMode.classList.remove('hidden');
-            editMode.classList.remove('active');
-        }
-    }
 
     function uploadAvatar(input) {
         if (input.files && input.files[0]) {
@@ -1245,86 +978,6 @@
         }
     }
 
-    function initAcademicChart() {
-        const ctx = document.getElementById('academicChart');
-        new Chart(ctx, {
-            type: 'radar',
-            data: {
-                labels: {{ subject_labels|safe }},
-                datasets: [{
-                    label: 'Your Performance',
-                    data: {{ subject_scores|safe }},
-                    backgroundColor: 'rgba(123, 44, 191, 0.2)',
-                    borderColor: '#7B2CBF',
-                    pointBackgroundColor: '#7B2CBF',
-                    pointBorderColor: '#fff',
-                    pointHoverBackgroundColor: '#fff',
-                    pointHoverBorderColor: '#7B2CBF'
-                }, {
-                    label: 'Class Average',
-                    data: {{ class_averages|safe }},
-                    backgroundColor: 'rgba(74, 144, 226, 0.2)',
-                    borderColor: '#4A90E2',
-                    pointBackgroundColor: '#4A90E2',
-                    pointBorderColor: '#fff',
-                    pointHoverBackgroundColor: '#fff',
-                    pointHoverBorderColor: '#4A90E2'
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    r: {
-                        beginAtZero: true,
-                        max: 100,
-                        ticks: {
-                            stepSize: 20
-                        }
-                    }
-                },
-                animation: {
-                    duration: 2000,
-                    easing: 'easeInOutQuart'
-                }
-            }
-        });
-    }
-
-    function toggleTwoFactor() {
-        const checkbox = document.getElementById('twoFactor');
-        const setupDiv = document.getElementById('twoFactorSetup');
-        
-        if (checkbox.checked) {
-            setupDiv.style.display = 'block';
-            setupDiv.style.animation = 'fadeIn 0.5s ease';
-        } else {
-            setupDiv.style.display = 'none';
-        }
-    }
-
-    function verifyTwoFactor() {
-        const code = document.getElementById('verificationCode').value;
-        
-        if (code.length === 6) {
-            showNotification('Two-factor authentication enabled!', 'success');
-            document.getElementById('twoFactorSetup').style.display = 'none';
-        } else {
-            showNotification('Please enter a valid 6-digit code', 'error');
-        }
-    }
-
-    function cancelTwoFactor() {
-        document.getElementById('twoFactorSetup').style.display = 'none';
-        document.getElementById('twoFactor').checked = false;
-    }
-
-    function toggleNotification(type) {
-        const checkbox = document.getElementById(type + 'Notif');
-        const status = checkbox.checked ? 'enabled' : 'disabled';
-        showNotification(`${type.charAt(0).toUpperCase() + type.slice(1)} notifications ${status}`, 'info');
-    }
-
     function toggleLoginAlerts() {
         const checkbox = document.getElementById('loginAlerts');
         const status = checkbox.checked ? 'enabled' : 'disabled';
@@ -1337,18 +990,14 @@
         showNotification(`Session timeout ${status}`, 'info');
     }
 
-    function revokeDevice(deviceId) {
-        showNotification('Device access revoked', 'success');
+    function toggleNotification(type) {
+        const checkbox = document.getElementById(type + 'Notif');
+        const status = checkbox.checked ? 'enabled' : 'disabled';
+        showNotification(`${type.charAt(0).toUpperCase() + type.slice(1)} notifications ${status}`, 'info');
     }
 
     function verifyEmail() {
         showNotification('Verification email sent!', 'success');
-    }
-
-    function copyToClipboard(text) {
-        navigator.clipboard.writeText(text).then(() => {
-            showNotification('Code copied to clipboard!', 'success');
-        });
     }
 
     function deleteAccount() {
@@ -1363,7 +1012,7 @@
     }
 
     // Form submission handler
-    document.getElementById('profileForm').addEventListener('submit', function(e) {
+    document.getElementById('profile-form').addEventListener('submit', function(e) {
         e.preventDefault();
         
         // Simulate form submission
@@ -1376,9 +1025,6 @@
             submitBtn.innerHTML = originalText;
             submitBtn.disabled = false;
             
-            // Exit edit mode
-            toggleEdit();
-            
             // Update displayed info (simulated)
             showNotification('Profile updated successfully!', 'success');
         }, 2000);
@@ -1386,15 +1032,12 @@
 
     // Keyboard shortcuts
     document.addEventListener('keydown', function(e) {
-        // Ctrl + S to save when in edit mode
-        if (e.ctrlKey && e.key === 's' && document.getElementById('editMode').classList.contains('active')) {
-            e.preventDefault();
-            document.getElementById('profileForm').dispatchEvent(new Event('submit'));
-        }
-        
-        // Escape to cancel edit
-        if (e.key === 'Escape' && document.getElementById('editMode').classList.contains('active')) {
-            toggleEdit();
+        // Escape to close modals
+        if (e.key === 'Escape') {
+            const modals = document.querySelectorAll('.modal.show');
+            modals.forEach(modal => {
+                bootstrap.Modal.getInstance(modal).hide();
+            });
         }
     });
 

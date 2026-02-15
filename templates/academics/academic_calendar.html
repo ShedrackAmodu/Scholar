@@ -1,0 +1,201 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Academic Calendar - {{ school_profile.name|default:"School" }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .calendar-header {
+        background: linear-gradient(135deg, rgba(123, 44, 191, 0.1), rgba(74, 144, 226, 0.1));
+        padding: 2rem;
+        border-radius: 10px;
+        margin-bottom: 2rem;
+    }
+
+    .academic-year {
+        margin-bottom: 2.5rem;
+    }
+
+    .academic-year-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+        border-left: 4px solid var(--primary-color);
+        padding-left: 1rem;
+    }
+
+    .terms-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .term-card {
+        background: var(--card-bg);
+        border-radius: 10px;
+        padding: 1.5rem;
+        box-shadow: var(--shadow);
+        border: 1px solid var(--border-color);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .term-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-hover);
+    }
+
+    .term-name {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: var(--primary-color);
+        margin-bottom: 1rem;
+    }
+
+    .term-details {
+        list-style: none;
+        padding: 0;
+    }
+
+    .term-details li {
+        padding: 0.5rem 0;
+        display: flex;
+        align-items: center;
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+    }
+
+    .term-details i {
+        margin-right: 0.75rem;
+        color: var(--primary-color);
+        width: 20px;
+        text-align: center;
+    }
+
+    .no-data {
+        background: var(--card-bg);
+        padding: 2rem;
+        border-radius: 10px;
+        text-align: center;
+        color: var(--text-secondary);
+    }
+
+    .school-info {
+        background: var(--card-bg);
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        border-left: 4px solid var(--primary-color);
+    }
+
+    .school-info h5 {
+        color: var(--primary-color);
+        margin-bottom: 1rem;
+    }
+
+    .school-info p {
+        margin-bottom: 0.5rem;
+        color: var(--text-secondary);
+    }
+
+    @media (prefers-color-scheme: dark) {
+        .calendar-header {
+            background: linear-gradient(135deg, rgba(157, 78, 221, 0.1), rgba(58, 12, 163, 0.1));
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="h2">Academic Calendar</h1>
+            <p class="text-muted">View school terms, holidays, and important dates</p>
+        </div>
+    </div>
+
+    {% if school_profile %}
+    <!-- School Information -->
+    <div class="row mb-4">
+        <div class="col-lg-8">
+            <div class="school-info">
+                <h5><i class="fas fa-school"></i> School Information</h5>
+                <p><strong>School Name:</strong> {{ school_profile.name }}</p>
+                {% if school_profile.address %}
+                    <p><strong>Address:</strong> {{ school_profile.address }}</p>
+                {% endif %}
+                {% if school_profile.phone %}
+                    <p><strong>Phone:</strong> {{ school_profile.phone }}</p>
+                {% endif %}
+                {% if school_profile.opening_time and school_profile.closing_time %}
+                    <p><strong>School Hours:</strong> {{ school_profile.opening_time|time:"H:i" }} - {{ school_profile.closing_time|time:"H:i" }}</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Academic Years -->
+    {% if academic_years %}
+        {% for academic_year in academic_years %}
+        <div class="academic-year">
+            <div class="academic-year-title">
+                <i class="fas fa-calendar-alt"></i>
+                Academic Year {{ academic_year.start_year }}/{{ academic_year.end_year }}
+            </div>
+
+            {% if academic_year.term_set.all %}
+            <div class="terms-grid">
+                {% for term in academic_year.term_set.all %}
+                <div class="term-card">
+                    <div class="term-name">{{ term.name }}</div>
+                    <ul class="term-details">
+                        <li>
+                            <i class="fas fa-calendar-check"></i>
+                            <span><strong>Start:</strong> {{ term.start_date|date:"M d, Y" }}</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-calendar-times"></i>
+                            <span><strong>End:</strong> {{ term.end_date|date:"M d, Y" }}</span>
+                        </li>
+                        {% if term.duration %}
+                        <li>
+                            <i class="fas fa-hourglass-half"></i>
+                            <span><strong>Duration:</strong> {{ term.duration }} weeks</span>
+                        </li>
+                        {% endif %}
+                        <li>
+                            <i class="fas fa-info-circle"></i>
+                            <span><strong>Status:</strong> 
+                                {% if term.is_current %}
+                                    <span class="badge bg-success">Active</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Inactive</span>
+                                {% endif %}
+                            </span>
+                        </li>
+                    </ul>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+                <div class="no-data">
+                    <i class="fas fa-inbox"></i>
+                    <p>No terms defined for this academic year</p>
+                </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="no-data">
+            <i class="fas fa-calendar"></i>
+            <p>No academic years configured yet</p>
+            {% if user.is_staff %}
+                <p class="mt-2"><small>Please configure academic years in the admin panel</small></p>
+            {% endif %}
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

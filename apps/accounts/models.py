@@ -69,6 +69,36 @@ class User(AbstractUser):
         return self.role in [self.Roles.TEACHER, self.Roles.PRINCIPAL,
                              self.Roles.VICE_PRINCIPAL]
 
+    # convenience properties used in templates and decorators
+    @property
+    def is_admin(self):
+        # superuser flag should also qualify
+        return self.is_superuser or self.has_admin_access()
+
+    @property
+    def is_teacher(self):
+        return self.role == self.Roles.TEACHER
+
+    @property
+    def is_student(self):
+        return self.role == self.Roles.STUDENT
+
+    @property
+    def is_parent(self):
+        return self.role == self.Roles.PARENT
+
+    @property
+    def is_principal(self):
+        return self.role == self.Roles.PRINCIPAL
+
+    @property
+    def is_vice_principal(self):
+        return self.role == self.Roles.VICE_PRINCIPAL
+
+    @property
+    def is_director(self):
+        return self.role == self.Roles.DIRECTOR
+
 
 class LoginHistory(models.Model):
     """Track user login history"""

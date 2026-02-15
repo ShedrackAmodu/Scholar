@@ -1,12 +1,13 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.views.generic import ListView, CreateView, UpdateView, DeleteView
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView
 from django.contrib.messages.views import SuccessMessageMixin
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.utils import timezone
 from django.http import JsonResponse
+from django.utils.decorators import method_decorator
 
 from .models import SchoolProfile, AcademicYear, Term, Holiday
 from apps.announcements.models import Event, Notice
@@ -145,6 +146,7 @@ def school_hours(request):
     return render(request, 'school/admin/hours_form.html', context)
 
 # Academic Year Views
+@method_decorator([login_required, admin_required], name='dispatch')
 class AcademicYearListView(LoginRequiredMixin, ListView):
     """List all academic years"""
     model = AcademicYear
@@ -152,6 +154,7 @@ class AcademicYearListView(LoginRequiredMixin, ListView):
     context_object_name = 'academic_years'
     ordering = ['-start_date']
 
+@method_decorator([login_required, admin_required], name='dispatch')
 class AcademicYearCreateView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
     """Create new academic year"""
     model = AcademicYear
@@ -160,6 +163,7 @@ class AcademicYearCreateView(LoginRequiredMixin, SuccessMessageMixin, CreateView
     success_url = reverse_lazy('school:academic_year_list')
     success_message = "Academic year %(name)s created successfully."
 
+@method_decorator([login_required, admin_required], name='dispatch')
 class AcademicYearUpdateView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
     """Update academic year"""
     model = AcademicYear
@@ -168,6 +172,7 @@ class AcademicYearUpdateView(LoginRequiredMixin, SuccessMessageMixin, UpdateView
     success_url = reverse_lazy('school:academic_year_list')
     success_message = "Academic year %(name)s updated successfully."
 
+@method_decorator([login_required, admin_required], name='dispatch')
 class AcademicYearDeleteView(LoginRequiredMixin, DeleteView):
     """Delete academic year"""
     model = AcademicYear
@@ -175,7 +180,21 @@ class AcademicYearDeleteView(LoginRequiredMixin, DeleteView):
     success_url = reverse_lazy('school:academic_year_list')
     success_message = "Academic year deleted successfully."
 
+class AcademicYearDetailView(LoginRequiredMixin, DetailView):
+    """View academic year details"""
+    model = AcademicYear
+    template_name = 'school/admin/academic_year_detail.html'
+    context_object_name = 'academic_year'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        academic_year = self.get_object()
+        context['terms'] = Term.objects.filter(academic_year=academic_year)
+        context['holidays'] = Holiday.objects.filter(academic_year=academic_year)
+        return context
+
 # Term Views
+@method_decorator([login_required, admin_required], name='dispatch')
 class TermListView(LoginRequiredMixin, ListView):
     """List all terms"""
     model = Term
@@ -183,6 +202,7 @@ class TermListView(LoginRequiredMixin, ListView):
     context_object_name = 'terms'
     ordering = ['-academic_year__start_date', 'start_date']
 
+@method_decorator([login_required, admin_required], name='dispatch')
 class TermCreateView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
     """Create new term"""
     model = Term
@@ -191,6 +211,7 @@ class TermCreateView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
     success_url = reverse_lazy('school:term_list')
     success_message = "Term created successfully."
 
+@method_decorator([login_required, admin_required], name='dispatch')
 class TermUpdateView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
     """Update term"""
     model = Term
@@ -199,6 +220,7 @@ class TermUpdateView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
     success_url = reverse_lazy('school:term_list')
     success_message = "Term updated successfully."
 
+@method_decorator([login_required, admin_required], name='dispatch')
 class TermDeleteView(LoginRequiredMixin, DeleteView):
     """Delete term"""
     model = Term
@@ -206,7 +228,20 @@ class TermDeleteView(LoginRequiredMixin, DeleteView):
     success_url = reverse_lazy('school:term_list')
     success_message = "Term deleted successfully."
 
+class TermDetailView(LoginRequiredMixin, DetailView):
+    """View term details"""
+    model = Term
+    template_name = 'school/admin/term_detail.html'
+    context_object_name = 'term'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        term = self.get_object()
+        context['classes'] = term.academic_year.classes.all() if hasattr(term.academic_year, 'classes') else []
+        return context
+
 # Holiday Views
+@method_decorator([login_required, admin_required], name='dispatch')
 class HolidayListView(LoginRequiredMixin, ListView):
     """List all holidays"""
     model = Holiday
@@ -214,6 +249,7 @@ class HolidayListView(LoginRequiredMixin, ListView):
     context_object_name = 'holidays'
     ordering = ['-start_date']
 
+@method_decorator([login_required, admin_required], name='dispatch')
 class HolidayCreateView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
     """Create new holiday"""
     model = Holiday
@@ -222,6 +258,7 @@ class HolidayCreateView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
     success_url = reverse_lazy('school:holiday_list')
     success_message = "Holiday %(name)s created successfully."
 
+@method_decorator([login_required, admin_required], name='dispatch')
 class HolidayUpdateView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
     """Update holiday"""
     model = Holiday
@@ -230,12 +267,19 @@ class HolidayUpdateView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
     success_url = reverse_lazy('school:holiday_list')
     success_message = "Holiday %(name)s updated successfully."
 
+@method_decorator([login_required, admin_required], name='dispatch')
 class HolidayDeleteView(LoginRequiredMixin, DeleteView):
     """Delete holiday"""
     model = Holiday
     template_name = 'school/admin/holiday_confirm_delete.html'
     success_url = reverse_lazy('school:holiday_list')
     success_message = "Holiday deleted successfully."
+
+class HolidayDetailView(LoginRequiredMixin, DetailView):
+    """View holiday details"""
+    model = Holiday
+    template_name = 'school/admin/holiday_detail.html'
+    context_object_name = 'holiday'
 
 # API Views (for AJAX requests)
 @login_required

@@ -1,24 +1,811 @@
-{% load static %}
 {% extends 'base.html' %}
+{% load static %}
 
-{% block title %}Performance{% endblock %}
-
-{% block content %}
-<div class="container py-5">
-    <h1 class="display-4 text-center mb-4" data-aos="fade-down">Performance</h1>
-    <p class="lead text-center" data-aos="fade-up" data-aos-delay="200">This is the Performance page. Customize the structure and content here as needed.</p>
-    <!-- Add your form, table, or other components below -->
-</div>
-{% endblock %}
+{% block title %}Performance - {{ student.user.get_full_name }}{% endblock %}
 
 {% block extra_css %}
 <style>
-/* Styles specific to Performance */
+    /* Page Header */
+    .page-header {
+        background: linear-gradient(135deg, #6c5ce7, #a363d9);
+        padding: 50px 0;
+        margin-bottom: 40px;
+        border-radius: 0 0 50px 50px;
+        color: white;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .page-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -30%;
+        width: 400px;
+        height: 400px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        animation: float 20s ease-in-out infinite;
+    }
+
+    .header-content {
+        position: relative;
+        z-index: 2;
+    }
+
+    .header-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 2.8rem;
+        font-weight: 700;
+        margin-bottom: 15px;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .header-subtitle {
+        font-size: 1.2rem;
+        opacity: 0.95;
+    }
+
+    /* Student Info Card */
+    .student-info-card {
+        background: var(--card-bg);
+        backdrop-filter: blur(10px);
+        border: var(--border);
+        border-radius: 30px;
+        padding: 30px;
+        box-shadow: var(--shadow);
+        margin-bottom: 40px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .student-info-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 150px;
+        height: 150px;
+        background: linear-gradient(135deg, #6c5ce7, #a363d9);
+        opacity: 0.1;
+        border-radius: 0 0 0 100%;
+    }
+
+    .student-header {
+        display: flex;
+        align-items: center;
+        gap: 30px;
+        margin-bottom: 30px;
+    }
+
+    .student-avatar {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #6c5ce7, #a363d9);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        font-weight: 600;
+        border: 5px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .student-details {
+        flex: 1;
+    }
+
+    .student-name {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 5px;
+    }
+
+    .student-meta {
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+    }
+
+    .meta-item {
+        background: rgba(108, 92, 231, 0.1);
+        color: #6c5ce7;
+        padding: 8px 20px;
+        border-radius: 25px;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    .student-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+    }
+
+    .stat-card {
+        background: rgba(108, 92, 231, 0.05);
+        border-radius: 20px;
+        padding: 20px;
+        text-align: center;
+        transition: var(--transition-smooth);
+    }
+
+    .stat-card:hover {
+        background: rgba(108, 92, 231, 0.1);
+        transform: translateY(-5px);
+    }
+
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #6c5ce7;
+        margin-bottom: 5px;
+    }
+
+    .stat-label {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+    }
+
+    /* Performance Overview */
+    .performance-section {
+        background: var(--card-bg);
+        border: var(--border);
+        border-radius: 30px;
+        padding: 30px;
+        margin-bottom: 40px;
+        box-shadow: var(--shadow);
+    }
+
+    .section-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 25px;
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .section-title i {
+        color: #6c5ce7;
+    }
+
+    /* Current Term Scores */
+    .scores-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 25px;
+        margin-bottom: 40px;
+    }
+
+    .score-card {
+        background: rgba(108, 92, 231, 0.05);
+        border-radius: 20px;
+        padding: 25px;
+        border-left: 4px solid #6c5ce7;
+        transition: var(--transition-smooth);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .score-card:hover {
+        background: rgba(108, 92, 231, 0.1);
+        transform: translateX(5px);
+    }
+
+    .score-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .subject-name {
+        font-weight: 600;
+        color: var(--text-primary);
+        font-size: 1.1rem;
+    }
+
+    .score-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #6c5ce7;
+    }
+
+    .score-details {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: var(--border);
+    }
+
+    .score-item {
+        text-align: center;
+    }
+
+    .score-item-label {
+        color: var(--text-secondary);
+        font-size: 0.8rem;
+        margin-bottom: 5px;
+    }
+
+    .score-item-value {
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .grade-badge {
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    .grade-A { background: linear-gradient(135deg, #00b894, #00cec9); color: white; }
+    .grade-B { background: linear-gradient(135deg, #0984e3, #74b9ff); color: white; }
+    .grade-C { background: linear-gradient(135deg, #fdcb6e, #ffeaa7); color: #2d3436; }
+    .grade-D { background: linear-gradient(135deg, #e17055, #fab1a0); color: white; }
+    .grade-F { background: linear-gradient(135deg, #d63031, #ff7675); color: white; }
+
+    /* Report Cards */
+    .report-cards-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 25px;
+    }
+
+    .report-card-item {
+        background: var(--card-bg);
+        border: var(--border);
+        border-radius: 25px;
+        padding: 25px;
+        box-shadow: var(--shadow);
+        transition: var(--transition-bounce);
+        position: relative;
+        overflow: hidden;
+        cursor: pointer;
+    }
+
+    .report-card-item:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 25px 50px rgba(108, 92, 231, 0.3);
+    }
+
+    .report-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: var(--border);
+    }
+
+    .report-card-title {
+        font-weight: 600;
+        color: var(--text-primary);
+        font-size: 1.1rem;
+    }
+
+    .report-card-date {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+    }
+
+    .report-card-stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+
+    .report-stat {
+        background: rgba(108, 92, 231, 0.05);
+        border-radius: 15px;
+        padding: 15px;
+        text-align: center;
+    }
+
+    .report-stat-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #6c5ce7;
+        margin-bottom: 5px;
+    }
+
+    .report-stat-label {
+        color: var(--text-secondary);
+        font-size: 0.8rem;
+    }
+
+    .report-card-actions {
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+    }
+
+    .btn-report {
+        background: rgba(108, 92, 231, 0.1);
+        color: #6c5ce7;
+        border: 2px solid rgba(108, 92, 231, 0.3);
+        padding: 8px 15px;
+        border-radius: 20px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition-smooth);
+    }
+
+    .btn-report:hover {
+        background: linear-gradient(135deg, #6c5ce7, #a363d9);
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    /* Empty States */
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        background: var(--card-bg);
+        border-radius: 25px;
+        border: var(--border);
+    }
+
+    .empty-state-icon {
+        width: 120px;
+        height: 120px;
+        line-height: 120px;
+        text-align: center;
+        background: linear-gradient(135deg, rgba(108, 92, 231, 0.1), rgba(163, 99, 217, 0.1));
+        border-radius: 50%;
+        margin: 0 auto 30px;
+        font-size: 3rem;
+        color: #6c5ce7;
+        animation: pulse 2s ease infinite;
+    }
+
+    .empty-state h3 {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin-bottom: 15px;
+        color: var(--text-primary);
+    }
+
+    .empty-state p {
+        color: var(--text-secondary);
+        margin-bottom: 30px;
+        max-width: 500px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    /* Progress Chart Placeholder */
+    .progress-chart {
+        background: rgba(108, 92, 231, 0.05);
+        border-radius: 20px;
+        padding: 30px;
+        text-align: center;
+        margin-bottom: 40px;
+    }
+
+    .chart-placeholder {
+        width: 100%;
+        height: 300px;
+        background: linear-gradient(135deg, rgba(108, 92, 231, 0.1), rgba(163, 99, 217, 0.1));
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #6c5ce7;
+        font-size: 1.2rem;
+        font-weight: 600;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .header-title {
+            font-size: 2rem;
+        }
+
+        .student-header {
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .student-meta {
+            justify-content: center;
+        }
+
+        .scores-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .report-cards-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .report-card-stats {
+            grid-template-columns: 1fr;
+        }
+    }
 </style>
+{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<section class="page-header">
+    <div class="container header-content">
+        <h1 class="header-title animate__animated animate__fadeInDown">
+            <i class="fas fa-chart-line me-3"></i>Academic Performance
+        </h1>
+        <p class="header-subtitle animate__animated animate__fadeInUp">
+            Track your academic progress and view detailed performance reports
+        </p>
+    </div>
+</section>
+
+<div class="container">
+    <!-- Student Info Card -->
+    <div class="student-info-card animate__animated animate__fadeInUp">
+        <div class="student-header">
+            <div class="student-avatar">
+                {{ student.user.get_full_name|first|upper }}
+            </div>
+            <div class="student-details">
+                <h2 class="student-name">{{ student.user.get_full_name }}</h2>
+                <div class="student-meta">
+                    <span class="meta-item">
+                        <i class="fas fa-id-card me-2"></i>
+                        {{ student.admission_number }}
+                    </span>
+                    <span class="meta-item">
+                        <i class="fas fa-school me-2"></i>
+                        {{ student.current_class.name }}
+                    </span>
+                    <span class="meta-item">
+                        <i class="fas fa-calendar me-2"></i>
+                        {{ student.enrollment_date|date:"Y" }}
+                    </span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="student-stats">
+            <div class="stat-card">
+                <div class="stat-value">{{ report_cards.count }}</div>
+                <div class="stat-label">Report Cards</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{{ current_scores.count }}</div>
+                <div class="stat-label">Current Scores</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{{ student.user.date_joined|date:"Y" }}</div>
+                <div class="stat-label">Year Joined</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{{ student.enrollment_status }}</div>
+                <div class="stat-label">Status</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Current Term Performance -->
+    {% if current_scores %}
+        <div class="performance-section animate__animated animate__fadeInUp">
+            <h3 class="section-title">
+                <i class="fas fa-tachometer-alt"></i>
+                Current Term Performance
+            </h3>
+            
+            <div class="scores-grid">
+                {% for score in current_scores %}
+                    <div class="score-card">
+                        <div class="score-header">
+                            <div class="subject-name">{{ score.subject_assessment.subject.name }}</div>
+                            <div class="score-value">{{ score.score }}%</div>
+                        </div>
+                        
+                        <div class="progress-bar" style="height: 8px; background: var(--card-bg); border: var(--border); border-radius: 4px; overflow: hidden;">
+                            <div class="progress-fill" style="height: 100%; background: linear-gradient(135deg, #6c5ce7, #a363d9); width: {{ score.score }}%;"></div>
+                        </div>
+                        
+                        <div class="score-details">
+                            <div class="score-item">
+                                <div class="score-item-label">Assessment</div>
+                                <div class="score-item-value">{{ score.subject_assessment.assessment.name }}</div>
+                            </div>
+                            <div class="score-item">
+                                <div class="score-item-label">Grade</div>
+                                <div class="grade-badge grade-{{ score.grade }}">{{ score.grade }}</div>
+                            </div>
+                            <div class="score-item">
+                                <div class="score-item-label">Max Score</div>
+                                <div class="score-item-value">{{ score.subject_assessment.max_score }}</div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Progress Chart -->
+    <div class="progress-chart animate__animated animate__fadeInUp">
+        <h3 class="section-title" style="margin-bottom: 20px;">
+            <i class="fas fa-chart-bar"></i>
+            Academic Progress
+        </h3>
+        <div class="chart-placeholder">
+            <i class="fas fa-chart-line me-3"></i>
+            Performance trend chart will be displayed here
+        </div>
+        <p class="text-secondary small text-center mt-3">
+            Your academic progress will be visualized here based on your scores over time
+        </p>
+    </div>
+
+    <!-- Report Cards -->
+    {% if report_cards %}
+        <div class="performance-section animate__animated animate__fadeInUp">
+            <h3 class="section-title">
+                <i class="fas fa-file-alt"></i>
+                Report Cards
+            </h3>
+            
+            <div class="report-cards-grid">
+                {% for report in report_cards %}
+                    <div class="report-card-item" onclick="location.href='{% url 'academics:report_card_detail' report.id %}'">
+                        <div class="report-card-header">
+                            <div class="report-card-title">
+                                {{ report.term }} Term {{ report.academic_year }}
+                            </div>
+                            <div class="report-card-date">
+                                <i class="fas fa-calendar-alt me-2"></i>
+                                {{ report.generated_at|date:"M d, Y" }}
+                            </div>
+                        </div>
+                        
+                        <div class="report-card-stats">
+                            <div class="report-stat">
+                                <div class="report-stat-value">{{ report.average_score|floatformat:1 }}</div>
+                                <div class="report-stat-label">Average</div>
+                            </div>
+                            <div class="report-stat">
+                                <div class="report-stat-value">{{ report.position }}</div>
+                                <div class="report-stat-label">Position</div>
+                            </div>
+                            <div class="report-stat">
+                                <div class="report-stat-value">{{ report.total_students }}</div>
+                                <div class="report-stat-label">Out of</div>
+                            </div>
+                        </div>
+                        
+                        <div class="report-card-actions">
+                            <a href="{% url 'academics:report_card_detail' report.id %}" class="btn-report">
+                                <i class="fas fa-eye me-2"></i>View Details
+                            </a>
+                            <a href="{% url 'academics:download_report_card_pdf' report.id %}" class="btn-report">
+                                <i class="fas fa-download me-2"></i>Download PDF
+                            </a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% else %}
+        <div class="empty-state animate__animated animate__fadeInUp">
+            <div class="empty-state-icon">
+                <i class="fas fa-file-alt"></i>
+            </div>
+            <h3>No Report Cards Yet</h3>
+            <p>Your report cards will appear here once they are generated by your teachers.</p>
+            <div class="d-flex gap-2 justify-content-center">
+                <button class="btn btn-primary" onclick="location.href='{% url 'core:dashboard' %}'">
+                    <i class="fas fa-home me-2"></i>Back to Dashboard
+                </button>
+                <button class="btn btn-outline-primary" onclick="location.href='{% url 'academics:student_performance' %}'">
+                    <i class="fas fa-refresh me-2"></i>Refresh
+                </button>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Academic Summary -->
+    {% if report_cards %}
+        <div class="performance-section animate__animated animate__fadeInUp">
+            <h3 class="section-title">
+                <i class="fas fa-award"></i>
+                Academic Summary
+            </h3>
+            
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="stat-card" style="background: rgba(108, 92, 231, 0.05); border-radius: 20px; padding: 25px;">
+                        <div class="stat-value">{{ report_cards.first.average_score|floatformat:1 }}%</div>
+                        <div class="stat-label">Best Average</div>
+                        <div class="text-secondary small mt-2">
+                            {{ report_cards.first.term }} Term {{ report_cards.first.academic_year }}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stat-card" style="background: rgba(108, 92, 231, 0.05); border-radius: 20px; padding: 25px;">
+                        <div class="stat-value">{{ report_cards.first.position }}</div>
+                        <div class="stat-label">Best Position</div>
+                        <div class="text-secondary small mt-2">
+                            {{ report_cards.first.term }} Term {{ report_cards.first.academic_year }}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stat-card" style="background: rgba(108, 92, 231, 0.05); border-radius: 20px; padding: 25px;">
+                        <div class="stat-value">{{ report_cards.count }}</div>
+                        <div class="stat-label">Total Reports</div>
+                        <div class="text-secondary small mt-2">
+                            All terms and years
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Success Modal -->
+<div class="modal fade" id="successModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content text-center">
+            <div class="modal-body p-5">
+                <div class="mb-4">
+                    <i class="fas fa-check-circle text-success" style="font-size: 4rem;"></i>
+                </div>
+                <h4 class="modal-title mb-2">Report Card Downloaded!</h4>
+                <p class="text-secondary">Your report card has been downloaded successfully.</p>
+                <div class="d-flex gap-2 justify-content-center mt-4">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
+                        <i class="fas fa-check me-2"></i>OK
+                    </button>
+                    <a href="{% url 'academics:student_performance' %}" class="btn btn-outline-primary">
+                        <i class="fas fa-eye me-2"></i>View More
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-// JS for Performance
+    // Chart animation
+    document.addEventListener('DOMContentLoaded', function() {
+        const chartPlaceholder = document.querySelector('.chart-placeholder');
+        
+        // Simulate chart loading
+        setTimeout(() => {
+            chartPlaceholder.innerHTML = `
+                <div style="display: flex; align-items: center; justify-content: center; gap: 20px; flex-wrap: wrap;">
+                    <div style="text-align: center;">
+                        <div style="width: 60px; height: 180px; background: linear-gradient(180deg, #6c5ce7, #a363d9); border-radius: 10px; margin: 0 auto 10px;"></div>
+                        <div style="color: var(--text-secondary); font-size: 0.8rem;">Math</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="width: 60px; height: 160px; background: linear-gradient(180deg, #0984e3, #74b9ff); border-radius: 10px; margin: 0 auto 10px;"></div>
+                        <div style="color: var(--text-secondary); font-size: 0.8rem;">English</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="width: 60px; height: 200px; background: linear-gradient(180deg, #00b894, #00cec9); border-radius: 10px; margin: 0 auto 10px;"></div>
+                        <div style="color: var(--text-secondary); font-size: 0.8rem;">Science</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="width: 60px; height: 140px; background: linear-gradient(180deg, #fdcb6e, #ffeaa7); border-radius: 10px; margin: 0 auto 10px;"></div>
+                        <div style="color: var(--text-secondary); font-size: 0.8rem;">History</div>
+                    </div>
+                </div>
+                <div style="margin-top: 20px; color: #6c5ce7; font-weight: 600;">
+                    Academic Performance Trend
+                </div>
+            `;
+        }, 1000);
+    });
+
+    // Report card hover effects
+    document.querySelectorAll('.report-card-item').forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-15px) scale(1.02)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(-10px) scale(1)';
+        });
+    });
+
+    // Score card hover effects
+    document.querySelectorAll('.score-card').forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateX(10px) scale(1.01)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateX(0) scale(1)';
+        });
+    });
+
+    // Download report card
+    function downloadReportCard(reportId) {
+        // Simulate download
+        const modal = new bootstrap.Modal(document.getElementById('successModal'));
+        modal.show();
+        
+        // In real implementation, this would trigger the actual download
+        console.log('Downloading report card:', reportId);
+    }
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        // Ctrl + P to print
+        if (e.ctrlKey && e.key === 'p') {
+            e.preventDefault();
+            window.print();
+        }
+        
+        // Ctrl + D to download latest report
+        if (e.ctrlKey && e.key === 'd') {
+            e.preventDefault();
+            const firstReport = document.querySelector('.report-card-item');
+            if (firstReport) {
+                const reportId = firstReport.getAttribute('onclick').match(/(\d+)/)[1];
+                downloadReportCard(reportId);
+            }
+        }
+    });
+
+    // Initialize tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+
+    // Animate stats on scroll
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const statValues = entry.target.querySelectorAll('.stat-value');
+                statValues.forEach(stat => {
+                    const value = parseFloat(stat.innerText);
+                    if (value && !isNaN(value)) {
+                        let current = 0;
+                        const increment = value / 50;
+                        
+                        const timer = setInterval(() => {
+                            current += increment;
+                            if (current >= value) {
+                                current = value;
+                                clearInterval(timer);
+                            }
+                            stat.innerText = Math.floor(current) + (stat.innerText.includes('%') ? '%' : '');
+                        }, 20);
+                    }
+                });
+                
+                observer.unobserve(entry.target);
+            }
+        });
+    }, observerOptions);
+
+    document.querySelectorAll('.performance-section').forEach(section => {
+        observer.observe(section);
+    });
 </script>
 {% endblock %}

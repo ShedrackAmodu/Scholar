@@ -18,7 +18,7 @@ from .forms import (
     ProfileUpdateForm, RoleForm, PermissionForm, CustomPasswordResetForm
 )
 from apps.school.models import SchoolProfile
-from apps.accounts.decorators import admin_required
+from apps.accounts.decorators import admin_required, teacher_required, student_required, parent_required, principal_required, director_required
 from apps.classes.models import Class, Subject
 from apps.academics.models import Score, ReportCard
 from apps.payments.models import Payment
@@ -37,7 +37,16 @@ def login_view(request):
         if form.is_valid():
             user = form.get_user()
             login(request, user)
-            
+
+            # session expiry based on "remember me" checkbox
+            remember = form.cleaned_data.get('remember_me')
+            if remember is False:
+                # expire on browser close
+                request.session.set_expiry(0)
+            else:
+                # keep default expiry (2 weeks or SESSION_COOKIE_AGE)
+                request.session.set_expiry(None)
+
             # Record login history
             LoginHistory.objects.create(
                 user=user,
@@ -45,7 +54,7 @@ def login_view(request):
                 user_agent=request.META.get('HTTP_USER_AGENT', ''),
                 session_key=request.session.session_key
             )
-            
+
             messages.success(request, f"Welcome back, {user.get_full_name()}!")
             return redirect_based_on_role(user)
         else:
@@ -64,7 +73,11 @@ def login_view(request):
     return render(request, 'accounts/login.html', context)
 
 def redirect_based_on_role(user):
-    """Redirect user based on their role"""
+    """Redirect user based on their role or superuser status"""
+    # superuser flag takes precedence; often used during development
+    if getattr(user, 'is_superuser', False):
+        return redirect('accounts:admin_dashboard')
+
     role_redirects = {
         'SUPER_ADMIN': 'accounts:admin_dashboard',
         'ADMIN': 'accounts:admin_dashboard',
@@ -79,7 +92,19 @@ def redirect_based_on_role(user):
 
 @login_required
 def logout_view(request):
-    """Handle user logout"""
+    """Handle user logout and update history"""
+    # update logout_time for the most recent login record matching this session
+    session_key = request.session.session_key
+    if session_key:
+        history = LoginHistory.objects.filter(
+            user=request.user,
+            session_key=session_key,
+            logout_time__isnull=True
+        ).order_by('-login_time').first()
+        if history:
+            history.logout_time = timezone.now()
+            history.save()
+
     logout(request)
     messages.success(request, "You have been logged out successfully.")
     return redirect('accounts:login')
@@ -325,11 +350,10 @@ def role_delete(request, pk):
 
 # Teacher Dashboard
 @login_required
+@teacher_required
 def teacher_dashboard(request):
     """Teacher dashboard view"""
-    if request.user.role != 'TEACHER':
-        return redirect_based_on_role(request.user)
-    
+    # already decorated with @teacher_required, redirecting if role mismatch
     teacher = request.user.teacher_profile
     
     # Get classes taught by this teacher
@@ -360,11 +384,10 @@ def teacher_dashboard(request):
 
 # Student Dashboard
 @login_required
+@student_required
 def student_dashboard(request):
     """Student dashboard view"""
-    if request.user.role != 'STUDENT':
-        return redirect_based_on_role(request.user)
-    
+    # decorated; any mismatch will be handled by decorator
     student = request.user.student_profile
     
     # Get recent scores
@@ -394,6 +417,7 @@ def student_dashboard(request):
 
 # Parent Dashboard
 @login_required
+@parent_required
 def parent_dashboard(request):
     """Parent dashboard view"""
     parent = request.user.parent_profile
@@ -416,6 +440,7 @@ def parent_dashboard(request):
 
 # Principal Dashboard
 @login_required
+@principal_required
 def principal_dashboard(request):
     """Principal dashboard view"""
     school = SchoolProfile.objects.first()
@@ -441,6 +466,8 @@ def principal_dashboard(request):
 
 # Vice Principal Dashboard
 @login_required
+@principal_required
+# vice principals are included in principal_required mixin
 def vice_principal_dashboard(request):
     """Vice principal dashboard view"""
     school = SchoolProfile.objects.first()
@@ -459,6 +486,7 @@ def vice_principal_dashboard(request):
 
 # Director Dashboard
 @login_required
+@director_required
 def director_dashboard(request):
     """Director dashboard view"""
     school = SchoolProfile.objects.first()

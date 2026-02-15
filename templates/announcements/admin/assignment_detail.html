@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ assignment.title }} - Assignment Details{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">{{ assignment.title }}</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>Class:</strong> {{ assignment.class_assigned.name }}
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Subject:</strong> {{ assignment.subject.name }}
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>Created By:</strong> {{ assignment.created_by.get_full_name }}
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Due Date:</strong> {{ assignment.due_date|date:"F j, Y" }}
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>Status:</strong> 
+                            {% if assignment.status == 'OPEN' %}
+                                <span class="badge bg-success">Open</span>
+                            {% else %}
+                                <span class="badge bg-danger">{{ assignment.status }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <strong>Description:</strong>
+                        <p>{{ assignment.description|linebreaks }}</p>
+                    </div>
+                    {% if submissions %}
+                        <div class="mb-3">
+                            <strong>Submissions:</strong>
+                            <div class="list-group">
+                                {% for submission in submissions %}
+                                    <div class="list-group-item">
+                                        <strong>{{ submission.student.user.get_full_name }}</strong> - 
+                                        <small class="text-muted">Submitted: {{ submission.submission_date|date:"F j, Y H:i" }}</small>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="card-footer">
+                    <a href="{% url 'announcements:assignment_edit' assignment.pk %}" class="btn btn-warning">
+                        <i class="fas fa-edit"></i> Edit
+                    </a>
+                    <a href="{% url 'announcements:assignment_delete' assignment.pk %}" class="btn btn-danger">
+                        <i class="fas fa-trash"></i> Delete
+                    </a>
+                    <a href="{% url 'announcements:assignment_list' %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Back to List
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

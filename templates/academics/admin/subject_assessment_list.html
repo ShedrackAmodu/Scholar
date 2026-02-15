@@ -1,24 +1,293 @@
+{% extends 'academics/base.html' %}
 {% load static %}
-{% extends 'base.html' %}
 
-{% block title %}Subject Assessment List{% endblock %}
+{% block title %}Subject Assessments{% endblock %}
 
-{% block content %}
-<div class="container py-5">
-    <h1 class="display-4 text-center mb-4" data-aos="fade-down">Subject Assessment List</h1>
-    <p class="lead text-center" data-aos="fade-up" data-aos-delay="200">This is the Subject Assessment List page. Customize the structure and content here as needed.</p>
-    <!-- Add your form, table, or other components below -->
+{% block academics_content %}
+<!-- Page Header -->
+<div class="academics-hero animate__animated animate__fadeIn">
+    <div class="container">
+        <h1><i class="fas fa-book me-3"></i>Subject Assessments</h1>
+        <p>Manage assessments for each subject and class level combination</p>
+    </div>
 </div>
-{% endblock %}
 
-{% block extra_css %}
-<style>
-/* Styles specific to Subject Assessment List */
-</style>
+<!-- Quick Actions -->
+<div class="quick-actions animate__animated animate__fadeInUp">
+    <a href="{% url 'academics:assessment_create' %}" class="quick-action-btn">
+        <i class="fas fa-plus"></i>
+        <span>Create Assessment</span>
+    </a>
+    <a href="{% url 'academics:assessment_list' %}" class="quick-action-btn">
+        <i class="fas fa-list"></i>
+        <span>View All Assessments</span>
+    </a>
+    <a href="{% url 'academics:score_entry' %}" class="quick-action-btn">
+        <i class="fas fa-edit"></i>
+        <span>Enter Scores</span>
+    </a>
+</div>
+
+<!-- Filters -->
+<div class="card border-0 shadow-sm mb-4 animate__animated animate__fadeInUp">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-3">
+                <label for="class_level" class="form-label">Class Level</label>
+                <select name="class_level" id="class_level" class="form-select">
+                    <option value="">All Class Levels</option>
+                    {% for level in class_levels %}
+                        <option value="{{ level.id }}" {% if request.GET.class_level == level.id|stringformat:"s" %}selected{% endif %}>
+                            {{ level.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="subject" class="form-label">Subject</label>
+                <select name="subject" id="subject" class="form-select">
+                    <option value="">All Subjects</option>
+                    {% for subject in subjects %}
+                        <option value="{{ subject.id }}" {% if request.GET.subject == subject.id|stringformat:"s" %}selected{% endif %}>
+                            {{ subject.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="assessment_type" class="form-label">Assessment Type</label>
+                <select name="assessment_type" id="assessment_type" class="form-select">
+                    <option value="">All Types</option>
+                    <option value="TEST" {% if request.GET.assessment_type == 'TEST' %}selected{% endif %}>Test</option>
+                    <option value="EXAM" {% if request.GET.assessment_type == 'EXAM' %}selected{% endif %}>Exam</option>
+                    <option value="PROJECT" {% if request.GET.assessment_type == 'PROJECT' %}selected{% endif %}>Project</option>
+                    <option value="ASSIGNMENT" {% if request.GET.assessment_type == 'ASSIGNMENT' %}selected{% endif %}>Assignment</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">&nbsp;</label>
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-filter me-2"></i>Filter
+                    </button>
+                    <a href="{% url 'academics:subject_assessment_list' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-undo me-2"></i>Reset
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Subject Assessments Grid -->
+{% if subject_assessments %}
+    <div class="assessment-grid animate__animated animate__fadeInUp">
+        {% for subject_assessment in subject_assessments %}
+            <div class="assessment-card">
+                <div class="assessment-header">
+                    <div>
+                        <h5 class="assessment-title">{{ subject_assessment.subject.name }}</h5>
+                        <span class="assessment-badge badge-{{ subject_assessment.assessment.assessment_type|lower }}">
+                            <i class="fas fa-{{ subject_assessment.assessment.get_assessment_type_icon }}"></i>
+                            {{ subject_assessment.assessment.get_assessment_type_display }}
+                        </span>
+                    </div>
+                    <div class="dropdown">
+                        <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a class="dropdown-item" href="{% url 'academics:subject_assessment_edit' subject_assessment.id %}">
+                                    <i class="fas fa-edit me-2"></i>Edit
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="{% url 'academics:score_entry' %}?subject={{ subject_assessment.subject.id }}&assessment={{ subject_assessment.assessment.id }}">
+                                    <i class="fas fa-plus me-2"></i>Enter Scores
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="{% url 'academics:bulk_score_entry' %}?subject={{ subject_assessment.subject.id }}&assessment={{ subject_assessment.assessment.id }}">
+                                    <i class="fas fa-upload me-2"></i>Bulk Upload
+                                </a>
+                            </li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li>
+                                <a class="dropdown-item text-danger" href="{% url 'academics:subject_assessment_delete' subject_assessment.id %}">
+                                    <i class="fas fa-trash me-2"></i>Delete
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="assessment-meta">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <i class="fas fa-layer-group me-2"></i>
+                            <strong>Class Level:</strong> {{ subject_assessment.assessment.class_level.name }}
+                        </div>
+                        <div class="col-md-6">
+                            <i class="fas fa-percentage me-2"></i>
+                            <strong>Max Score:</strong> {{ subject_assessment.max_score }}
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-md-6">
+                            <i class="fas fa-calendar-alt me-2"></i>
+                            <strong>Created:</strong> {{ subject_assessment.created_at|date:"M d, Y" }}
+                        </div>
+                        <div class="col-md-6">
+                            <i class="fas fa-weight me-2"></i>
+                            <strong>Weight:</strong> {{ subject_assessment.assessment.weight_percentage }}%
+                        </div>
+                    </div>
+                </div>
+
+                <div class="assessment-actions">
+                    <a href="{% url 'academics:score_entry' %}?subject={{ subject_assessment.subject.id }}&assessment={{ subject_assessment.assessment.id }}" 
+                       class="btn btn-primary btn-sm">
+                        <i class="fas fa-plus me-2"></i>Enter Scores
+                    </a>
+                    <a href="{% url 'academics:bulk_score_entry' %}?subject={{ subject_assessment.subject.id }}&assessment={{ subject_assessment.assessment.id }}" 
+                       class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-upload me-2"></i>Bulk Upload
+                    </a>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if subject_assessments.has_other_pages %}
+        <nav aria-label="Page navigation" class="mt-4">
+            <ul class="pagination justify-content-center">
+                {% if subject_assessments.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ subject_assessments.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                            <i class="fas fa-chevron-left"></i> Previous
+                        </a>
+                    </li>
+                {% endif %}
+
+                {% for num in subject_assessments.paginator.page_range %}
+                    {% if subject_assessments.number == num %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ num }}</span>
+                        </li>
+                    {% elif num > subject_assessments.number|add:'-3' and num < subject_assessments.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                {{ num }}
+                            </a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if subject_assessments.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ subject_assessments.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                            Next <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% endif %}
+{% else %}
+    <div class="empty-state animate__animated animate__fadeInUp">
+        <div class="empty-state-icon">
+            <i class="fas fa-book"></i>
+        </div>
+        <h3>No Subject Assessments Found</h3>
+        <p>
+            {% if request.GET %}
+                No subject assessments match your current filters.
+                <a href="{% url 'academics:subject_assessment_list' %}" class="btn btn-outline-primary btn-sm">
+                    <i class="fas fa-undo me-2"></i>Clear Filters
+                </a>
+            {% else %}
+                No subject assessments have been created yet.
+            {% endif %}
+        </p>
+        <div class="d-flex gap-2 justify-content-center">
+            <a href="{% url 'academics:assessment_create' %}" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i>Create Assessment
+            </a>
+            <a href="{% url 'academics:assessment_list' %}" class="btn btn-outline-primary">
+                <i class="fas fa-list me-2"></i>View All Assessments
+            </a>
+        </div>
+    </div>
+{% endif %}
 {% endblock %}
 
 {% block extra_js %}
 <script>
-// JS for Subject Assessment List
+    // Filter form submission
+    document.querySelector('form').addEventListener('submit', function(e) {
+        // Add loading state
+        const submitBtn = this.querySelector('button[type="submit"]');
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Filtering...';
+        submitBtn.disabled = true;
+        
+        setTimeout(() => {
+            submitBtn.innerHTML = '<i class="fas fa-filter me-2"></i>Filter';
+            submitBtn.disabled = false;
+        }, 1000);
+    });
+
+    // Hover effects for assessment cards
+    document.querySelectorAll('.assessment-card').forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-10px) scale(1.02)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(-5px) scale(1)';
+        });
+    });
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        // Ctrl + N for new assessment
+        if (e.ctrlKey && e.key === 'n') {
+            e.preventDefault();
+            window.location.href = "{% url 'academics:assessment_create' %}";
+        }
+        
+        // Ctrl + F for filter focus
+        if (e.ctrlKey && e.key === 'f') {
+            e.preventDefault();
+            document.getElementById('class_level').focus();
+        }
+    });
+
+    // Initialize tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+
+    // Filter persistence
+    document.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const classLevel = urlParams.get('class_level');
+        const subject = urlParams.get('subject');
+        const assessmentType = urlParams.get('assessment_type');
+        
+        if (classLevel) {
+            document.getElementById('class_level').value = classLevel;
+        }
+        if (subject) {
+            document.getElementById('subject').value = subject;
+        }
+        if (assessmentType) {
+            document.getElementById('assessment_type').value = assessmentType;
+        }
+    });
 </script>
 {% endblock %}

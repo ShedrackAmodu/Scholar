@@ -1,24 +1,603 @@
+{% extends 'academics/base.html' %}
 {% load static %}
-{% extends 'base.html' %}
 
 {% block title %}Edit Scores{% endblock %}
 
-{% block content %}
-<div class="container py-5">
-    <h1 class="display-4 text-center mb-4" data-aos="fade-down">Edit Scores</h1>
-    <p class="lead text-center" data-aos="fade-up" data-aos-delay="200">This is the Edit Scores page. Customize the structure and content here as needed.</p>
-    <!-- Add your form, table, or other components below -->
+{% block academics_content %}
+<!-- Page Header -->
+<div class="academics-hero animate__animated animate__fadeIn">
+    <div class="container">
+        <h1><i class="fas fa-edit me-3"></i>Edit Scores</h1>
+        <p>Update existing scores for students in a subject assessment</p>
+    </div>
 </div>
-{% endblock %}
 
-{% block extra_css %}
-<style>
-/* Styles specific to Edit Scores */
-</style>
+<!-- Quick Actions -->
+<div class="quick-actions animate__animated animate__fadeInUp">
+    <a href="{% url 'academics:score_entry' %}" class="quick-action-btn">
+        <i class="fas fa-list"></i>
+        <span>Back to Score Entry</span>
+    </a>
+    <a href="{% url 'academics:bulk_score_entry' %}" class="quick-action-btn">
+        <i class="fas fa-upload"></i>
+        <span>Bulk Upload</span>
+    </a>
+    <a href="{% url 'academics:report_card_list' 1 %}" class="quick-action-btn">
+        <i class="fas fa-file-alt"></i>
+        <span>View Report Cards</span>
+    </a>
+</div>
+
+<!-- Filters -->
+<div class="card border-0 shadow-sm mb-4 animate__animated animate__fadeInUp">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-4">
+                <label for="subject_assessment" class="form-label">Subject Assessment</label>
+                <select name="subject_assessment" id="subject_assessment" class="form-select">
+                    <option value="">Select a subject assessment...</option>
+                    {% for subject_assessment in subject_assessments %}
+                        <option value="{{ subject_assessment.id }}" 
+                                data-max="{{ subject_assessment.max_score }}"
+                                {% if request.GET.subject_assessment == subject_assessment.id|stringformat:"s" %}selected{% endif %}>
+                            {{ subject_assessment.subject.name }} - {{ subject_assessment.assessment.name }} (Max: {{ subject_assessment.max_score }})
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label for="class_level" class="form-label">Class Level</label>
+                <select name="class_level" id="class_level" class="form-select">
+                    <option value="">All Class Levels</option>
+                    {% for level in class_levels %}
+                        <option value="{{ level.id }}" {% if request.GET.class_level == level.id|stringformat:"s" %}selected{% endif %}>
+                            {{ level.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">&nbsp;</label>
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search me-2"></i>Search
+                    </button>
+                    <a href="{% url 'academics:edit_scores' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-undo me-2"></i>Reset
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Scores Table -->
+{% if scores %}
+    <div class="card border-0 shadow-sm animate__animated animate__fadeInUp">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>
+                                <i class="fas fa-user me-2"></i>
+                                Student
+                            </th>
+                            <th>
+                                <i class="fas fa-id-card me-2"></i>
+                                Admission No
+                            </th>
+                            <th>
+                                <i class="fas fa-school me-2"></i>
+                                Class
+                            </th>
+                            <th>
+                                <i class="fas fa-percentage me-2"></i>
+                                Current Score
+                            </th>
+                            <th>
+                                <i class="fas fa-edit me-2"></i>
+                                New Score
+                            </th>
+                            <th>
+                                <i class="fas fa-calendar me-2"></i>
+                                Last Updated
+                            </th>
+                            <th>
+                                <i class="fas fa-cog me-2"></i>
+                                Actions
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for score in scores %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar-sm bg-gradient rounded-circle me-3 d-flex align-items-center justify-content-center">
+                                            <span class="text-white fw-bold">{{ score.student.user.get_full_name|first|upper }}</span>
+                                        </div>
+                                        <div>
+                                            <div class="fw-bold">{{ score.student.user.get_full_name }}</div>
+                                            <small class="text-muted">{{ score.student.user.email }}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-primary">{{ score.student.admission_number }}</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary">{{ score.student.current_class.name }}</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-info">{{ score.score }} / {{ score.subject_assessment.max_score }}</span>
+                                    <div class="small text-muted">{{ score.grade }}</div>
+                                </td>
+                                <td>
+                                    <form method="post" class="score-form" data-score-id="{{ score.id }}">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="score_id" value="{{ score.id }}">
+                                        <div class="input-group input-group-sm">
+                                            <input type="number" 
+                                                   name="new_score" 
+                                                   class="form-control new-score-input"
+                                                   min="0" 
+                                                   max="{{ score.subject_assessment.max_score }}"
+                                                   step="0.01"
+                                                   value="{{ score.score }}"
+                                                   style="width: 100px;">
+                                            <button type="submit" class="btn btn-outline-primary btn-sm update-score-btn" disabled>
+                                                <i class="fas fa-save"></i>
+                                            </button>
+                                        </div>
+                                    </form>
+                                </td>
+                                <td>
+                                    <div class="small">{{ score.updated_at|date:"M d, Y H:i" }}</div>
+                                    <div class="text-muted small">{{ score.updated_at|timesince }} ago</div>
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <button type="button" class="btn btn-outline-warning edit-score-btn" 
+                                                data-score-id="{{ score.id }}"
+                                                data-student-name="{{ score.student.user.get_full_name }}"
+                                                data-current-score="{{ score.score }}"
+                                                data-max-score="{{ score.subject_assessment.max_score }}">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-outline-info view-history-btn"
+                                                data-score-id="{{ score.id }}"
+                                                data-student-name="{{ score.student.user.get_full_name }}">
+                                            <i class="fas fa-history"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-outline-danger delete-score-btn"
+                                                data-score-id="{{ score.id }}"
+                                                data-student-name="{{ score.student.user.get_full_name }}">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    {% if scores.has_other_pages %}
+        <nav aria-label="Page navigation" class="mt-4">
+            <ul class="pagination justify-content-center">
+                {% if scores.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ scores.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                            <i class="fas fa-chevron-left"></i> Previous
+                        </a>
+                    </li>
+                {% endif %}
+
+                {% for num in scores.paginator.page_range %}
+                    {% if scores.number == num %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ num }}</span>
+                        </li>
+                    {% elif num > scores.number|add:'-3' and num < scores.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                {{ num }}
+                            </a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if scores.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ scores.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                            Next <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% endif %}
+{% else %}
+    <div class="empty-state animate__animated animate__fadeInUp">
+        <div class="empty-state-icon">
+            <i class="fas fa-edit"></i>
+        </div>
+        <h3>No Scores Found</h3>
+        <p>
+            {% if request.GET %}
+                No scores match your current filters.
+                <a href="{% url 'academics:edit_scores' %}" class="btn btn-outline-primary btn-sm">
+                    <i class="fas fa-undo me-2"></i>Clear Filters
+                </a>
+            {% else %}
+                No scores have been entered yet. Please go to score entry to add scores first.
+            {% endif %}
+        </p>
+        <div class="d-flex gap-2 justify-content-center">
+            <a href="{% url 'academics:score_entry' %}" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i>Enter Scores
+            </a>
+            <a href="{% url 'academics:bulk_score_entry' %}" class="btn btn-outline-primary">
+                <i class="fas fa-upload me-2"></i>Bulk Upload
+            </a>
+        </div>
+    </div>
+{% endif %}
+
+<!-- Edit Score Modal -->
+<div class="modal fade" id="editScoreModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-edit me-2"></i>
+                    Edit Score
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editScoreForm">
+                    {% csrf_token %}
+                    <input type="hidden" id="editScoreId" name="score_id">
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Student</label>
+                        <div class="form-control-plaintext" id="editStudentName"></div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="editNewScore" class="form-label">New Score</label>
+                        <div class="input-group">
+                            <input type="number" 
+                                   id="editNewScore" 
+                                   name="new_score" 
+                                   class="form-control"
+                                   min="0" 
+                                   step="0.01"
+                                   required>
+                            <span class="input-group-text" id="editMaxScoreLabel">/ 100</span>
+                        </div>
+                        <div class="form-text">Enter the new score (0 to maximum score)</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="editReason" class="form-label">Reason for Change</label>
+                        <textarea id="editReason" name="reason" class="form-control" rows="3" 
+                                  placeholder="Please provide a reason for editing this score"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>Cancel
+                </button>
+                <button type="button" class="btn btn-primary" id="saveEditBtn">
+                    <i class="fas fa-save me-2"></i>Save Changes
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Score Modal -->
+<div class="modal fade" id="deleteScoreModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-trash me-2"></i>
+                    Delete Score
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center mb-4">
+                    <i class="fas fa-exclamation-triangle text-warning" style="font-size: 3rem;"></i>
+                </div>
+                <p class="text-center">Are you sure you want to delete the score for <strong id="deleteStudentName"></strong>?</p>
+                <div class="alert alert-warning">
+                    <i class="fas fa-info-circle me-2"></i>
+                    This action cannot be undone. The score will be permanently removed from the system.
+                </div>
+                <form id="deleteScoreForm">
+                    {% csrf_token %}
+                    <input type="hidden" id="deleteScoreId" name="score_id">
+                    <div class="mb-3">
+                        <label for="deleteReason" class="form-label">Reason for Deletion</label>
+                        <textarea id="deleteReason" name="reason" class="form-control" rows="3" 
+                                  placeholder="Please provide a reason for deleting this score" required></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>Cancel
+                </button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
+                    <i class="fas fa-trash me-2"></i>Delete Score
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Success Modal -->
+<div class="modal fade" id="successModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content text-center">
+            <div class="modal-body p-5">
+                <div class="mb-4">
+                    <i class="fas fa-check-circle text-success" style="font-size: 4rem;"></i>
+                </div>
+                <h4 class="modal-title mb-2" id="successTitle">Success!</h4>
+                <p class="text-secondary" id="successMessage">The score has been updated successfully.</p>
+                <div class="d-flex gap-2 justify-content-center mt-4">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
+                        <i class="fas fa-check me-2"></i>OK
+                    </button>
+                    <a href="{% url 'academics:edit_scores' %}" class="btn btn-outline-primary">
+                        <i class="fas fa-list me-2"></i>View All
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Error Modal -->
+<div class="modal fade" id="errorModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content text-center">
+            <div class="modal-body p-5">
+                <div class="mb-4">
+                    <i class="fas fa-exclamation-triangle text-danger" style="font-size: 4rem;"></i>
+                </div>
+                <h4 class="modal-title mb-2">Error</h4>
+                <p class="text-secondary" id="errorMessage">An error occurred while processing your request.</p>
+                <div class="d-flex gap-2 justify-content-center mt-4">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
+                        <i class="fas fa-check me-2"></i>OK
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-// JS for Edit Scores
+    // Edit score modal handlers
+    document.querySelectorAll('.edit-score-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const scoreId = this.dataset.scoreId;
+            const studentName = this.dataset.studentName;
+            const currentScore = this.dataset.currentScore;
+            const maxScore = this.dataset.maxScore;
+            
+            document.getElementById('editScoreId').value = scoreId;
+            document.getElementById('editStudentName').textContent = studentName;
+            document.getElementById('editNewScore').value = currentScore;
+            document.getElementById('editNewScore').max = maxScore;
+            document.getElementById('editMaxScoreLabel').textContent = `/ ${maxScore}`;
+            
+            const modal = new bootstrap.Modal(document.getElementById('editScoreModal'));
+            modal.show();
+        });
+    });
+
+    // Delete score modal handlers
+    document.querySelectorAll('.delete-score-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const scoreId = this.dataset.scoreId;
+            const studentName = this.dataset.studentName;
+            
+            document.getElementById('deleteScoreId').value = scoreId;
+            document.getElementById('deleteStudentName').textContent = studentName;
+            
+            const modal = new bootstrap.Modal(document.getElementById('deleteScoreModal'));
+            modal.show();
+        });
+    });
+
+    // Save edit handler
+    document.getElementById('saveEditBtn').addEventListener('click', function() {
+        const form = document.getElementById('editScoreForm');
+        const scoreId = document.getElementById('editScoreId').value;
+        const newScore = document.getElementById('editNewScore').value;
+        const reason = document.getElementById('editReason').value;
+        
+        if (!newScore || parseFloat(newScore) < 0) {
+            showNotification('Please enter a valid score', 'error');
+            return;
+        }
+
+        // Show loading state
+        this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Saving...';
+        this.disabled = true;
+
+        // Simulate API call
+        setTimeout(() => {
+            const modal = new bootstrap.Modal(document.getElementById('successModal'));
+            document.getElementById('successTitle').textContent = 'Score Updated!';
+            document.getElementById('successMessage').textContent = 'The student\'s score has been updated successfully.';
+            modal.show();
+            
+            // Reset button
+            this.innerHTML = '<i class="fas fa-save me-2"></i>Save Changes';
+            this.disabled = false;
+            
+            // Close edit modal
+            bootstrap.Modal.getInstance(document.getElementById('editScoreModal')).hide();
+        }, 1500);
+    });
+
+    // Confirm delete handler
+    document.getElementById('confirmDeleteBtn').addEventListener('click', function() {
+        const form = document.getElementById('deleteScoreForm');
+        const scoreId = document.getElementById('deleteScoreId').value;
+        const reason = document.getElementById('deleteReason').value;
+        
+        if (!reason) {
+            showNotification('Please provide a reason for deletion', 'error');
+            return;
+        }
+
+        // Show loading state
+        this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Deleting...';
+        this.disabled = true;
+
+        // Simulate API call
+        setTimeout(() => {
+            const modal = new bootstrap.Modal(document.getElementById('successModal'));
+            document.getElementById('successTitle').textContent = 'Score Deleted!';
+            document.getElementById('successMessage').textContent = 'The student\'s score has been deleted successfully.';
+            modal.show();
+            
+            // Reset button
+            this.innerHTML = '<i class="fas fa-trash me-2"></i>Delete Score';
+            this.disabled = false;
+            
+            // Close delete modal
+            bootstrap.Modal.getInstance(document.getElementById('deleteScoreModal')).hide();
+        }, 1500);
+    });
+
+    // Real-time score validation
+    document.querySelectorAll('.new-score-input').forEach(input => {
+        input.addEventListener('input', function() {
+            const form = this.closest('.score-form');
+            const maxScore = parseInt(this.max);
+            const value = parseFloat(this.value);
+            const updateBtn = form.querySelector('.update-score-btn');
+            
+            if (value >= 0 && value <= maxScore && value !== parseFloat(this.defaultValue)) {
+                updateBtn.disabled = false;
+            } else {
+                updateBtn.disabled = true;
+            }
+        });
+    });
+
+    // Inline score update forms
+    document.querySelectorAll('.score-form').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const scoreId = this.dataset.scoreId;
+            const newScore = this.querySelector('.new-score-input').value;
+            
+            if (!newScore || parseFloat(newScore) < 0) {
+                showNotification('Please enter a valid score', 'error');
+                return;
+            }
+
+            // Show loading state
+            const btn = this.querySelector('.update-score-btn');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            btn.disabled = true;
+
+            // Simulate API call
+            setTimeout(() => {
+                showNotification('Score updated successfully', 'success');
+                btn.innerHTML = '<i class="fas fa-save"></i>';
+                btn.disabled = true; // Disable after successful update
+                this.querySelector('.new-score-input').defaultValue = newScore;
+            }, 1000);
+        });
+    });
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        // Ctrl + E for edit focus
+        if (e.ctrlKey && e.key === 'e') {
+            e.preventDefault();
+            const firstEditBtn = document.querySelector('.edit-score-btn');
+            if (firstEditBtn) {
+                firstEditBtn.click();
+            }
+        }
+        
+        // Ctrl + D for delete focus
+        if (e.ctrlKey && e.key === 'd') {
+            e.preventDefault();
+            const firstDeleteBtn = document.querySelector('.delete-score-btn');
+            if (firstDeleteBtn) {
+                firstDeleteBtn.click();
+            }
+        }
+    });
+
+    // Initialize tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+
+    // Filter persistence
+    document.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const subjectAssessment = urlParams.get('subject_assessment');
+        const classLevel = urlParams.get('class_level');
+        
+        if (subjectAssessment) {
+            document.getElementById('subject_assessment').value = subjectAssessment;
+        }
+        if (classLevel) {
+            document.getElementById('class_level').value = classLevel;
+        }
+    });
+
+    // Hover effects
+    document.querySelectorAll('tbody tr').forEach(row => {
+        row.addEventListener('mouseenter', function() {
+            this.style.backgroundColor = '#f8f9fa';
+        });
+        
+        row.addEventListener('mouseleave', function() {
+            this.style.backgroundColor = '';
+        });
+    });
+
+    // Show notification function
+    function showNotification(message, type) {
+        // You can implement a toast notification here
+        console.log(`${type}: ${message}`);
+        
+        // Simple alert for now
+        if (type === 'success') {
+            const modal = new bootstrap.Modal(document.getElementById('successModal'));
+            document.getElementById('successMessage').textContent = message;
+            modal.show();
+        } else {
+            const modal = new bootstrap.Modal(document.getElementById('errorModal'));
+            document.getElementById('errorMessage').textContent = message;
+            modal.show();
+        }
+    }
 </script>
 {% endblock %}

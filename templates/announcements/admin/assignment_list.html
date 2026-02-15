@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Assignments{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1>Assignments</h1>
+                <a href="{% url 'announcements:assignment_create' %}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Create Assignment
+                </a>
+            </div>
+
+            {% if assignments %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Title</th>
+                                <th>Class</th>
+                                <th>Subject</th>
+                                <th>Due Date</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for assignment in assignments %}
+                                <tr>
+                                    <td><strong>{{ assignment.title }}</strong></td>
+                                    <td>{{ assignment.class_assigned.name }}</td>
+                                    <td>{{ assignment.subject.name }}</td>
+                                    <td>{{ assignment.due_date|date:"M j, Y" }}</td>
+                                    <td>
+                                        {% if assignment.status == 'OPEN' %}
+                                            <span class="badge bg-success">Open</span>
+                                        {% elif assignment.status == 'CLOSED' %}
+                                            <span class="badge bg-danger">Closed</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">{{ assignment.status }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'announcements:assignment_detail' assignment.pk %}" class="btn btn-sm btn-info" title="View">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="{% url 'announcements:assignment_edit' assignment.pk %}" class="btn btn-sm btn-warning" title="Edit">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a href="{% url 'announcements:assignment_delete' assignment.pk %}" class="btn btn-sm btn-danger" title="Delete">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="alert alert-info">
+                    No assignments created yet. <a href="{% url 'announcements:assignment_create' %}">Create one now</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

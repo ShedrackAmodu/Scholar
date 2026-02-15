@@ -12,7 +12,8 @@ def admin_required(view_func):
         if not request.user.is_authenticated:
             return user_passes_test(lambda u: False)(view_func)(request, *args, **kwargs)
         
-        if not request.user.is_admin:
+        # `is_admin` property defined on custom User model
+        if not getattr(request.user, 'is_admin', False):
             raise PermissionDenied("You do not have permission to access this page.")
         
         return view_func(request, *args, **kwargs)
@@ -46,7 +47,7 @@ def teacher_required(view_func):
         if not request.user.is_authenticated:
             return user_passes_test(lambda u: False)(view_func)(request, *args, **kwargs)
         
-        if not request.user.is_teacher:
+        if not getattr(request.user, 'is_teacher', False):
             raise PermissionDenied("You do not have permission to access this page.")
         
         return view_func(request, *args, **kwargs)
@@ -63,7 +64,7 @@ def parent_required(view_func):
         if not request.user.is_authenticated:
             return user_passes_test(lambda u: False)(view_func)(request, *args, **kwargs)
         
-        if not request.user.is_parent:
+        if not getattr(request.user, 'is_parent', False):
             raise PermissionDenied("You do not have permission to access this page.")
         
         return view_func(request, *args, **kwargs)
@@ -80,7 +81,7 @@ def student_required(view_func):
         if not request.user.is_authenticated:
             return user_passes_test(lambda u: False)(view_func)(request, *args, **kwargs)
         
-        if not request.user.is_student:
+        if not getattr(request.user, 'is_student', False):
             raise PermissionDenied("You do not have permission to access this page.")
         
         return view_func(request, *args, **kwargs)
@@ -97,7 +98,7 @@ def principal_required(view_func):
         if not request.user.is_authenticated:
             return user_passes_test(lambda u: False)(view_func)(request, *args, **kwargs)
         
-        if request.user.role != 'PRINCIPAL':
+        if not getattr(request.user, 'is_principal', False):
             raise PermissionDenied("You do not have permission to access this page.")
         
         return view_func(request, *args, **kwargs)
@@ -114,7 +115,7 @@ def director_required(view_func):
         if not request.user.is_authenticated:
             return user_passes_test(lambda u: False)(view_func)(request, *args, **kwargs)
         
-        if request.user.role != 'DIRECTOR':
+        if not getattr(request.user, 'is_director', False):
             raise PermissionDenied("You do not have permission to access this page.")
         
         return view_func(request, *args, **kwargs)
@@ -131,6 +132,7 @@ def accountant_required(view_func):
         if not request.user.is_authenticated:
             return user_passes_test(lambda u: False)(view_func)(request, *args, **kwargs)
         
+        # accountants may not have their own boolean property, check role directly
         if request.user.role != 'ACCOUNTANT':
             raise PermissionDenied("You do not have permission to access this page.")
         

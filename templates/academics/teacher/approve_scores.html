@@ -1,24 +1,479 @@
+{% extends 'academics/base.html' %}
 {% load static %}
-{% extends 'base.html' %}
 
-{% block title %}Approve Scores{% endblock %}
+{% block title %}Approve Scores - {{ class_obj.name }} - {{ subject.name }}{% endblock %}
 
-{% block content %}
-<div class="container py-5">
-    <h1 class="display-4 text-center mb-4" data-aos="fade-down">Approve Scores</h1>
-    <p class="lead text-center" data-aos="fade-up" data-aos-delay="200">This is the Approve Scores page. Customize the structure and content here as needed.</p>
-    <!-- Add your form, table, or other components below -->
+{% block academics_content %}
+<!-- Page Header -->
+<div class="academics-hero animate__animated animate__fadeIn">
+    <div class="container">
+        <h1><i class="fas fa-check-double me-3"></i>Approve Scores</h1>
+        <p>Review and approve scores for {{ class_obj.name }} - {{ subject.name }}</p>
+        <div class="hero-stats">
+            <div class="stat-item">
+                <i class="fas fa-clock"></i>
+                <span id="pendingCount">{{ pending_scores.count }}</span> Pending
+            </div>
+            <div class="stat-item">
+                <i class="fas fa-check-circle"></i>
+                <span id="approvedCount">{{ approved_scores.count }}</span> Approved
+            </div>
+            <div class="stat-item">
+                <i class="fas fa-times-circle"></i>
+                <span id="rejectedCount">{{ rejected_scores.count }}</span> Rejected
+            </div>
+        </div>
+    </div>
 </div>
-{% endblock %}
 
-{% block extra_css %}
-<style>
-/* Styles specific to Approve Scores */
-</style>
+<!-- Filter Section -->
+<div class="card border-0 shadow-sm animate__animated animate__fadeInUp">
+    <div class="card-body p-4">
+        <div class="row g-3">
+            <div class="col-md-3">
+                <label for="assessmentFilter" class="form-label">Filter by Assessment</label>
+                <select id="assessmentFilter" class="form-select">
+                    <option value="">All Assessments</option>
+                    {% for assessment in assessments %}
+                        <option value="{{ assessment.id }}">{{ assessment.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="statusFilter" class="form-label">Filter by Status</label>
+                <select id="statusFilter" class="form-select">
+                    <option value="">All Status</option>
+                    <option value="pending">Pending</option>
+                    <option value="approved">Approved</option>
+                    <option value="rejected">Rejected</option>
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label for="searchFilter" class="form-label">Search Students</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                    <input type="text" id="searchFilter" class="form-control" placeholder="Search by name or admission number...">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Approval Actions -->
+<div class="card border-0 shadow-sm animate__animated animate__fadeInUp">
+    <div class="card-body p-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="form-check">
+                <input type="checkbox" class="form-check-input" id="selectAllApprovals">
+                <label class="form-check-label" for="selectAllApprovals">
+                    <strong>Select All Pending</strong>
+                </label>
+            </div>
+            <div class="d-flex gap-2">
+                <button class="btn btn-success" id="approveSelectedBtn" disabled>
+                    <i class="fas fa-check-circle me-2"></i>Approve Selected
+                </button>
+                <button class="btn btn-danger" id="rejectSelectedBtn" disabled>
+                    <i class="fas fa-times-circle me-2"></i>Reject Selected
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scores Table -->
+<div class="card border-0 shadow-sm animate__animated animate__fadeInUp">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>
+                            <input type="checkbox" class="form-check-input" id="headerSelectAll">
+                        </th>
+                        <th>Student</th>
+                        <th>Assessment</th>
+                        <th>Score</th>
+                        <th>Grade</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="scoresTableBody">
+                    {% for score in scores %}
+                    <tr data-student-id="{{ score.student.id }}" data-assessment-id="{{ score.subject_assessment.assessment.id }}" data-status="{{ score.status }}">
+                        <td>
+                            <input type="checkbox" class="form-check-input score-checkbox" value="{{ score.id }}" 
+                                   {% if score.status == 'PENDING' %}data-pending="true"{% endif %}>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="avatar-sm bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3">
+                                    {{ score.student.user.get_full_name|first|upper }}
+                                </div>
+                                <div>
+                                    <div class="fw-bold">{{ score.student.user.get_full_name }}</div>
+                                    <small class="text-muted">{{ score.student.admission_number }}</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="fw-bold">{{ score.subject_assessment.subject.name }}</div>
+                            <small class="text-muted">{{ score.subject_assessment.assessment.name }}</small>
+                        </td>
+                        <td>
+                            <span class="badge bg-primary">{{ score.score }}</span>
+                            <small class="text-muted d-block mt-1">Max: {{ score.subject_assessment.max_score }}</small>
+                        </td>
+                        <td>
+                            <span class="badge {% if score.grade == 'A' %}bg-success{% elif score.grade == 'B' %}bg-info{% elif score.grade == 'C' %}bg-warning{% else %}bg-danger{% endif %}">
+                                {{ score.grade }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if score.status == 'PENDING' %}
+                                <span class="badge bg-warning">
+                                    <i class="fas fa-clock me-1"></i>Pending
+                                </span>
+                            {% elif score.status == 'APPROVED' %}
+                                <span class="badge bg-success">
+                                    <i class="fas fa-check-circle me-1"></i>Approved
+                                </span>
+                            {% else %}
+                                <span class="badge bg-danger">
+                                    <i class="fas fa-times-circle me-1"></i>Rejected
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if score.status == 'PENDING' %}
+                                <div class="btn-group" role="group">
+                                    <button class="btn btn-success btn-sm approve-btn" data-score-id="{{ score.id }}">
+                                        <i class="fas fa-check"></i> Approve
+                                    </button>
+                                    <button class="btn btn-danger btn-sm reject-btn" data-score-id="{{ score.id }}">
+                                        <i class="fas fa-times"></i> Reject
+                                    </button>
+                                </div>
+                            {% else %}
+                                <span class="text-muted">No action needed</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center text-muted py-5">
+                            <i class="fas fa-inbox fa-2x mb-3"></i>
+                            <div>No scores found for approval</div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Remarks Modal -->
+<div class="modal fade" id="remarksModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-comment me-2"></i>Add Remarks
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="remarksForm">
+                    <input type="hidden" id="remarksScoreId">
+                    <div class="mb-3">
+                        <label for="remarksText" class="form-label">Remarks</label>
+                        <textarea class="form-control" id="remarksText" rows="4" placeholder="Enter remarks for this score..."></textarea>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="sendNotification">
+                        <label class="form-check-label" for="sendNotification">
+                            Send notification to student/parent
+                        </label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="saveRemarksBtn">
+                    <i class="fas fa-save me-2"></i>Save Remarks
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Success Modal -->
+<div class="modal fade" id="successModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content text-center">
+            <div class="modal-body p-5">
+                <div class="mb-4">
+                    <i class="fas fa-check-circle text-success" style="font-size: 4rem;"></i>
+                </div>
+                <h4 class="modal-title mb-2">Scores Updated Successfully!</h4>
+                <p class="text-secondary" id="successMessage">The selected scores have been processed.</p>
+                <div class="d-flex gap-2 justify-content-center mt-4">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
+                        <i class="fas fa-check me-2"></i>OK
+                    </button>
+                    <a href="{% url 'academics:score_entry' %}" class="btn btn-outline-primary">
+                        <i class="fas fa-list me-2"></i>Back to Scores
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Error Modal -->
+<div class="modal fade" id="errorModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content text-center">
+            <div class="modal-body p-5">
+                <div class="mb-4">
+                    <i class="fas fa-exclamation-triangle text-danger" style="font-size: 4rem;"></i>
+                </div>
+                <h4 class="modal-title mb-2">Error</h4>
+                <p class="text-secondary" id="errorMessage">An error occurred while processing the scores.</p>
+                <div class="d-flex gap-2 justify-content-center mt-4">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
+                        <i class="fas fa-check me-2"></i>OK
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-// JS for Approve Scores
+    // DOM Elements
+    const assessmentFilter = document.getElementById('assessmentFilter');
+    const statusFilter = document.getElementById('statusFilter');
+    const searchFilter = document.getElementById('searchFilter');
+    const scoresTableBody = document.getElementById('scoresTableBody');
+    const selectAllApprovals = document.getElementById('selectAllApprovals');
+    const headerSelectAll = document.getElementById('headerSelectAll');
+    const approveSelectedBtn = document.getElementById('approveSelectedBtn');
+    const rejectSelectedBtn = document.getElementById('rejectSelectedBtn');
+    const scoreCheckboxes = document.querySelectorAll('.score-checkbox');
+
+    // Filter functionality
+    function filterTable() {
+        const assessmentValue = assessmentFilter.value;
+        const statusValue = statusFilter.value;
+        const searchValue = searchFilter.value.toLowerCase();
+
+        const rows = scoresTableBody.querySelectorAll('tr');
+        
+        rows.forEach(row => {
+            const assessmentId = row.dataset.assessmentId;
+            const status = row.dataset.status;
+            const studentName = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
+            const admissionNumber = row.querySelector('td:nth-child(2) small').textContent.toLowerCase();
+
+            let showRow = true;
+
+            // Filter by assessment
+            if (assessmentValue && assessmentId !== assessmentValue) {
+                showRow = false;
+            }
+
+            // Filter by status
+            if (statusValue && status.toLowerCase() !== statusValue) {
+                showRow = false;
+            }
+
+            // Filter by search
+            if (searchValue && !studentName.includes(searchValue) && !admissionNumber.includes(searchValue)) {
+                showRow = false;
+            }
+
+            row.style.display = showRow ? '' : 'none';
+        });
+
+        updateSelectAllState();
+        updateActionButtons();
+    }
+
+    // Update select all checkbox state
+    function updateSelectAllState() {
+        const visiblePendingCheckboxes = document.querySelectorAll('.score-checkbox[data-pending="true"]:not(:disabled)');
+        const visibleCheckedCheckboxes = document.querySelectorAll('.score-checkbox[data-pending="true"]:checked:not(:disabled)');
+        
+        if (visibleCheckedCheckboxes.length === 0) {
+            selectAllApprovals.checked = false;
+            selectAllApprovals.indeterminate = false;
+        } else if (visibleCheckedCheckboxes.length === visiblePendingCheckboxes.length) {
+            selectAllApprovals.checked = true;
+            selectAllApprovals.indeterminate = false;
+        } else {
+            selectAllApprovals.checked = false;
+            selectAllApprovals.indeterminate = true;
+        }
+    }
+
+    // Update action buttons state
+    function updateActionButtons() {
+        const checkedCheckboxes = document.querySelectorAll('.score-checkbox:checked[data-pending="true"]');
+        const hasChecked = checkedCheckboxes.length > 0;
+
+        approveSelectedBtn.disabled = !hasChecked;
+        rejectSelectedBtn.disabled = !hasChecked;
+    }
+
+    // Approve/reject individual score
+    function handleIndividualAction(action, scoreId) {
+        const formData = new FormData();
+        formData.append('action', action);
+        formData.append('score_id', scoreId);
+        formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+        fetch('{% url "academics:approve_scores" class_obj.id subject.id %}', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showSuccessMessage(`${action === 'approve' ? 'Approved' : 'Rejected'} score successfully`);
+                location.reload();
+            } else {
+                showErrorMessage(data.error || 'Failed to process score');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showErrorMessage('An error occurred while processing the score');
+        });
+    }
+
+    // Approve/reject selected scores
+    function handleBulkAction(action) {
+        const selectedScores = Array.from(document.querySelectorAll('.score-checkbox:checked[data-pending="true"]'))
+            .map(cb => cb.value);
+
+        if (selectedScores.length === 0) {
+            showErrorMessage('Please select at least one score to process');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('action', action);
+        formData.append('selected_scores', JSON.stringify(selectedScores));
+        formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+        fetch('{% url "academics:approve_scores" class_obj.id subject.id %}', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showSuccessMessage(`${action === 'approve' ? 'Approved' : 'Rejected'} ${selectedScores.length} scores successfully`);
+                location.reload();
+            } else {
+                showErrorMessage(data.error || 'Failed to process scores');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showErrorMessage('An error occurred while processing the scores');
+        });
+    }
+
+    // Show success message
+    function showSuccessMessage(message) {
+        document.getElementById('successMessage').textContent = message;
+        const modal = new bootstrap.Modal(document.getElementById('successModal'));
+        modal.show();
+    }
+
+    // Show error message
+    function showErrorMessage(message) {
+        document.getElementById('errorMessage').textContent = message;
+        const modal = new bootstrap.Modal(document.getElementById('errorModal'));
+        modal.show();
+    }
+
+    // Event Listeners
+    assessmentFilter.addEventListener('change', filterTable);
+    statusFilter.addEventListener('change', filterTable);
+    searchFilter.addEventListener('input', filterTable);
+
+    selectAllApprovals.addEventListener('change', function() {
+        const pendingCheckboxes = document.querySelectorAll('.score-checkbox[data-pending="true"]:not(:disabled)');
+        pendingCheckboxes.forEach(cb => cb.checked = this.checked);
+        updateActionButtons();
+    });
+
+    headerSelectAll.addEventListener('change', function() {
+        const allCheckboxes = document.querySelectorAll('.score-checkbox:not(:disabled)');
+        allCheckboxes.forEach(cb => cb.checked = this.checked);
+        updateSelectAllState();
+        updateActionButtons();
+    });
+
+    approveSelectedBtn.addEventListener('click', () => handleBulkAction('approve'));
+    rejectSelectedBtn.addEventListener('click', () => handleBulkAction('reject'));
+
+    // Individual action buttons
+    document.querySelectorAll('.approve-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const scoreId = this.dataset.scoreId;
+            handleIndividualAction('approve', scoreId);
+        });
+    });
+
+    document.querySelectorAll('.reject-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const scoreId = this.dataset.scoreId;
+            handleIndividualAction('reject', scoreId);
+        });
+    });
+
+    // Checkbox change events
+    document.querySelectorAll('.score-checkbox').forEach(cb => {
+        cb.addEventListener('change', function() {
+            updateSelectAllState();
+            updateActionButtons();
+        });
+    });
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        // Ctrl + A to select all
+        if (e.ctrlKey && e.key === 'a') {
+            e.preventDefault();
+            selectAllApprovals.click();
+        }
+        
+        // Ctrl + Enter to approve selected
+        if (e.ctrlKey && e.key === 'Enter') {
+            e.preventDefault();
+            if (!approveSelectedBtn.disabled) {
+                handleBulkAction('approve');
+            }
+        }
+    });
+
+    // Initialize tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+
+    // Initialize with current filters
+    document.addEventListener('DOMContentLoaded', function() {
+        filterTable();
+    });
 </script>
 {% endblock %}

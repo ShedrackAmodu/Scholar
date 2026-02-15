@@ -22,7 +22,7 @@
         </div>
         {% empty %}
         <div class="col-12 text-center py-5">
-            <p class="lead">No leave requests yet. <a href="{% url 'teachers:leave_create' %}">Apply now</a>.</p>
+            <p class="lead">No leave requests yet. <a href="{% url 'teachers:teacher_leave_create' %}">Apply now</a>.</p>
         </div>
         {% endfor %}
     </div>

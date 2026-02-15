@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ event.title }} - Event Details{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">{{ event.title }}</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>Event Type:</strong> {{ event.event_type }}
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Featured:</strong> {% if event.is_featured %}<span class="badge bg-success">Yes</span>{% else %}<span class="badge bg-secondary">No</span>{% endif %}
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>Start Date:</strong> {{ event.start_date|date:"F j, Y H:i" }}
+                        </div>
+                        <div class="col-md-6">
+                            <strong>End Date:</strong> {{ event.end_date|date:"F j, Y H:i" }}
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <strong>Description:</strong>
+                        <p>{{ event.description|linebreaks }}</p>
+                    </div>
+                    {% if event.image %}
+                        <div class="mb-3">
+                            <strong>Image:</strong><br>
+                            <img src="{{ event.image.url }}" class="img-fluid max-width-100" alt="{{ event.title }}" style="max-width: 400px;">
+                        </div>
+                    {% endif %}
+                    <div class="row">
+                        <div class="col-md-6">
+                            <strong>Created By:</strong> {{ event.created_by.get_full_name }}
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Created At:</strong> {{ event.created_at|date:"F j, Y H:i" }}
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <a href="{% url 'announcements:event_edit' event.pk %}" class="btn btn-warning">
+                        <i class="fas fa-edit"></i> Edit
+                    </a>
+                    <a href="{% url 'announcements:event_delete' event.pk %}" class="btn btn-danger">
+                        <i class="fas fa-trash"></i> Delete
+                    </a>
+                    <a href="{% url 'announcements:event_list' %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Back to List
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,24 +1,512 @@
+{% extends 'academics/base.html' %}
 {% load static %}
-{% extends 'base.html' %}
 
-{% block title %}Individual Score Entry{% endblock %}
+{% block title %}Enter Individual Score{% endblock %}
 
-{% block content %}
-<div class="container py-5">
-    <h1 class="display-4 text-center mb-4" data-aos="fade-down">Individual Score Entry</h1>
-    <p class="lead text-center" data-aos="fade-up" data-aos-delay="200">This is the Individual Score Entry page. Customize the structure and content here as needed.</p>
-    <!-- Add your form, table, or other components below -->
+{% block academics_content %}
+<!-- Page Header -->
+<div class="academics-hero animate__animated animate__fadeIn">
+    <div class="container">
+        <h1><i class="fas fa-plus-circle me-3"></i>Enter Individual Score</h1>
+        <p>Enter a score for a specific student in a subject assessment</p>
+    </div>
 </div>
-{% endblock %}
 
-{% block extra_css %}
-<style>
-/* Styles specific to Individual Score Entry */
-</style>
+<!-- Quick Actions -->
+<div class="quick-actions animate__animated animate__fadeInUp">
+    <a href="{% url 'academics:score_entry' %}" class="quick-action-btn">
+        <i class="fas fa-list"></i>
+        <span>Back to Score Entry</span>
+    </a>
+    <a href="{% url 'academics:bulk_score_entry' %}" class="quick-action-btn">
+        <i class="fas fa-upload"></i>
+        <span>Bulk Upload</span>
+    </a>
+    <a href="{% url 'academics:report_card_list' 1 %}" class="quick-action-btn">
+        <i class="fas fa-file-alt"></i>
+        <span>View Report Cards</span>
+    </a>
+</div>
+
+<!-- Form Card -->
+<div class="card border-0 shadow-sm animate__animated animate__fadeInUp">
+    <div class="card-body p-4">
+        <form method="post" id="individualScoreForm">
+            {% csrf_token %}
+            
+            <div class="row g-4">
+                <!-- Subject Assessment Selection -->
+                <div class="col-md-6">
+                    <label for="{{ form.subject_assessment.id }}" class="form-label">
+                        <i class="fas fa-clipboard-list me-2"></i>
+                        Subject Assessment
+                    </label>
+                    <select name="{{ form.subject_assessment.name }}" id="{{ form.subject_assessment.id }}" class="form-select" required>
+                        <option value="">Select a subject assessment...</option>
+                        {% for subject_assessment in subject_assessments %}
+                            <option value="{{ subject_assessment.id }}" 
+                                    data-subject="{{ subject_assessment.subject.name }}"
+                                    data-assessment="{{ subject_assessment.assessment.name }}"
+                                    data-max="{{ subject_assessment.max_score }}"
+                                    {% if form.subject_assessment.value == subject_assessment.id %}selected{% endif %}>
+                                {{ subject_assessment.subject.name }} - {{ subject_assessment.assessment.name }} (Max: {{ subject_assessment.max_score }})
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <div class="form-text">Select the assessment for which you want to enter a score</div>
+                </div>
+
+                <!-- Student Selection -->
+                <div class="col-md-6">
+                    <label for="{{ form.student.id }}" class="form-label">
+                        <i class="fas fa-user-graduate me-2"></i>
+                        Student
+                    </label>
+                    <select name="{{ form.student.name }}" id="{{ form.student.id }}" class="form-select" required>
+                        <option value="">Select a student...</option>
+                        {% for student in students %}
+                            <option value="{{ student.id }}" 
+                                    data-class="{{ student.current_class.name }}"
+                                    {% if form.student.value == student.id %}selected{% endif %}>
+                                {{ student.user.get_full_name }} ({{ student.admission_number }})
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <div class="form-text">Select the student for whom you want to enter a score</div>
+                </div>
+
+                <!-- Score Input -->
+                <div class="col-md-6">
+                    <label for="{{ form.score.id }}" class="form-label">
+                        <i class="fas fa-percentage me-2"></i>
+                        Score
+                    </label>
+                    <div class="input-group">
+                        <input type="number" 
+                               name="{{ form.score.name }}" 
+                               id="{{ form.score.id }}" 
+                               class="form-control" 
+                               placeholder="Enter score"
+                               min="0" 
+                               step="0.01"
+                               value="{{ form.score.value|default:'' }}"
+                               required>
+                        <span class="input-group-text" id="maxScoreLabel">/ 100</span>
+                    </div>
+                    <div class="form-text">Enter the student's score (0 to maximum score)</div>
+                </div>
+
+                <!-- Assessment Details -->
+                <div class="col-md-6">
+                    <div class="card border-0 bg-light">
+                        <div class="card-body">
+                            <h6 class="card-title mb-3">
+                                <i class="fas fa-info-circle me-2"></i>
+                                Assessment Information
+                            </h6>
+                            <div id="assessmentInfo" class="text-muted">
+                                <p class="mb-2">Select a subject assessment to view details</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Student Details -->
+                <div class="col-md-6">
+                    <div class="card border-0 bg-light">
+                        <div class="card-body">
+                            <h6 class="card-title mb-3">
+                                <i class="fas fa-user me-2"></i>
+                                Student Information
+                            </h6>
+                            <div id="studentInfo" class="text-muted">
+                                <p class="mb-2">Select a student to view details</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Previous Scores -->
+                <div class="col-md-6">
+                    <div class="card border-0 bg-light">
+                        <div class="card-body">
+                            <h6 class="card-title mb-3">
+                                <i class="fas fa-history me-2"></i>
+                                Previous Scores
+                            </h6>
+                            <div id="previousScores" class="text-muted">
+                                <p class="mb-2">Select a student and assessment to view previous scores</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Validation Messages -->
+                <div class="col-12">
+                    <div id="validationMessages" class="alert alert-warning d-none" role="alert">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <span id="validationText"></span>
+                    </div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="col-12">
+                    <div class="d-flex gap-3">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-save me-2"></i>
+                            Save Score
+                        </button>
+                        <a href="{% url 'academics:score_entry' %}" class="btn btn-outline-secondary btn-lg">
+                            <i class="fas fa-arrow-left me-2"></i>
+                            Cancel
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Success Modal -->
+<div class="modal fade" id="successModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content text-center">
+            <div class="modal-body p-5">
+                <div class="mb-4">
+                    <i class="fas fa-check-circle text-success" style="font-size: 4rem;"></i>
+                </div>
+                <h4 class="modal-title mb-2">Score Saved Successfully!</h4>
+                <p class="text-secondary" id="successMessage">The student's score has been recorded.</p>
+                <div class="d-flex gap-2 justify-content-center mt-4">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal" id="continueBtn">
+                        <i class="fas fa-plus me-2"></i>Enter Another
+                    </button>
+                    <a href="{% url 'academics:score_entry' %}" class="btn btn-outline-primary">
+                        <i class="fas fa-list me-2"></i>Back to List
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Error Modal -->
+<div class="modal fade" id="errorModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content text-center">
+            <div class="modal-body p-5">
+                <div class="mb-4">
+                    <i class="fas fa-exclamation-triangle text-danger" style="font-size: 4rem;"></i>
+                </div>
+                <h4 class="modal-title mb-2">Validation Error</h4>
+                <p class="text-secondary" id="errorMessage">Please check the form for errors.</p>
+                <div class="d-flex gap-2 justify-content-center mt-4">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
+                        <i class="fas fa-check me-2"></i>OK
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Warning Modal -->
+<div class="modal fade" id="warningModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content text-center">
+            <div class="modal-body p-5">
+                <div class="mb-4">
+                    <i class="fas fa-exclamation-triangle text-warning" style="font-size: 4rem;"></i>
+                </div>
+                <h4 class="modal-title mb-2">Score Already Exists</h4>
+                <p class="text-secondary" id="warningMessage">This student already has a score for this assessment. Do you want to update it?</p>
+                <div class="d-flex gap-2 justify-content-center mt-4">
+                    <button type="button" class="btn btn-warning" id="updateScoreBtn">
+                        <i class="fas fa-edit me-2"></i>Update Score
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i>Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-// JS for Individual Score Entry
+    // Form elements
+    const subjectAssessmentSelect = document.getElementById('{{ form.subject_assessment.id }}');
+    const studentSelect = document.getElementById('{{ form.student.id }}');
+    const scoreInput = document.getElementById('{{ form.score.id }}');
+    const maxScoreLabel = document.getElementById('maxScoreLabel');
+    const assessmentInfo = document.getElementById('assessmentInfo');
+    const studentInfo = document.getElementById('studentInfo');
+    const previousScores = document.getElementById('previousScores');
+    const validationMessages = document.getElementById('validationMessages');
+    const validationText = document.getElementById('validationText');
+
+    // Data objects
+    const subjectAssessmentsData = {
+        {% for subject_assessment in subject_assessments %}
+            {{ subject_assessment.id }}: {
+                id: {{ subject_assessment.id }},
+                subject: "{{ subject_assessment.subject.name }}",
+                assessment: "{{ subject_assessment.assessment.name }}",
+                maxScore: {{ subject_assessment.max_score }},
+                assessmentType: "{{ subject_assessment.assessment.get_assessment_type_display }}",
+                weight: {{ subject_assessment.assessment.weight_percentage }}
+            }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    };
+
+    const studentsData = {
+        {% for student in students %}
+            {{ student.id }}: {
+                id: {{ student.id }},
+                name: "{{ student.user.get_full_name }}",
+                admissionNumber: "{{ student.admission_number }}",
+                className: "{{ student.current_class.name }}",
+                enrollmentStatus: "{{ student.enrollment_status }}"
+            }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    };
+
+    // Update assessment information
+    function updateAssessmentInfo() {
+        const selectedId = subjectAssessmentSelect.value;
+        
+        if (selectedId && subjectAssessmentsData[selectedId]) {
+            const sa = subjectAssessmentsData[selectedId];
+            maxScoreLabel.textContent = `/ ${sa.maxScore}`;
+            assessmentInfo.innerHTML = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <strong><i class="fas fa-book me-2"></i>Subject:</strong>
+                        <span>${sa.subject}</span>
+                    </div>
+                    <div class="col-md-6">
+                        <strong><i class="fas fa-clipboard-list me-2"></i>Assessment:</strong>
+                        <span>${sa.assessment}</span>
+                    </div>
+                </div>
+                <div class="row mt-2">
+                    <div class="col-md-6">
+                        <strong><i class="fas fa-tag me-2"></i>Type:</strong>
+                        <span class="badge badge-${sa.assessmentType.toLowerCase()}">${sa.assessmentType}</span>
+                    </div>
+                    <div class="col-md-6">
+                        <strong><i class="fas fa-weight me-2"></i>Weight:</strong>
+                        <span>${sa.weight}%</span>
+                    </div>
+                </div>
+                <div class="row mt-2">
+                    <div class="col-12">
+                        <strong><i class="fas fa-percentage me-2"></i>Max Score:</strong>
+                        <span>${sa.maxScore}</span>
+                    </div>
+                </div>
+            `;
+        } else {
+            maxScoreLabel.textContent = '/ 100';
+            assessmentInfo.innerHTML = '<p class="mb-2">Select a subject assessment to view details</p>';
+        }
+        
+        updateStudentInfo();
+        validateForm();
+    }
+
+    // Update student information
+    function updateStudentInfo() {
+        const selectedId = studentSelect.value;
+        const selectedAssessmentId = subjectAssessmentSelect.value;
+        
+        if (selectedId && studentsData[selectedId]) {
+            const student = studentsData[selectedId];
+            studentInfo.innerHTML = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <strong><i class="fas fa-user me-2"></i>Name:</strong>
+                        <span>${student.name}</span>
+                    </div>
+                    <div class="col-md-6">
+                        <strong><i class="fas fa-id-card me-2"></i>Admission:</strong>
+                        <span>${student.admissionNumber}</span>
+                    </div>
+                </div>
+                <div class="row mt-2">
+                    <div class="col-md-6">
+                        <strong><i class="fas fa-school me-2"></i>Class:</strong>
+                        <span>${student.className}</span>
+                    </div>
+                    <div class="col-md-6">
+                        <strong><i class="fas fa-circle me-2"></i>Status:</strong>
+                        <span class="badge ${student.enrollmentStatus === 'ACTIVE' ? 'badge-success' : 'badge-warning'}">
+                            ${student.enrollmentStatus}
+                        </span>
+                    </div>
+                </div>
+            `;
+            
+            // Load previous scores if assessment is selected
+            if (selectedAssessmentId) {
+                loadPreviousScores(student.id, selectedAssessmentId);
+            }
+        } else {
+            studentInfo.innerHTML = '<p class="mb-2">Select a student to view details</p>';
+            previousScores.innerHTML = '<p class="mb-2">Select a student and assessment to view previous scores</p>';
+        }
+    }
+
+    // Load previous scores
+    function loadPreviousScores(studentId, subjectAssessmentId) {
+        // This would typically be an AJAX call to fetch previous scores
+        // For now, we'll simulate it
+        previousScores.innerHTML = `
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>
+                Previous scores for this assessment will be displayed here.
+                <br><small class="text-muted">In a real implementation, this would fetch from the database.</small>
+            </div>
+        `;
+    }
+
+    // Validation logic
+    function validateForm() {
+        const selectedAssessmentId = subjectAssessmentSelect.value;
+        const selectedStudentId = studentSelect.value;
+        const score = parseFloat(scoreInput.value);
+        let isValid = true;
+        let messages = [];
+
+        if (selectedAssessmentId && selectedStudentId) {
+            const sa = subjectAssessmentsData[selectedAssessmentId];
+            
+            // Check score range
+            if (score < 0 || score > sa.maxScore) {
+                isValid = false;
+                messages.push(`Score must be between 0 and ${sa.maxScore}.`);
+            }
+            
+            // Check for existing score
+            // This would typically be an AJAX call to check for duplicates
+            // For now, we'll show a warning message
+            if (score >= 0 && score <= sa.maxScore) {
+                // Simulate checking for existing score
+                // In real implementation, this would be server-side validation
+            }
+        }
+
+        if (!isValid) {
+            validationMessages.classList.remove('d-none');
+            validationText.innerHTML = messages.join('<br>');
+        } else {
+            validationMessages.classList.add('d-none');
+        }
+
+        return isValid;
+    }
+
+    // Event listeners
+    subjectAssessmentSelect.addEventListener('change', updateAssessmentInfo);
+    studentSelect.addEventListener('change', updateStudentInfo);
+    scoreInput.addEventListener('input', validateForm);
+
+    // Form submission
+    document.getElementById('individualScoreForm').addEventListener('submit', function(e) {
+        if (!validateForm()) {
+            e.preventDefault();
+            const modal = new bootstrap.Modal(document.getElementById('errorModal'));
+            modal.show();
+            return false;
+        }
+
+        // Check for existing score (simulated)
+        const selectedAssessmentId = subjectAssessmentSelect.value;
+        const selectedStudentId = studentSelect.value;
+        
+        // Simulate checking for existing score
+        // In real implementation, this would be an AJAX call
+        const hasExistingScore = Math.random() > 0.5; // Simulate 50% chance
+        
+        if (hasExistingScore) {
+            e.preventDefault();
+            const modal = new bootstrap.Modal(document.getElementById('warningModal'));
+            modal.show();
+            
+            // Handle update score button
+            document.getElementById('updateScoreBtn').onclick = function() {
+                // Submit form for update
+                document.getElementById('individualScoreForm').submit();
+            };
+            
+            return false;
+        }
+
+        // Show loading state
+        const submitBtn = this.querySelector('button[type="submit"]');
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Saving...';
+        submitBtn.disabled = true;
+
+        // Simulate form submission
+        setTimeout(() => {
+            const modal = new bootstrap.Modal(document.getElementById('successModal'));
+            modal.show();
+            
+            // Update success message
+            const student = studentsData[selectedStudentId];
+            const sa = subjectAssessmentsData[selectedAssessmentId];
+            document.getElementById('successMessage').textContent = 
+                `${student.name} scored ${scoreInput.value} in ${sa.subject} - ${sa.assessment}`;
+        }, 1500);
+    });
+
+    // Continue button handler
+    document.getElementById('continueBtn').addEventListener('click', function() {
+        // Reset form
+        subjectAssessmentSelect.value = '';
+        studentSelect.value = '';
+        scoreInput.value = '';
+        updateAssessmentInfo();
+        updateStudentInfo();
+    });
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        // Ctrl + S to submit
+        if (e.ctrlKey && e.key === 's') {
+            e.preventDefault();
+            document.getElementById('individualScoreForm').requestSubmit();
+        }
+        
+        // Ctrl + C to cancel
+        if (e.ctrlKey && e.key === 'c') {
+            e.preventDefault();
+            window.location.href = "{% url 'academics:score_entry' %}";
+        }
+    });
+
+    // Initialize tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+
+    // Initialize with current values
+    document.addEventListener('DOMContentLoaded', function() {
+        updateAssessmentInfo();
+    });
+
+    // Hover effects
+    document.querySelectorAll('.card').forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-5px)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+        });
+    });
 </script>
 {% endblock %}

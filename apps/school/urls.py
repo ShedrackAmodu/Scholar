@@ -18,6 +18,7 @@ urlpatterns = [
     # Academic year CRUD
     path('admin/academic-years/', views.AcademicYearListView.as_view(), name='academic_year_list'),
     path('admin/academic-years/create/', views.AcademicYearCreateView.as_view(), name='academic_year_create'),
+    path('admin/academic-years/<int:pk>/', views.AcademicYearDetailView.as_view(), name='academic_year_detail'),
     path('admin/academic-years/<int:pk>/edit/', views.AcademicYearUpdateView.as_view(), name='academic_year_edit'),
     path('admin/academic-years/<int:pk>/delete/', views.AcademicYearDeleteView.as_view(), name='academic_year_delete'),
     path('admin/academic-years/set-current/', views.set_current_academic_year, name='set_current_academic_year'),
@@ -25,6 +26,7 @@ urlpatterns = [
     # Term CRUD
     path('admin/terms/', views.TermListView.as_view(), name='term_list'),
     path('admin/terms/create/', views.TermCreateView.as_view(), name='term_create'),
+    path('admin/terms/<int:pk>/', views.TermDetailView.as_view(), name='term_detail'),
     path('admin/terms/<int:pk>/edit/', views.TermUpdateView.as_view(), name='term_edit'),
     path('admin/terms/<int:pk>/delete/', views.TermDeleteView.as_view(), name='term_delete'),
     path('admin/terms/set-current/', views.set_current_term, name='set_current_term'),
@@ -32,6 +34,7 @@ urlpatterns = [
     # Holiday CRUD
     path('admin/holidays/', views.HolidayListView.as_view(), name='holiday_list'),
     path('admin/holidays/create/', views.HolidayCreateView.as_view(), name='holiday_create'),
+    path('admin/holidays/<int:pk>/', views.HolidayDetailView.as_view(), name='holiday_detail'),
     path('admin/holidays/<int:pk>/edit/', views.HolidayUpdateView.as_view(), name='holiday_edit'),
     path('admin/holidays/<int:pk>/delete/', views.HolidayDeleteView.as_view(), name='holiday_delete'),
 

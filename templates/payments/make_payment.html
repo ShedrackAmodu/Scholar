@@ -1,0 +1,871 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Make Payment - Invoice {{ invoice.invoice_number }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Page Header */
+    .page-header {
+        background: linear-gradient(135deg, rgba(123, 44, 191, 0.1), rgba(74, 144, 226, 0.1));
+        padding: 40px 0;
+        margin-bottom: 40px;
+        position: relative;
+        overflow: hidden;
+        border-radius: 0 0 50px 50px;
+    }
+
+    /* Payment Container */
+    .payment-container {
+        display: grid;
+        grid-template-columns: 1fr 350px;
+        gap: 30px;
+        animation: fadeInUp 0.8s ease;
+    }
+
+    /* Payment Form Card */
+    .payment-form-card {
+        background: var(--card-bg);
+        backdrop-filter: blur(10px);
+        border: var(--border);
+        border-radius: 30px;
+        padding: 40px;
+        box-shadow: var(--shadow);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .payment-form-card::before {
+        content: '';
+        position: absolute;
+        top: -50px;
+        right: -50px;
+        width: 200px;
+        height: 200px;
+        background: linear-gradient(135deg, var(--primary-pink), var(--secondary-pink));
+        border-radius: 50%;
+        opacity: 0.05;
+        animation: float 15s ease-in-out infinite;
+    }
+
+    .section-title {
+        display: flex;
+        align-items: center;
+        margin-bottom: 30px;
+    }
+
+    .section-icon {
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, var(--primary-pink), var(--dark-pink));
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.3rem;
+        margin-right: 15px;
+        transform: rotate(-5deg);
+        transition: var(--transition-smooth);
+    }
+
+    .section-title:hover .section-icon {
+        transform: rotate(0deg) scale(1.1);
+    }
+
+    .section-title h3 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin: 0;
+    }
+
+    .section-title p {
+        color: var(--text-secondary);
+        margin: 5px 0 0;
+    }
+
+    /* Invoice Summary */
+    .invoice-summary {
+        background: rgba(123, 44, 191, 0.05);
+        border-radius: 20px;
+        padding: 25px;
+        margin-bottom: 30px;
+    }
+
+    .summary-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 15px 0;
+        border-bottom: var(--border);
+    }
+
+    .summary-item:last-child {
+        border-bottom: none;
+    }
+
+    .summary-label {
+        color: var(--text-secondary);
+    }
+
+    .summary-value {
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .summary-value.total {
+        font-size: 1.4rem;
+        color: var(--primary-pink);
+    }
+
+    .balance-due {
+        background: linear-gradient(135deg, var(--primary-pink), var(--dark-pink));
+        color: white;
+        padding: 20px;
+        border-radius: 15px;
+        text-align: center;
+        margin-top: 20px;
+    }
+
+    .balance-due .label {
+        font-size: 0.9rem;
+        opacity: 0.9;
+        margin-bottom: 5px;
+    }
+
+    .balance-due .amount {
+        font-size: 2rem;
+        font-weight: 700;
+    }
+
+    /* Payment Methods */
+    .payment-methods {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 15px;
+        margin: 25px 0;
+    }
+
+    .payment-method {
+        position: relative;
+        cursor: pointer;
+    }
+
+    .payment-method input[type="radio"] {
+        position: absolute;
+        opacity: 0;
+    }
+
+    .method-card {
+        background: var(--card-bg);
+        border: 2px solid rgba(123, 44, 191, 0.1);
+        border-radius: 15px;
+        padding: 20px;
+        text-align: center;
+        transition: var(--transition-bounce);
+    }
+
+    .payment-method input[type="radio"]:checked + .method-card {
+        border-color: var(--primary-pink);
+        background: rgba(123, 44, 191, 0.05);
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(123, 44, 191, 0.2);
+    }
+
+    .method-icon {
+        font-size: 2rem;
+        color: var(--primary-pink);
+        margin-bottom: 10px;
+    }
+
+    .method-name {
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 5px;
+    }
+
+    .method-desc {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+    }
+
+    /* Form Fields */
+    .form-group {
+        margin-bottom: 25px;
+        position: relative;
+        animation: fadeInUp 0.5s ease;
+        animation-fill-mode: both;
+    }
+
+    .form-group:nth-child(1) { animation-delay: 0.1s; }
+    .form-group:nth-child(2) { animation-delay: 0.15s; }
+    .form-group:nth-child(3) { animation-delay: 0.2s; }
+
+    .form-label {
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 10px;
+        display: block;
+    }
+
+    .form-label i {
+        color: var(--primary-pink);
+        margin-right: 8px;
+    }
+
+    .form-control {
+        background: var(--card-bg);
+        border: 2px solid rgba(123, 44, 191, 0.1);
+        border-radius: 15px;
+        padding: 15px 20px;
+        color: var(--text-primary);
+        transition: var(--transition-smooth);
+        width: 100%;
+        font-size: 1.1rem;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: var(--primary-pink);
+        box-shadow: 0 0 0 5px rgba(123, 44, 191, 0.1);
+        transform: translateY(-2px);
+    }
+
+    .form-control[readonly] {
+        background: rgba(123, 44, 191, 0.05);
+        cursor: not-allowed;
+    }
+
+    /* Amount Input Group */
+    .amount-input-group {
+        position: relative;
+    }
+
+    .currency-symbol {
+        position: absolute;
+        left: 20px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: var(--primary-pink);
+    }
+
+    .amount-input-group .form-control {
+        padding-left: 50px;
+    }
+
+    /* Paystack Button */
+    .paystack-button {
+        background: linear-gradient(135deg, #0c4b33, #1b7a5c);
+        color: white;
+        border: none;
+        border-radius: 15px;
+        padding: 18px;
+        font-size: 1.2rem;
+        font-weight: 600;
+        width: 100%;
+        transition: var(--transition-bounce);
+        position: relative;
+        overflow: hidden;
+        margin-top: 20px;
+    }
+
+    .paystack-button::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        transform: translate(-50%, -50%);
+        transition: width 0.6s, height 0.6s;
+    }
+
+    .paystack-button:hover::before {
+        width: 300px;
+        height: 300px;
+    }
+
+    .paystack-button:hover {
+        transform: translateY(-3px) scale(1.02);
+        box-shadow: 0 10px 30px rgba(12, 75, 51, 0.4);
+    }
+
+    .paystack-button i {
+        margin-right: 10px;
+    }
+
+    /* Order Summary Card */
+    .order-summary {
+        background: var(--card-bg);
+        backdrop-filter: blur(10px);
+        border: var(--border);
+        border-radius: 30px;
+        padding: 30px;
+        box-shadow: var(--shadow);
+        position: sticky;
+        top: 100px;
+        animation: slideInRight 0.8s ease;
+    }
+
+    .order-header {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 25px;
+    }
+
+    .order-icon {
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, var(--primary-pink), var(--dark-pink));
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.3rem;
+    }
+
+    .order-header h4 {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin: 0;
+    }
+
+    .order-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 12px 0;
+        border-bottom: var(--border);
+        font-size: 0.95rem;
+    }
+
+    .order-item:last-child {
+        border-bottom: none;
+    }
+
+    .order-total {
+        margin-top: 20px;
+        padding-top: 20px;
+        border-top: 2px dashed rgba(123, 44, 191, 0.3);
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: var(--primary-pink);
+    }
+
+    /* Security Badge */
+    .security-badge {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        background: rgba(123, 44, 191, 0.05);
+        border-radius: 15px;
+        padding: 15px;
+        margin-top: 25px;
+    }
+
+    .security-icon {
+        width: 40px;
+        height: 40px;
+        background: linear-gradient(135deg, var(--primary-pink), var(--dark-pink));
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.1rem;
+    }
+
+    .security-text {
+        flex: 1;
+    }
+
+    .security-text strong {
+        display: block;
+        color: var(--text-primary);
+        margin-bottom: 3px;
+    }
+
+    .security-text small {
+        color: var(--text-secondary);
+        font-size: 0.8rem;
+    }
+
+    /* Animations */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes slideInRight {
+        from {
+            opacity: 0;
+            transform: translateX(50px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translate(0, 0) rotate(0deg); }
+        25% { transform: translate(30px, 30px) rotate(5deg); }
+        50% { transform: translate(-20px, 50px) rotate(-5deg); }
+        75% { transform: translate(40px, -20px) rotate(3deg); }
+    }
+
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+    }
+
+    @keyframes shimmer {
+        0% {
+            background-position: -1000px 0;
+        }
+        100% {
+            background-position: 1000px 0;
+        }
+    }
+
+    /* Loading State */
+    .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(5px);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+    }
+
+    .loading-spinner {
+        width: 80px;
+        height: 80px;
+        border: 5px solid rgba(255, 255, 255, 0.3);
+        border-top-color: var(--primary-pink);
+        border-radius: 50%;
+        animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    /* Responsive */
+    @media (max-width: 992px) {
+        .payment-container {
+            grid-template-columns: 1fr;
+        }
+        
+        .order-summary {
+            position: static;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .payment-form-card {
+            padding: 25px;
+        }
+        
+        .payment-methods {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Loading Overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-spinner"></div>
+</div>
+
+<!-- Page Header -->
+<div class="page-header">
+    <div class="container">
+        <h1 class="page-title gradient-text">
+            <i class="fas fa-credit-card me-3"></i>Make Payment
+        </h1>
+        <div class="page-breadcrumb">
+            <a href="{% url 'school:home' %}">Home</a>
+            <span class="separator"><i class="fas fa-chevron-right"></i></span>
+            <a href="{% url 'accounts:parent_dashboard' %}">Dashboard</a>
+            <span class="separator"><i class="fas fa-chevron-right"></i></span>
+            <a href="{% url 'payments:invoice_detail' invoice.id %}">{{ invoice.invoice_number }}</a>
+            <span class="separator"><i class="fas fa-chevron-right"></i></span>
+            <span class="active">Make Payment</span>
+        </div>
+    </div>
+</div>
+
+<div class="container mb-5">
+    <div class="payment-container">
+        <!-- Payment Form -->
+        <div class="payment-form-card">
+            <div class="section-title">
+                <div class="section-icon">
+                    <i class="fas fa-credit-card"></i>
+                </div>
+                <div>
+                    <h3>Payment Details</h3>
+                    <p>Complete your payment securely</p>
+                </div>
+            </div>
+
+            <!-- Invoice Summary -->
+            <div class="invoice-summary">
+                <div class="summary-item">
+                    <span class="summary-label">Invoice Number:</span>
+                    <span class="summary-value">{{ invoice.invoice_number }}</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Student:</span>
+                    <span class="summary-value">{{ invoice.student.user.get_full_name }}</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Total Amount:</span>
+                    <span class="summary-value">₦{{ invoice.total_amount|floatformat:2 }}</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Amount Paid:</span>
+                    <span class="summary-value text-success">₦{{ invoice.amount_paid|floatformat:2 }}</span>
+                </div>
+                
+                <div class="balance-due">
+                    <div class="label">Balance Due</div>
+                    <div class="amount">₦{{ invoice.balance|floatformat:2 }}</div>
+                </div>
+            </div>
+
+            <form method="post" id="paymentForm" action="{% url 'payments:process_payment' invoice.id %}">
+                {% csrf_token %}
+                
+                <!-- Payment Method Selection -->
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-credit-card"></i>Select Payment Method
+                    </label>
+                    
+                    <div class="payment-methods">
+                        <label class="payment-method">
+                            <input type="radio" name="payment_method" value="CARD" checked>
+                            <div class="method-card">
+                                <div class="method-icon">
+                                    <i class="fas fa-credit-card"></i>
+                                </div>
+                                <div class="method-name">Card Payment</div>
+                                <div class="method-desc">Pay with Visa, Mastercard</div>
+                            </div>
+                        </label>
+                        
+                        <label class="payment-method">
+                            <input type="radio" name="payment_method" value="TRANSFER">
+                            <div class="method-card">
+                                <div class="method-icon">
+                                    <i class="fas fa-university"></i>
+                                </div>
+                                <div class="method-name">Bank Transfer</div>
+                                <div class="method-desc">Pay via bank transfer</div>
+                            </div>
+                        </label>
+                        
+                        <label class="payment-method">
+                            <input type="radio" name="payment_method" value="USSD">
+                            <div class="method-card">
+                                <div class="method-icon">
+                                    <i class="fas fa-mobile-alt"></i>
+                                </div>
+                                <div class="method-name">USSD</div>
+                                <div class="method-desc">Pay with USSD code</div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Amount to Pay -->
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-money-bill-wave"></i>Amount to Pay (₦)
+                    </label>
+                    <div class="amount-input-group">
+                        <span class="currency-symbol">₦</span>
+                        <input type="number" 
+                               class="form-control" 
+                               name="amount" 
+                               id="amountInput"
+                               step="0.01" 
+                               min="0.01" 
+                               max="{{ invoice.balance }}"
+                               value="{{ invoice.balance }}"
+                               required>
+                    </div>
+                    <small class="text-muted">You can pay the full balance or a partial amount</small>
+                </div>
+
+                <!-- Email Address -->
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-envelope"></i>Email Address
+                    </label>
+                    <input type="email" 
+                           class="form-control" 
+                           name="email" 
+                           value="{{ user.email }}"
+                           readonly>
+                    <small class="text-muted">Receipt will be sent to this email</small>
+                </div>
+
+                <!-- Notes (Optional) -->
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-sticky-note"></i>Notes (Optional)
+                    </label>
+                    <textarea class="form-control" 
+                              name="notes" 
+                              rows="3" 
+                              placeholder="Any additional information..."></textarea>
+                </div>
+
+                <!-- Paystack Button -->
+                <button type="submit" class="paystack-button" id="payButton">
+                    <i class="fas fa-lock"></i>
+                    Pay ₦<span id="payAmount">{{ invoice.balance|floatformat:2 }}</span> with Paystack
+                </button>
+            </form>
+
+            <!-- Security Badge -->
+            <div class="security-badge">
+                <div class="security-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <div class="security-text">
+                    <strong>Secure Payment</strong>
+                    <small>Your payment information is encrypted and secure</small>
+                </div>
+                <div class="security-icon">
+                    <i class="fas fa-lock"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Order Summary -->
+        <div class="order-summary">
+            <div class="order-header">
+                <div class="order-icon">
+                    <i class="fas fa-shopping-cart"></i>
+                </div>
+                <h4>Order Summary</h4>
+            </div>
+
+            {% for item in invoice.items.all %}
+            <div class="order-item">
+                <span>{{ item.fee_structure.name }}</span>
+                <span>₦{{ item.total_price|floatformat:2 }}</span>
+            </div>
+            {% endfor %}
+
+            <div class="order-total">
+                <div class="d-flex justify-content-between">
+                    <span>Total:</span>
+                    <span>₦{{ invoice.total_amount|floatformat:2 }}</span>
+                </div>
+            </div>
+
+            <hr class="my-3">
+
+            <div class="text-center">
+                <i class="fas fa-clock text-muted mb-2"></i>
+                <p class="text-muted small mb-0">
+                    Payment due by {{ invoice.due_date|date:"F d, Y" }}
+                </p>
+            </div>
+
+            <!-- Trust Badges -->
+            <div class="d-flex justify-content-center gap-3 mt-4">
+                <img src="https://paystack.com/brand-assets/brand-mark/paystack-mark-white.svg" 
+                     alt="Paystack" 
+                     height="30"
+                     style="opacity: 0.7;">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Visa_Inc._logo.svg/2560px-Visa_Inc._logo.svg.png" 
+                     alt="Visa" 
+                     height="30"
+                     style="opacity: 0.7;">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Mastercard-logo.svg/1280px-Mastercard-logo.svg.png" 
+                     alt="Mastercard" 
+                     height="30"
+                     style="opacity: 0.7;">
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Update pay amount when input changes
+    document.getElementById('amountInput').addEventListener('input', function() {
+        const amount = parseFloat(this.value) || 0;
+        document.getElementById('payAmount').textContent = amount.toFixed(2);
+    });
+
+    // Form submission with validation
+    document.getElementById('paymentForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const amount = parseFloat(document.getElementById('amountInput').value);
+        const maxAmount = parseFloat('{{ invoice.balance }}');
+        
+        if (amount <= 0) {
+            showNotification('Please enter a valid amount', 'error');
+            return;
+        }
+        
+        if (amount > maxAmount) {
+            showNotification(`Amount cannot exceed ₦${maxAmount.toFixed(2)}`, 'error');
+            return;
+        }
+
+        // Show loading overlay
+        document.getElementById('loadingOverlay').style.display = 'flex';
+        
+        // Disable submit button
+        const submitBtn = document.getElementById('payButton');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+
+        // Submit the form
+        this.submit();
+    });
+
+    // Payment method selection animation
+    document.querySelectorAll('.payment-method input[type="radio"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            const methodCard = this.nextElementSibling;
+            methodCard.style.animation = 'pulse 0.5s ease';
+            setTimeout(() => {
+                methodCard.style.animation = '';
+            }, 500);
+        });
+    });
+
+    // Initialize amount input with formatting
+    document.addEventListener('DOMContentLoaded', function() {
+        const amountInput = document.getElementById('amountInput');
+        
+        // Set min and max
+        amountInput.min = 0.01;
+        amountInput.max = {{ invoice.balance }};
+        
+        // Add input validation
+        amountInput.addEventListener('blur', function() {
+            let value = parseFloat(this.value) || 0;
+            if (value < 0.01) this.value = 0.01;
+            if (value > {{ invoice.balance }}) this.value = {{ invoice.balance }};
+        });
+
+        // Animate the balance due
+        const balanceElement = document.querySelector('.balance-due .amount');
+        balanceElement.style.animation = 'pulse 2s ease infinite';
+    });
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        // Ctrl + Enter to submit
+        if (e.ctrlKey && e.key === 'Enter') {
+            e.preventDefault();
+            document.getElementById('paymentForm').submit();
+        }
+        
+        // Esc to cancel
+        if (e.key === 'Escape') {
+            if (confirm('Cancel payment?')) {
+                window.location.href = "{% url 'payments:invoice_detail' invoice.id %}";
+            }
+        }
+    });
+
+    // Warn user before leaving
+    window.addEventListener('beforeunload', function(e) {
+        if (document.getElementById('paymentForm').querySelector('input[name="amount"]').value) {
+            e.preventDefault();
+            e.returnValue = 'You have an ongoing payment. Are you sure you want to leave?';
+        }
+    });
+
+    // Simulate Paystack popup for demo
+    function simulatePaystackPayment() {
+        // This would be replaced with actual Paystack integration
+        const overlay = document.getElementById('loadingOverlay');
+        overlay.style.display = 'flex';
+        
+        setTimeout(() => {
+            overlay.style.display = 'none';
+            showNotification('Payment simulation - This would open Paystack checkout', 'info');
+        }, 1500);
+    }
+
+    // Handle bank transfer selection
+    document.querySelector('input[value="TRANSFER"]').addEventListener('change', function() {
+        if (this.checked) {
+            showNotification('Bank transfer details will be sent to your email', 'info');
+        }
+    });
+
+    // Handle USSD selection
+    document.querySelector('input[value="USSD"]').addEventListener('change', function() {
+        if (this.checked) {
+            showNotification('USSD code will be generated after submission', 'info');
+        }
+    });
+
+    // Add ripple effect to pay button
+    document.getElementById('payButton').addEventListener('click', function(e) {
+        const ripple = document.createElement('span');
+        ripple.classList.add('ripple');
+        this.appendChild(ripple);
+        
+        const x = e.clientX - e.target.offsetLeft;
+        const y = e.clientY - e.target.offsetTop;
+        
+        ripple.style.left = `${x}px`;
+        ripple.style.top = `${y}px`;
+        
+        setTimeout(() => {
+            ripple.remove();
+        }, 600);
+    });
+</script>
+
+<style>
+    .ripple {
+        position: absolute;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.5);
+        transform: scale(0);
+        animation: ripple-animation 0.6s ease-out;
+        pointer-events: none;
+    }
+
+    @keyframes ripple-animation {
+        to {
+            transform: scale(4);
+            opacity: 0;
+        }
+    }
+</style>
+{% endblock %}

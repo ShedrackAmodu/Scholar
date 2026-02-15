@@ -947,3 +947,24 @@ def get_students_with_scores(request):
         return JsonResponse(data, safe=False)
     
     return JsonResponse([], safe=False)
+
+@login_required
+def academic_calendar(request):
+    """Display the academic calendar for the school"""
+    try:
+        school_profile = SchoolProfile.objects.first()
+    except:
+        school_profile = None
+    
+    # Get current or all academic years
+    try:
+        academic_years = AcademicYear.objects.all().order_by('-start_year')
+    except:
+        academic_years = []
+    
+    context = {
+        'school_profile': school_profile,
+        'academic_years': academic_years,
+        'title': 'Academic Calendar'
+    }
+    return render(request, 'academics/academic_calendar.html', context)

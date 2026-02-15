@@ -28,6 +28,9 @@ urlpatterns = [
     path('principal/class-performance/<int:class_id>/<int:term>/<int:year_id>/', views.class_performance_detail, name='class_performance_detail'),
     path('principal/approve-report-cards/<int:class_id>/', views.approve_report_cards, name='approve_report_cards'),
 
+    # Calendar URL
+    path('academic-calendar/', views.academic_calendar, name='academic_calendar'),
+
     # API URLs
     path('api/assessments/', views.get_assessments_for_subject, name='api_get_assessments_for_subject'),
     path('api/students-with-scores/', views.get_students_with_scores, name='api_get_students_with_scores'),

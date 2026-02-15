@@ -14,7 +14,7 @@
                     <form method="post">
                         {% csrf_token %}
                         <button type="submit" class="btn btn-danger me-2"><i class="fas fa-trash-alt"></i> Delete</button>
-                        <a href="{% url 'teachers:admin:qualification_list' %}" class="btn btn-secondary"><i class="fas fa-times"></i> Cancel</a>
+                        <a href="{% url 'teachers:teacher_leave_list' %}" class="btn btn-secondary"><i class="fas fa-times"></i> Cancel</a>
                     </form>
                 </div>
             </div>

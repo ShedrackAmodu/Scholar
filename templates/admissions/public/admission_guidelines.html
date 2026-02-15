@@ -5,15 +5,138 @@
 
 {% block content %}
 <div class="container py-5">
-    <h1 class="display-4 text-center mb-4" data-aos="fade-down">Admission Guidelines</h1>
-    <p class="lead text-center" data-aos="fade-up" data-aos-delay="200">This is the Admission Guidelines page. Customize the structure and content here as needed.</p>
-    <!-- Add your form, table, or other components below -->
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+            <!-- No Login Required Info -->
+            <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+                <i class="fas fa-check-circle me-2"></i>
+                <strong>Simple Application Process:</strong> No login or account creation needed. Anyone can apply directly.
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+
+            <h1 class="display-4 text-center mb-2" data-aos="fade-down">Admission Guidelines</h1>
+            <p class="lead text-center text-muted mb-4" data-aos="fade-up" data-aos-delay="200">
+                Learn about our admission process and how to apply - no login required
+            </p>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header bg-info text-white">
+                            <h5 class="mb-0"><i class="fas fa-list me-2"></i>Eligibility Requirements</h5>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-unstyled">
+                                <li class="mb-3"><i class="fas fa-check-circle text-success me-2"></i> <strong>Age:</strong> 5-18 years</li>
+                                <li class="mb-3"><i class="fas fa-check-circle text-success me-2"></i> <strong>Records:</strong> Previous school records (if transferring)</li>
+                                <li class="mb-3"><i class="fas fa-check-circle text-success me-2"></i> <strong>Birth Certificate:</strong> Valid birth certificate</li>
+                                <li class="mb-3"><i class="fas fa-check-circle text-success me-2"></i> <strong>Health:</strong> Immunization records</li>
+                                <li><i class="fas fa-check-circle text-success me-2"></i> <strong>Residency:</strong> Proof of local residence</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0"><i class="fas fa-file-alt me-2"></i>Required Documents</h5>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-unstyled">
+                                <li class="mb-3"><i class="fas fa-file-alt text-primary me-2"></i> <strong>Application Form:</strong> Completed online (no login needed)</li>
+                                <li class="mb-3"><i class="fas fa-copy text-primary me-2"></i> <strong>Transcript:</strong> Previous school report card</li>
+                                <li class="mb-3"><i class="fas fa-id-card text-primary me-2"></i> <strong>Photos:</strong> 2 passport-sized photos</li>
+                                <li class="mb-3"><i class="fas fa-file-pdf text-primary me-2"></i> <strong>Medical:</strong> Medical certification</li>
+                                <li><i class="fas fa-file-text text-primary me-2"></i> <strong>Birth Document:</strong> Birth certificate copy</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow-sm">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0"><i class="fas fa-tasks me-2"></i>Application Process Steps</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="text-center mb-3">
+                                <div class="display-5 text-primary fw-bold mb-2">1</div>
+                                <h6>Fill Application</h6>
+                                <p class="small text-muted">Complete the online form - no account needed</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center mb-3">
+                                <div class="display-5 text-success fw-bold mb-2">2</div>
+                                <h6>Submit Documents</h6>
+                                <p class="small text-muted">Upload or provide required documents</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center mb-3">
+                                <div class="display-5 text-info fw-bold mb-2">3</div>
+                                <h6>Receive Confirmation</h6>
+                                <p class="small text-muted">Get email confirmation with reference number</p>
+                            </div>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="text-center mb-3">
+                                <div class="display-5 text-warning fw-bold mb-2">4</div>
+                                <h6>Application Review</h6>
+                                <p class="small text-muted">Our team reviews your application</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center mb-3">
+                                <div class="display-5 text-danger fw-bold mb-2">5</div>
+                                <h6>Interview (if applicable)</h6>
+                                <p class="small text-muted">Attend interview if selected</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center mb-3">
+                                <div class="display-5 text-secondary fw-bold mb-2">6</div>
+                                <h6>Admission Decision</h6>
+                                <p class="small text-muted">Receive admission decision letter</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center mt-5">
+                <h5>Ready to Apply?</h5>
+                <p class="text-muted mb-3">Start your application now - no registration required</p>
+                <a href="{% url 'admissions:application_create' %}" class="btn btn-primary btn-lg">
+                    <i class="fas fa-pencil-alt me-2"></i> Begin Application
+                </a>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}
 
 {% block extra_css %}
 <style>
-/* Styles specific to Admission Guidelines */
+.card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+}
+
+.alert-success {
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+}
 </style>
 {% endblock %}
 

@@ -1,0 +1,159 @@
+{% comment %}
+Reusable sidebar for all authenticated users. Add or remove links as needed for your project.
+{% endcomment %}
+<div id="sidebar" class="sidebar bg-light border-end">
+    <div class="sidebar-header text-center py-4">
+        <a href="/" class="navbar-brand fw-bold fs-4 text-primary">
+            <i class="fas fa-school me-2"></i> Scholar
+        </a>
+    </div>
+    <ul class="nav flex-column px-2">
+        <li class="nav-item mb-2">
+            <a class="nav-link" href="/">
+                <i class="fas fa-home me-2"></i> Dashboard
+            </a>
+        </li>
+        {% if user.is_superuser or user.is_staff %}
+        <li class="nav-item mb-2">
+            <a class="nav-link" href="/admin/">
+                <i class="fas fa-user-shield me-2"></i> Admin Panel
+            </a>
+        </li>
+        {% endif %}
+        <li class="nav-item mb-2">
+            <a class="nav-link" href="/academics/">
+                <i class="fas fa-book me-2"></i> Academics
+            </a>
+        </li>
+        <li class="nav-item mb-2">
+            <a class="nav-link" href="/students/">
+                <i class="fas fa-user-graduate me-2"></i> Students
+            </a>
+        </li>
+        <li class="nav-item mb-2">
+            <a class="nav-link" href="/teachers/">
+                <i class="fas fa-chalkboard-teacher me-2"></i> Teachers
+            </a>
+        </li>
+        <li class="nav-item mb-2">
+            <a class="nav-link" href="/parents/">
+                <i class="fas fa-users me-2"></i> Parents
+            </a>
+        </li>
+        <li class="nav-item mb-2">
+            <a class="nav-link" href="/classes/">
+                <i class="fas fa-school me-2"></i> Classes
+            </a>
+        </li>
+        <li class="nav-item mb-2">
+            <a class="nav-link" href="/attendance/">
+                <i class="fas fa-calendar-check me-2"></i> Attendance
+            </a>
+        </li>
+        <li class="nav-item mb-2">
+            <a class="nav-link" href="/payments/">
+                <i class="fas fa-money-bill-wave me-2"></i> Payments
+            </a>
+        </li>
+        <li class="nav-item mb-2">
+            <a class="nav-link" href="/announcements/">
+                <i class="fas fa-bullhorn me-2"></i> Announcements
+            </a>
+        </li>
+        <li class="nav-item mb-2">
+            <a class="nav-link" href="/admissions/">
+                <i class="fas fa-user-plus me-2"></i> Admissions
+            </a>
+        </li>
+        {% if user.is_authenticated and user.groups.all %}
+            {% for group in user.groups.all %}
+                {% if group.name == 'Students' %}
+                <li class="nav-item mb-2">
+                    <a class="nav-link" href="/students/dashboard/">
+                        <i class="fas fa-tachometer-alt me-2"></i> My Dashboard
+                    </a>
+                </li>
+                <li class="nav-item mb-2">
+                    <a class="nav-link" href="/students/dashboard/report_cards/">
+                        <i class="fas fa-file-alt me-2"></i> Report Cards
+                    </a>
+                </li>
+                {% elif group.name == 'Teachers' %}
+                <li class="nav-item mb-2">
+                    <a class="nav-link" href="/teachers/dashboard/">
+                        <i class="fas fa-tachometer-alt me-2"></i> Teacher Dashboard
+                    </a>
+                </li>
+                <li class="nav-item mb-2">
+                    <a class="nav-link" href="/teachers/leave/">
+                        <i class="fas fa-calendar-minus me-2"></i> Leave Requests
+                    </a>
+                </li>
+                {% elif group.name == 'Parents' %}
+                <li class="nav-item mb-2">
+                    <a class="nav-link" href="/parents/dashboard/">
+                        <i class="fas fa-tachometer-alt me-2"></i> Parent Dashboard
+                    </a>
+                </li>
+                <li class="nav-item mb-2">
+                    <a class="nav-link" href="/parents/children/">
+                        <i class="fas fa-child me-2"></i> My Children
+                    </a>
+                </li>
+                {% elif group.name == 'Accountants' %}
+                <li class="nav-item mb-2">
+                    <a class="nav-link" href="/payments/admin/">
+                        <i class="fas fa-file-invoice-dollar me-2"></i> Payment Admin
+                    </a>
+                </li>
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+        <li class="nav-item mb-2">
+            <a class="nav-link" href="/accounts/profile/">
+                <i class="fas fa-user-circle me-2"></i> Profile
+            </a>
+        </li>
+        <li class="nav-item mt-4">
+            <a class="nav-link text-danger" href="/accounts/logout/">
+                <i class="fas fa-sign-out-alt me-2"></i> Logout
+            </a>
+        </li>
+    </ul>
+</div>
+<style>
+.sidebar {
+    width: 250px;
+    min-height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1040;
+    background: var(--card-bg-light, #fff);
+    box-shadow: var(--shadow-light, 0 2px 8px rgba(0,0,0,0.05));
+    transition: all 0.2s;
+}
+.sidebar .nav-link {
+    color: var(--text-primary-light, #2d3436);
+    font-weight: 500;
+    border-radius: 0.375rem;
+    padding: 0.75rem 1rem;
+    transition: background 0.2s, color 0.2s;
+}
+.sidebar .nav-link.active, .sidebar .nav-link:hover {
+    background: var(--primary-pink, #7B2CBF);
+    color: #fff;
+}
+.sidebar-header {
+    border-bottom: 1px solid #eee;
+}
+@media (max-width: 991.98px) {
+    .sidebar {
+        left: -250px;
+        transition: left 0.3s;
+    }
+    .sidebar.show {
+        left: 0;
+    }
+}
+</style>

@@ -1,24 +1,536 @@
+{% extends 'academics/base.html' %}
 {% load static %}
-{% extends 'base.html' %}
 
-{% block title %}Approve Report Cards{% endblock %}
+{% block title %}Approve Report Cards - {{ class_obj.name }}{% endblock %}
 
-{% block content %}
-<div class="container py-5">
-    <h1 class="display-4 text-center mb-4" data-aos="fade-down">Approve Report Cards</h1>
-    <p class="lead text-center" data-aos="fade-up" data-aos-delay="200">This is the Approve Report Cards page. Customize the structure and content here as needed.</p>
-    <!-- Add your form, table, or other components below -->
+{% block academics_content %}
+<!-- Page Header -->
+<div class="academics-hero animate__animated animate__fadeIn">
+    <div class="container">
+        <h1><i class="fas fa-check-double me-3"></i>Approve Report Cards</h1>
+        <p>Review and approve report cards for {{ class_obj.name }} - First Term 2024</p>
+        <div class="hero-stats">
+            <div class="stat-item">
+                <i class="fas fa-scroll"></i>
+                <span id="totalCards">{{ report_cards.count }}</span> Total
+            </div>
+            <div class="stat-item">
+                <i class="fas fa-check-circle"></i>
+                <span id="approvedCards">{{ approved_count }}</span> Approved
+            </div>
+            <div class="stat-item">
+                <i class="fas fa-clock"></i>
+                <span id="pendingCards">{{ pending_count }}</span> Pending
+            </div>
+            <div class="stat-item">
+                <i class="fas fa-chart-line"></i>
+                <span id="classAverage">{{ class_average|floatformat:1 }}</span>% Average
+            </div>
+        </div>
+    </div>
 </div>
-{% endblock %}
 
-{% block extra_css %}
-<style>
-/* Styles specific to Approve Report Cards */
-</style>
+<!-- Class Summary -->
+<div class="card border-0 shadow-sm animate__animated animate__fadeInUp">
+    <div class="card-body p-4">
+        <div class="row g-4">
+            <div class="col-md-8">
+                <h5 class="card-title mb-3">
+                    <i class="fas fa-info-circle me-2"></i>Class Information
+                </h5>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="info-item">
+                            <strong>Class:</strong> {{ class_obj.name }}
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="info-item">
+                            <strong>Term:</strong> First Term
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="info-item">
+                            <strong>Session:</strong> 2024/2025
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <h5 class="card-title mb-3">
+                    <i class="fas fa-chart-bar me-2"></i>Quick Stats
+                </h5>
+                <div class="row text-center">
+                    <div class="col-4">
+                        <div class="stat-mini">
+                            <div class="stat-value text-primary">{{ top_students.count }}</div>
+                            <div class="stat-label">Top Students</div>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="stat-mini">
+                            <div class="stat-value text-warning">{{ needs_attention.count }}</div>
+                            <div class="stat-label">Needs Attention</div>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="stat-mini">
+                            <div class="stat-value text-success">{{ excellent_count }}</div>
+                            <div class="stat-label">Excellent</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bulk Actions -->
+<div class="card border-0 shadow-sm animate__animated animate__fadeInUp">
+    <div class="card-body p-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="form-check">
+                <input type="checkbox" class="form-check-input" id="selectAllCards">
+                <label class="form-check-label" for="selectAllCards">
+                    <strong>Select All Pending</strong>
+                </label>
+            </div>
+            <div class="d-flex gap-2">
+                <button class="btn btn-success" id="approveAllBtn" disabled>
+                    <i class="fas fa-check-circle me-2"></i>Approve Selected
+                </button>
+                <button class="btn btn-warning" id="unapproveAllBtn" disabled>
+                    <i class="fas fa-times-circle me-2"></i>Unapprove Selected
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Report Cards Grid -->
+<div class="card border-0 shadow-sm animate__animated animate__fadeInUp">
+    <div class="card-body p-0">
+        <div class="report-cards-grid">
+            {% for report_card in report_cards %}
+            <div class="report-card {% if report_card.is_approved %}approved{% else %}pending{% endif %}" 
+                 data-student-id="{{ report_card.student.id }}" 
+                 data-approved="{{ report_card.is_approved }}">
+                
+                <!-- Header -->
+                <div class="report-header">
+                    <div class="student-info">
+                        <div class="student-avatar">
+                            {{ report_card.student.user.get_full_name|first|upper }}
+                        </div>
+                        <div class="student-details">
+                            <h4>{{ report_card.student.user.get_full_name }}</h4>
+                            <p>
+                                <i class="fas fa-id-card"></i> {{ report_card.student.admission_number }}
+                                <span class="mx-2">•</span>
+                                <i class="fas fa-users"></i> {{ report_card.student.current_class.name }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Body -->
+                <div class="report-body">
+                    <div class="grade-summary">
+                        <div class="grade-item">
+                            <div class="grade-value">{{ report_card.average_score|floatformat:1 }}</div>
+                            <div class="grade-label">Average</div>
+                        </div>
+                        <div class="grade-item">
+                            <div class="grade-value">{{ report_card.position }}</div>
+                            <div class="grade-label">Position</div>
+                        </div>
+                        <div class="grade-item">
+                            <div class="grade-value">{{ report_card.overall_grade }}</div>
+                            <div class="grade-label">Grade</div>
+                        </div>
+                    </div>
+
+                    <div class="subject-preview">
+                        <h6 class="mb-2">Subject Performance</h6>
+                        {% for subject_score in report_card.subject_scores.all %}
+                        <div class="subject-row">
+                            <span class="subject-name">{{ subject_score.subject_assessment.subject.name }}</span>
+                            <span class="subject-score">{{ subject_score.score }}</span>
+                            <span class="subject-grade badge bg-{{ subject_score.grade|lower }}">
+                                {{ subject_score.grade }}
+                            </span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div class="report-footer">
+                    <div class="approval-status {% if report_card.is_approved %}status-approved{% else %}status-pending{% endif %}">
+                        {% if report_card.is_approved %}
+                            <i class="fas fa-check-circle"></i>
+                            <span>Approved</span>
+                        {% else %}
+                            <i class="fas fa-clock"></i>
+                            <span>Pending Approval</span>
+                        {% endif %}
+                    </div>
+                    <div>
+                        {% if not report_card.is_approved %}
+                            <input type="checkbox" class="form-check-input approve-checkbox" value="{{ report_card.id }}">
+                        {% else %}
+                            <input type="checkbox" class="form-check-input approve-checkbox" value="{{ report_card.id }}" checked disabled>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="text-center p-5">
+                <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                <h5 class="text-muted">No report cards found</h5>
+                <p class="text-muted">Report cards will appear here once scores are entered and processed.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Comments Section -->
+<div class="card border-0 shadow-sm animate__animated animate__fadeInUp">
+    <div class="card-body p-4">
+        <h5 class="card-title mb-3">
+            <i class="fas fa-comment me-2"></i>Principal's Comments
+        </h5>
+        
+        <form id="commentsForm">
+            {% csrf_token %}
+            
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label for="classTeacherComment" class="form-label">
+                        <i class="fas fa-chalkboard-teacher me-2"></i>
+                        Class Teacher's Comment
+                    </label>
+                    <textarea class="form-control" id="classTeacherComment" name="class_teacher_comment" 
+                              rows="4" placeholder="Enter class teacher's comment...">{{ default_comments.class_teacher_comment }}</textarea>
+                </div>
+                
+                <div class="col-md-6">
+                    <label for="principalComment" class="form-label">
+                        <i class="fas fa-user-tie me-2"></i>
+                        Principal's Comment
+                    </label>
+                    <textarea class="form-control" id="principalComment" name="principal_comment" 
+                              rows="4" placeholder="Enter principal's comment...">{{ default_comments.principal_comment }}</textarea>
+                </div>
+                
+                <div class="col-12">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="applyToAll" name="apply_to_all" checked>
+                        <label class="form-check-label" for="applyToAll">
+                            <strong>Apply these comments to all selected report cards</strong>
+                            <br>
+                            <small class="text-muted">Individual comments will be overwritten</small>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Action Buttons -->
+<div class="card border-0 shadow-sm animate__animated animate__fadeInUp">
+    <div class="card-body p-4">
+        <div class="d-flex gap-3">
+            <button class="btn btn-primary btn-lg" id="saveApprovalsBtn">
+                <i class="fas fa-save me-2"></i>
+                Save & Approve Selected
+            </button>
+            <a href="{% url 'academics:report_card_list' class_obj.id %}" class="btn btn-outline-secondary btn-lg">
+                <i class="fas fa-arrow-left me-2"></i>
+                Back to Report Cards
+            </a>
+            <button class="btn btn-outline-primary btn-lg" id="printSelectedBtn" disabled>
+                <i class="fas fa-print me-2"></i>
+                Print Selected
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Success Modal -->
+<div class="modal fade" id="successModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content text-center">
+            <div class="modal-body p-5">
+                <div class="mb-4">
+                    <i class="fas fa-check-circle text-success" style="font-size: 4rem;"></i>
+                </div>
+                <h4 class="modal-title mb-2">Report Cards Approved!</h4>
+                <p class="text-secondary" id="successMessage">Report cards have been successfully approved.</p>
+                <div class="d-flex gap-2 justify-content-center mt-4">
+                    <a href="{% url 'academics:report_card_list' class_obj.id %}" class="btn btn-primary">
+                        <i class="fas fa-eye me-2"></i>View Report Cards
+                    </a>
+                    <a href="{% url 'academics:class_performance' %}" class="btn btn-outline-primary">
+                        <i class="fas fa-chart-bar me-2"></i>Class Performance
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Error Modal -->
+<div class="modal fade" id="errorModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content text-center">
+            <div class="modal-body p-5">
+                <div class="mb-4">
+                    <i class="fas fa-exclamation-triangle text-danger" style="font-size: 4rem;"></i>
+                </div>
+                <h4 class="modal-title mb-2">Error</h4>
+                <p class="text-secondary" id="errorMessage">An error occurred while processing the report cards.</p>
+                <div class="d-flex gap-2 justify-content-center mt-4">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
+                        <i class="fas fa-check me-2"></i>OK
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Confirmation Modal -->
+<div class="modal fade" id="confirmModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center py-4">
+                <i class="fas fa-question-circle fa-4x text-warning mb-3"></i>
+                <h4 class="mb-3">Confirm Action</h4>
+                <p class="text-secondary" id="confirmMessage">Are you sure you want to proceed with this action?</p>
+                <div class="mt-4 d-flex gap-3 justify-content-center">
+                    <button class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i>Cancel
+                    </button>
+                    <button class="btn btn-success" id="confirmActionBtn">
+                        <i class="fas fa-check me-2"></i>Confirm
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-// JS for Approve Report Cards
+    // DOM Elements
+    const selectAllCards = document.getElementById('selectAllCards');
+    const approveAllBtn = document.getElementById('approveAllBtn');
+    const unapproveAllBtn = document.getElementById('unapproveAllBtn');
+    const saveApprovalsBtn = document.getElementById('saveApprovalsBtn');
+    const printSelectedBtn = document.getElementById('printSelectedBtn');
+    const reportCards = document.querySelectorAll('.report-card');
+    const approveCheckboxes = document.querySelectorAll('.approve-checkbox');
+
+    // Update select all state
+    function updateSelectAllState() {
+        const pendingCheckboxes = document.querySelectorAll('.approve-checkbox:not(:disabled)');
+        const checkedCheckboxes = document.querySelectorAll('.approve-checkbox:checked:not(:disabled)');
+        
+        if (checkedCheckboxes.length === 0) {
+            selectAllCards.checked = false;
+            selectAllCards.indeterminate = false;
+        } else if (checkedCheckboxes.length === pendingCheckboxes.length) {
+            selectAllCards.checked = true;
+            selectAllCards.indeterminate = false;
+        } else {
+            selectAllCards.checked = false;
+            selectAllCards.indeterminate = true;
+        }
+    }
+
+    // Update action buttons state
+    function updateActionButtons() {
+        const checkedCheckboxes = document.querySelectorAll('.approve-checkbox:checked:not(:disabled)');
+        const hasChecked = checkedCheckboxes.length > 0;
+
+        approveAllBtn.disabled = !hasChecked;
+        unapproveAllBtn.disabled = !hasChecked;
+        saveApprovalsBtn.disabled = !hasChecked;
+        printSelectedBtn.disabled = !hasChecked;
+    }
+
+    // Toggle select all
+    selectAllCards.addEventListener('change', function() {
+        const pendingCheckboxes = document.querySelectorAll('.approve-checkbox:not(:disabled)');
+        pendingCheckboxes.forEach(cb => cb.checked = this.checked);
+        updateActionButtons();
+    });
+
+    // Individual checkbox changes
+    approveCheckboxes.forEach(cb => {
+        cb.addEventListener('change', function() {
+            updateSelectAllState();
+            updateActionButtons();
+        });
+    });
+
+    // Bulk approve action
+    approveAllBtn.addEventListener('click', function() {
+        const selectedCards = Array.from(document.querySelectorAll('.approve-checkbox:checked:not(:disabled)'))
+            .map(cb => cb.value);
+
+        if (selectedCards.length === 0) {
+            showErrorMessage('Please select at least one report card to approve');
+            return;
+        }
+
+        confirmAction('approve', selectedCards.length);
+    });
+
+    // Bulk unapprove action
+    unapproveAllBtn.addEventListener('click', function() {
+        const selectedCards = Array.from(document.querySelectorAll('.approve-checkbox:checked'))
+            .map(cb => cb.value);
+
+        if (selectedCards.length === 0) {
+            showErrorMessage('Please select at least one report card to unapprove');
+            return;
+        }
+
+        confirmAction('unapprove', selectedCards.length);
+    });
+
+    // Save and approve action
+    saveApprovalsBtn.addEventListener('click', function() {
+        const selectedCards = Array.from(document.querySelectorAll('.approve-checkbox:checked:not(:disabled)'))
+            .map(cb => cb.value);
+
+        if (selectedCards.length === 0) {
+            showErrorMessage('Please select at least one report card to approve');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('action', 'approve');
+        formData.append('selected_cards', JSON.stringify(selectedCards));
+        formData.append('class_teacher_comment', document.getElementById('classTeacherComment').value);
+        formData.append('principal_comment', document.getElementById('principalComment').value);
+        formData.append('apply_to_all', document.getElementById('applyToAll').checked);
+        formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+        processReportCards(formData);
+    });
+
+    // Print selected report cards
+    printSelectedBtn.addEventListener('click', function() {
+        const selectedCards = Array.from(document.querySelectorAll('.approve-checkbox:checked'))
+            .map(cb => cb.value);
+
+        if (selectedCards.length === 0) {
+            showErrorMessage('Please select at least one report card to print');
+            return;
+        }
+
+        // Redirect to print view
+        window.open(`{% url 'academics:print_report_cards' class_obj.id %}?cards=${selectedCards.join(',')}`, '_blank');
+    });
+
+    // Confirm action
+    function confirmAction(action, count) {
+        const modal = new bootstrap.Modal(document.getElementById('confirmModal'));
+        const message = document.getElementById('confirmMessage');
+        const confirmBtn = document.getElementById('confirmActionBtn');
+        
+        message.textContent = `Are you sure you want to ${action} ${count} selected report card(s)?`;
+        
+        confirmBtn.className = action === 'approve' ? 'btn btn-success' : 'btn btn-warning';
+        confirmBtn.innerHTML = `<i class="fas fa-${action === 'approve' ? 'check' : 'times'} me-2"></i>Confirm ${action}`;
+        
+        confirmBtn.onclick = function() {
+            modal.hide();
+            if (action === 'approve') {
+                approveAllBtn.click();
+            } else {
+                unapproveAllBtn.click();
+            }
+        };
+        
+        modal.show();
+    }
+
+    // Process report cards
+    function processReportCards(formData) {
+        fetch('{% url "academics:approve_report_cards" class_obj.id %}', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showSuccessMessage(`${data.message || 'Report cards processed successfully'}`);
+                setTimeout(() => {
+                    location.reload();
+                }, 2000);
+            } else {
+                showErrorMessage(data.error || 'Failed to process report cards');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showErrorMessage('An error occurred while processing the report cards');
+        });
+    }
+
+    // Show success message
+    function showSuccessMessage(message) {
+        document.getElementById('successMessage').textContent = message;
+        const modal = new bootstrap.Modal(document.getElementById('successModal'));
+        modal.show();
+    }
+
+    // Show error message
+    function showErrorMessage(message) {
+        document.getElementById('errorMessage').textContent = message;
+        const modal = new bootstrap.Modal(document.getElementById('errorModal'));
+        modal.show();
+    }
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        // Ctrl + A to select all
+        if (e.ctrlKey && e.key === 'a') {
+            e.preventDefault();
+            selectAllCards.click();
+        }
+        
+        // Ctrl + Enter to save approvals
+        if (e.ctrlKey && e.key === 'Enter') {
+            e.preventDefault();
+            if (!saveApprovalsBtn.disabled) {
+                saveApprovalsBtn.click();
+            }
+        }
+    });
+
+    // Initialize tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+
+    // Initialize with current state
+    document.addEventListener('DOMContentLoaded', function() {
+        updateSelectAllState();
+        updateActionButtons();
+        
+        // Add animation to report cards
+        reportCards.forEach((card, index) => {
+            card.style.animationDelay = `${index * 100}ms`;
+        });
+    });
 </script>
 {% endblock %}

@@ -1,24 +1,351 @@
+{% extends 'academics/base.html' %}
 {% load static %}
-{% extends 'base.html' %}
 
-{% block title %}Subject Assessment Form{% endblock %}
+{% block title %}{% if object %}Edit{% else %}Create{% endif %} Subject Assessment{% endblock %}
 
-{% block content %}
-<div class="container py-5">
-    <h1 class="display-4 text-center mb-4" data-aos="fade-down">Subject Assessment Form</h1>
-    <p class="lead text-center" data-aos="fade-up" data-aos-delay="200">This is the Subject Assessment Form page. Customize the structure and content here as needed.</p>
-    <!-- Add your form, table, or other components below -->
+{% block academics_content %}
+<!-- Page Header -->
+<div class="academics-hero animate__animated animate__fadeIn">
+    <div class="container">
+        <h1>
+            <i class="fas fa-plus-circle me-3"></i>
+            {% if object %}Edit Subject Assessment{% else %}Create Subject Assessment{% endif %}
+        </h1>
+        <p>Configure assessment details for a specific subject and class level</p>
+    </div>
 </div>
-{% endblock %}
 
-{% block extra_css %}
-<style>
-/* Styles specific to Subject Assessment Form */
-</style>
+<!-- Form Card -->
+<div class="card border-0 shadow-sm animate__animated animate__fadeInUp">
+    <div class="card-body p-4">
+        <form method="post" id="subjectAssessmentForm">
+            {% csrf_token %}
+            
+            <div class="row g-4">
+                <!-- Assessment Selection -->
+                <div class="col-md-6">
+                    <label for="{{ form.assessment.id }}" class="form-label">
+                        <i class="fas fa-clipboard-list me-2"></i>
+                        Assessment
+                    </label>
+                    <select name="{{ form.assessment.name }}" id="{{ form.assessment.id }}" class="form-select" required>
+                        <option value="">Select an assessment...</option>
+                        {% for assessment in assessments %}
+                            <option value="{{ assessment.id }}" 
+                                    data-type="{{ assessment.assessment_type }}"
+                                    data-weight="{{ assessment.weight_percentage }}"
+                                    {% if form.assessment.value == assessment.id %}selected{% endif %}>
+                                {{ assessment.name }} ({{ assessment.get_assessment_type_display }})
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <div class="form-text">Select the base assessment to associate with this subject</div>
+                </div>
+
+                <!-- Subject Selection -->
+                <div class="col-md-6">
+                    <label for="{{ form.subject.id }}" class="form-label">
+                        <i class="fas fa-book me-2"></i>
+                        Subject
+                    </label>
+                    <select name="{{ form.subject.name }}" id="{{ form.subject.id }}" class="form-select" required>
+                        <option value="">Select a subject...</option>
+                        {% for subject in subjects %}
+                            <option value="{{ subject.id }}" 
+                                    data-level="{{ subject.class_level.id }}"
+                                    {% if form.subject.value == subject.id %}selected{% endif %}>
+                                {{ subject.name }} ({{ subject.class_level.name }})
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <div class="form-text">Select the subject for this assessment</div>
+                </div>
+
+                <!-- Max Score -->
+                <div class="col-md-6">
+                    <label for="{{ form.max_score.id }}" class="form-label">
+                        <i class="fas fa-percentage me-2"></i>
+                        Maximum Score
+                    </label>
+                    <input type="number" 
+                           name="{{ form.max_score.name }}" 
+                           id="{{ form.max_score.id }}" 
+                           class="form-control" 
+                           placeholder="Enter maximum score (e.g., 100)"
+                           min="1" 
+                           max="1000"
+                           step="1"
+                           value="{{ form.max_score.value|default:100 }}"
+                           required>
+                    <div class="form-text">Maximum possible score for this assessment</div>
+                </div>
+
+                <!-- Assessment Details Preview -->
+                <div class="col-md-6">
+                    <div class="card border-0 bg-light">
+                        <div class="card-body">
+                            <h6 class="card-title mb-3">
+                                <i class="fas fa-info-circle me-2"></i>
+                                Assessment Details
+                            </h6>
+                            <div id="assessmentDetails" class="text-muted">
+                                <p class="mb-2">Select an assessment to view details</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Validation Messages -->
+                <div class="col-12">
+                    <div id="validationMessages" class="alert alert-warning d-none" role="alert">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <span id="validationText"></span>
+                    </div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="col-12">
+                    <div class="d-flex gap-3">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-save me-2"></i>
+                            {% if object %}Update{% else %}Create{% endif %} Subject Assessment
+                        </button>
+                        <a href="{% url 'academics:subject_assessment_list' %}" class="btn btn-outline-secondary btn-lg">
+                            <i class="fas fa-arrow-left me-2"></i>
+                            Cancel
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Success Modal -->
+<div class="modal fade" id="successModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content text-center">
+            <div class="modal-body p-5">
+                <div class="mb-4">
+                    <i class="fas fa-check-circle text-success" style="font-size: 4rem;"></i>
+                </div>
+                <h4 class="modal-title mb-2">Success!</h4>
+                <p class="text-secondary" id="successMessage">
+                    {% if object %}Subject assessment updated successfully!{% else %}Subject assessment created successfully!{% endif %}
+                </p>
+                <div class="d-flex gap-2 justify-content-center mt-4">
+                    <a href="{% url 'academics:subject_assessment_list' %}" class="btn btn-primary">
+                        <i class="fas fa-list me-2"></i>View All
+                    </a>
+                    <a href="{% url 'academics:subject_assessment_create' %}" class="btn btn-outline-primary">
+                        <i class="fas fa-plus me-2"></i>Create Another
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Error Modal -->
+<div class="modal fade" id="errorModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content text-center">
+            <div class="modal-body p-5">
+                <div class="mb-4">
+                    <i class="fas fa-exclamation-triangle text-danger" style="font-size: 4rem;"></i>
+                </div>
+                <h4 class="modal-title mb-2">Validation Error</h4>
+                <p class="text-secondary" id="errorMessage">Please check the form for errors.</p>
+                <div class="d-flex gap-2 justify-content-center mt-4">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
+                        <i class="fas fa-check me-2"></i>OK
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-// JS for Subject Assessment Form
+    // Assessment selection handler
+    const assessmentSelect = document.getElementById('{{ form.assessment.id }}');
+    const subjectSelect = document.getElementById('{{ form.subject.id }}');
+    const maxScoreInput = document.getElementById('{{ form.max_score.id }}');
+    const assessmentDetails = document.getElementById('assessmentDetails');
+    const validationMessages = document.getElementById('validationMessages');
+    const validationText = document.getElementById('validationText');
+
+    // Assessment data
+    const assessmentsData = {
+        {% for assessment in assessments %}
+            {{ assessment.id }}: {
+                name: "{{ assessment.name }}",
+                type: "{{ assessment.get_assessment_type_display }}",
+                typeIcon: "{{ assessment.get_assessment_type_icon }}",
+                weight: {{ assessment.weight_percentage }},
+                classLevel: {{ assessment.class_level.id }}
+            }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    };
+
+    // Subject data
+    const subjectsData = {
+        {% for subject in subjects %}
+            {{ subject.id }}: {
+                name: "{{ subject.name }}",
+                classLevel: {{ subject.class_level.id }}
+            }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    };
+
+    // Update assessment details
+    function updateAssessmentDetails() {
+        const selectedAssessmentId = assessmentSelect.value;
+        const selectedSubjectId = subjectSelect.value;
+        
+        if (selectedAssessmentId && assessmentsData[selectedAssessmentId]) {
+            const assessment = assessmentsData[selectedAssessmentId];
+            assessmentDetails.innerHTML = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <strong><i class="fas fa-tag me-2"></i>Type:</strong>
+                        <span class="badge badge-${assessment.type.toLowerCase()}">
+                            <i class="fas fa-${assessment.typeIcon}"></i>
+                            ${assessment.type}
+                        </span>
+                    </div>
+                    <div class="col-md-6">
+                        <strong><i class="fas fa-weight me-2"></i>Weight:</strong>
+                        <span>${assessment.weight}%</span>
+                    </div>
+                </div>
+            `;
+        } else {
+            assessmentDetails.innerHTML = '<p class="mb-2">Select an assessment to view details</p>';
+        }
+        
+        validateForm();
+    }
+
+    // Validation logic
+    function validateForm() {
+        const selectedAssessmentId = assessmentSelect.value;
+        const selectedSubjectId = subjectSelect.value;
+        let isValid = true;
+        let messages = [];
+
+        if (selectedAssessmentId && selectedSubjectId) {
+            const assessment = assessmentsData[selectedAssessmentId];
+            const subject = subjectsData[selectedSubjectId];
+
+            // Check class level compatibility
+            if (assessment.classLevel !== subject.classLevel) {
+                isValid = false;
+                messages.push(`This assessment is for ${getClassLevelName(assessment.classLevel)} but the subject is for ${getClassLevelName(subject.classLevel)}.`);
+            }
+
+            // Check if combination already exists
+            // This would typically be handled server-side, but we can show a warning
+            if (selectedAssessmentId && selectedSubjectId) {
+                // You could add an AJAX call here to check for duplicates
+            }
+        }
+
+        if (!isValid) {
+            validationMessages.classList.remove('d-none');
+            validationText.innerHTML = messages.join('<br>');
+        } else {
+            validationMessages.classList.add('d-none');
+        }
+
+        return isValid;
+    }
+
+    // Helper function to get class level name
+    function getClassLevelName(levelId) {
+        const levels = {
+            {% for level in class_levels %}
+                {{ level.id }}: "{{ level.name }}"{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        };
+        return levels[levelId] || 'Unknown';
+    }
+
+    // Event listeners
+    assessmentSelect.addEventListener('change', updateAssessmentDetails);
+    subjectSelect.addEventListener('change', function() {
+        updateAssessmentDetails();
+        
+        // Auto-set max score based on assessment type
+        const selectedAssessmentId = assessmentSelect.value;
+        if (selectedAssessmentId && assessmentsData[selectedAssessmentId]) {
+            const assessment = assessmentsData[selectedAssessmentId];
+            if (assessment.type.toLowerCase() === 'exam') {
+                maxScoreInput.value = maxScoreInput.value || '100';
+            } else {
+                maxScoreInput.value = maxScoreInput.value || '20';
+            }
+        }
+    });
+
+    // Form submission
+    document.getElementById('subjectAssessmentForm').addEventListener('submit', function(e) {
+        if (!validateForm()) {
+            e.preventDefault();
+            const modal = new bootstrap.Modal(document.getElementById('errorModal'));
+            modal.show();
+            return false;
+        }
+
+        // Show loading state
+        const submitBtn = this.querySelector('button[type="submit"]');
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+        submitBtn.disabled = true;
+
+        // Simulate form submission (in real implementation, this would be handled by Django)
+        setTimeout(() => {
+            const modal = new bootstrap.Modal(document.getElementById('successModal'));
+            modal.show();
+        }, 1500);
+    });
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        // Ctrl + S to submit
+        if (e.ctrlKey && e.key === 's') {
+            e.preventDefault();
+            document.getElementById('subjectAssessmentForm').requestSubmit();
+        }
+        
+        // Ctrl + C to cancel
+        if (e.ctrlKey && e.key === 'c') {
+            e.preventDefault();
+            window.location.href = "{% url 'academics:subject_assessment_list' %}";
+        }
+    });
+
+    // Initialize tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+
+    // Initialize with current values
+    document.addEventListener('DOMContentLoaded', function() {
+        updateAssessmentDetails();
+    });
+
+    // Hover effects
+    document.querySelectorAll('.card').forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-5px)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+        });
+    });
 </script>
 {% endblock %}
